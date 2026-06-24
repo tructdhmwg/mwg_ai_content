@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --sidebar-width: 220px;
+  }
+  html,
+  body {
+    overflow-x: hidden;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #f0f2f5;
+    color: #1a1a2e;
+    -webkit-font-smoothing: antialiased;
+  }
+  #root {
+    width: 100%;
+    min-height: 100vh;
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  .pulse-dot {
+    animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}

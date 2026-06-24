@@ -1,0 +1,2409 @@
+{
+    "object": [
+        {
+            "family_id": "2d589f10-2ee0-4f07-a94a-d946e87d7719",
+            "model_code": "181158",
+            "is_expired": false,
+            "cate_code": "36",
+            "parent_cate_code": "295",
+            "product_variant": [
+                {
+                    "end_date": 253402275599000,
+                    "image_information_by_variant": {
+                        "label": "Thông tin hình ảnh theo biến thể",
+                        "value": {
+                            "variant_avt_sku": {
+                                "label": "Hình đại diện của biến thể",
+                                "type": "image",
+                                "value": [
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361653/lg-inverter-2-hp-iec18m2-thumb-639034841352784495-550x160.jpg",
+                                        "name": "lg-inverter-2-hp-iec18m2-thumb-639034841352784495-550x160.jpg"
+                                    }
+                                ],
+                                "sort_order": 7
+                            },
+                            "gallery": {
+                                "label": "Hình gallery",
+                                "value": [
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361653/lg-inverter-2-hp-iec18m2-1-639034841425635666.jpg",
+                                        "name": "lg-inverter-2-hp-iec18m2-1-639034841425635666.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361653/lg-inverter-2-hp-iec18m2-2-639086473959684919.jpg",
+                                        "name": "lg-inverter-2-hp-iec18m2-2-639086473959684919.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361653/lg-inverter-2-hp-iec18m2-3-639086473994434615.jpg",
+                                        "name": "lg-inverter-2-hp-iec18m2-3-639086473994434615.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361653/lg-inverter-2-hp-iec18m2-4-639086474002882579.jpg",
+                                        "name": "lg-inverter-2-hp-iec18m2-4-639086474002882579.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361653/lg-inverter-2-hp-iec18m2-5-639086474009942575.jpg",
+                                        "name": "lg-inverter-2-hp-iec18m2-5-639086474009942575.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361653/lg-inverter-2-hp-iec18m2-99-639034841461345821.jpg",
+                                        "name": "lg-inverter-2-hp-iec18m2-99-639034841461345821.jpg"
+                                    }
+                                ],
+                                "type": "image",
+                                "sort_order": 8
+                            }
+                        }
+                    },
+                    "family_id": "2d589f10-2ee0-4f07-a94a-d946e87d7719",
+                    "filter_attribute_group": {
+                        "label": "Thuộc tính filter",
+                        "value": {
+                            "inverter_technology_dmxfilter": {
+                                "label": "Công nghệ Inverter",
+                                "type": "options",
+                                "value": [
+                                    {
+                                        "code": "1",
+                                        "name": "Có Inverter"
+                                    }
+                                ],
+                                "sort_order": 1
+                            },
+                            "style_dmxfilter": {
+                                "label": "Kiểu dáng/Phong cách",
+                                "value": [
+                                    {
+                                        "code": "1",
+                                        "name": "Multi Door"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "type_of_machine_dmxfilter": {
+                                "label": "Loại máy",
+                                "value": [
+                                    {
+                                        "code": "16",
+                                        "name": "1 chiều chỉ làm lạnh"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "utilities_dmxfilter": {
+                                "label": "Tiện ích",
+                                "value": [
+                                    {
+                                        "code": "158",
+                                        "name": "Màn hình hiển thị nhiệt độ trên dàn lạnh"
+                                    },
+                                    {
+                                        "code": "292",
+                                        "name": "Có Wifi, chỉnh bằng điện thoại"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "product_line_dmxfilter": {
+                                "label": "Dòng sản phẩm",
+                                "value": [
+                                    {
+                                        "code": "111",
+                                        "name": "2026"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 74
+                            }
+                        }
+                    },
+                    "seo_information": {
+                        "label": "Thông tin SEO",
+                        "value": {
+                            "title": {
+                                "label": "Tiêu đề SEO",
+                                "type": "text",
+                                "value": "Máy lạnh LG Inverter 2 HP IEC18M2 - giá tốt, mua trả chậm.",
+                                "sort_order": 11
+                            },
+                            "description": {
+                                "label": "Mô tả SEO",
+                                "value": "Máy lạnh LG Inverter 2 HP IEC18M2 giá rẻ chính hãng, mua trả chậm 0% lãi suất, bảo hành chính hãng - Giao hàng tận nơi, lắp đặt nhanh chóng, khuyến mãi hấp dẫn tại Điện máy XANH!",
+                                "type": "textarea",
+                                "sort_order": 11
+                            },
+                            "keyword": {
+                                "label": "Meta Keyword",
+                                "value": "Máy lạnh LG Inverter 2 HP IEC18M2, Máy lạnh, Máy lạnh LG, Máy lạnh LG Inverter, Máy lạnh LG Inverter 2 HP, Máy lạnh IEC18M2, Máy lạnh LG IEC18M2, LG IEC18M2, LG, IEC18M2",
+                                "type": "text",
+                                "sort_order": 12
+                            }
+                        }
+                    },
+                    "model_id": "cbf08eac-246f-4741-811c-32ecea431dfa",
+                    "common_information": {
+                        "label": "Thông tin chung",
+                        "value": {
+                            "code": {
+                                "label": "Mã",
+                                "value": "181158"
+                            },
+                            "is_activated": {
+                                "label": "Kích hoạt",
+                                "value": true
+                            },
+                            "name": {
+                                "label": "Tên",
+                                "value": "Máy lạnh LG Inverter 1 HP IEC09M2"
+                            },
+                            "created_date": {
+                                "label": "Ngày bắt đầu",
+                                "value": "2026-03-28T15:03:26.403Z"
+                            },
+                            "updated_date": {
+                                "label": "Ngày chỉnh sửa",
+                                "value": "2026-04-26T15:59:14.878Z"
+                            },
+                            "model_name": {
+                                "label": "Tên model",
+                                "value": "Máy lạnh LG Inverter 1 HP IEC09M2",
+                                "type": "text",
+                                "sort_order": 1
+                            },
+                            "image": {
+                                "label": "Hình đại diện của model",
+                                "value": [
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361651/lg-inverter-1-hp-iec09m2-thumb-639034820584739080-550x160.jpg",
+                                        "name": "lg-inverter-1-hp-iec09m2-thumb-639034820584739080-550x160.jpg"
+                                    }
+                                ],
+                                "type": "image",
+                                "sort_order": 3
+                            },
+                            "model_id_cms": {
+                                "label": "Mã sản phẩm CMS của model",
+                                "value": "361651",
+                                "type": "text",
+                                "sort_order": 15
+                            },
+                            "brand_id": {
+                                "label": "Thương hiệu",
+                                "value": "8",
+                                "type": "reference_data_option",
+                                "sort_order": 22
+                            },
+                            "product_shortname_sku": {
+                                "label": "Tên rút gọn hiển thị box sản phẩm của SKU",
+                                "value": "Máy lạnh LG Inverter 2 HP IEC18M2",
+                                "type": "text",
+                                "sort_order": 2
+                            },
+                            "product_name_sku": {
+                                "label": "Tên của SKU hiển thị trang chi tiết",
+                                "value": "Máy lạnh LG Inverter 2 HP IEC18M2",
+                                "type": "text",
+                                "sort_order": 4
+                            },
+                            "product_articles": {
+                                "label": "Bài viết sản phẩm",
+                                "value": "<p><em><strong><a href=\"https://www.dienmayxanh.com/may-lanh/lg-inverter-2-hp-iec18m2\" rel=\"noopener\" target=\"_blank\" title=\"Máy lạnh LG Inverter 2 HP IEC18M2\">Máy lạnh LG Inverter 2 HP IEC18M2</a> được thiết kế cho các không gian có diện tích từ 20 - 30m² như phòng khách, phòng ngủ lớn hoặc phòng làm việc, đáp ứng nhu cầu làm mát nhanh và tích hợp nhiều tiện ích hỗ trợ sử dụng trong sinh hoạt hằng ngày.</strong></em></p>\n\n<h3>Thiết kế </h3>\n\n<p><strong>Dàn lạnh </strong></p>\n\n<p><strong>Model IEC18M2</strong> thuộc dòng máy lạnh treo tường của LG với thiết kế gọn gàng và tông màu trắng trang nhã, dễ kết hợp với nhiều kiểu không gian nội thất.</p>\n\n<p><strong>Màn hình hiển thị nhiệt độ</strong> được tích hợp ngay trên dàn lạnh, cho phép người dùng quan sát trạng thái hoạt động của máy trong quá trình sử dụng.</p>\n\n<p><strong>Dàn nóng</strong></p>\n\n<p>Môi <a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cac-loai-gas-tren-may-lanh-588213#r32\" rel=\"noopener\" target=\"_blank\" title=\"Xem thêm chất lạnh R-32 là gì?\">chất lạnh R-32</a> được sử dụng trên thiết bị nhằm duy trì khả năng làm lạnh ổn định và thân thiện hơn với môi trường.</p>\n\n<p>Dàn nóng sử dụng <strong>ống dẫn gas bằng đồng</strong> kết hợp <strong>lá tản nhiệt nhôm phủ lớp Gold-Fin</strong> nhằm tăng độ bền cho thiết bị và hạn chế tác động từ môi trường bên ngoài.</p>\n\n<p><img alt=\"Máy lạnh LG Inverter 2 HP IEC18M2 - Thiết kế\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/5f/66/5f66a9ea2ba9fc2cbcfc71a25bc8a144.jpg\" title=\"Máy lạnh LG Inverter 2 HP IEC18M2 - Thiết kế\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<h3>Công nghệ làm lạnh</h3>\n\n<p>Sở hữu công suất làm lạnh 2 HP, thiết bị phù hợp lắp đặt trong các phòng có <strong>diện tích từ 20 - 30m²</strong> như phòng khách, phòng ngủ hoặc phòng làm việc.</p>\n\n<p>Khi kích hoạt <a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cac-che-do-lam-lanh-nhanh-thuong-gap-tren-may-lanh-837183#jet-cool\" rel=\"noopener\" target=\"_blank\" title=\"Xem thêm chế độ Jet Cool trên máy lạnh LG\">chế độ Jet Cool</a>, máy sẽ tăng cường công suất làm lạnh để nhanh chóng hạ nhiệt độ trong phòng, đồng thời tạo luồng khí mát mạnh giúp không gian đạt mức nhiệt độ cài đặt trong thời gian ngắn.</p>\n\n<p><span data-sheets-root=\"1\">Xem thêm: <a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/tong-hop-chung-nhan-cong-nghe-may-lanh-1581752\" rel=\"noopener\" target=\"_blank\" title=\"Tổng hợp chứng nhận công nghệ trên máy lạnh từ các hãng\" type=\"Tổng hợp chứng nhận công nghệ trên máy lạnh từ các hãng\">Tổng hợp chứng nhận công nghệ trên máy lạnh từ các hãng</a></span></p>\n\n<p><img alt=\"Máy lạnh LG Inverter 2 HP IEC18M2 - Công nghệ làm lạnh\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/de/3f/de3fb1a3770157da0b111c41204c7825.jpg\" title=\"Máy lạnh LG Inverter 2 HP IEC18M2 - Công nghệ làm lạnh\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<h3>Cơ chế thổi gió</h3>\n\n<p>Cánh đảo gió của <a href=\"https://www.dienmayxanh.com/may-lanh\" rel=\"noopener\" target=\"_blank\" title=\"Xem thêm máy lạnh đang kinh doanh tại Điện máy XANH\">máy lạnh</a> có thể chuyển động lên xuống tự động, đồng thời người dùng có thể điều chỉnh hướng gió trái phải bằng tay để luồng khí lạnh được phân bổ đến nhiều vị trí trong phòng.</p>\n\n<p><img alt=\"Máy lạnh LG Inverter 2 HP IEC18M2 - Cơ chế thổi gió\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/2b/ef/2bef41f46f0bdd7f918a823353800fc6.jpg\" title=\"Máy lạnh LG Inverter 2 HP IEC18M2 - Cơ chế thổi gió\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<h3>Công nghệ tiết kiệm điện</h3>\n\n<p><a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cong-nghe-dual-inverter-tren-dieu-hoa-lg-897446\" rel=\"noopener\" target=\"_blank\" title=\"Công nghệ Dual Inverter là gì\">Công nghệ Dual Inverter</a> sử dụng máy nén kép có khả năng điều chỉnh tốc độ quay linh hoạt, từ đó duy trì nhiệt độ trong phòng ổn định trong suốt quá trình vận hành, đồng thời góp phần tối ưu điện năng tiêu thụ và giảm độ ồn khi máy hoạt động.</p>\n\n<p><a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cach-chinh-che-do-kiem-soat-nang-luong-chu-dong-tr-619442\" rel=\"noopener\" target=\"_blank\" title=\"Chế độ Energy Ctrl trên máy lạnh LG là gì và cách sử dụng\">Energy Ctrl</a> cung cấp 4 mức kiểm soát năng lượng để người dùng chủ động thiết lập mức điện năng tiêu thụ phù hợp với nhu cầu làm mát và số lượng người trong phòng.</p>\n\n<p><a href=\"https://www.dienmayxanh.com/may-lanh-lg-may-lanh-inverter\" rel=\"noopener\" target=\"_blank\" title=\"Xêm thêm các máy lạnh LG Inverter đang kinh doanh tại Điện máy XANH\">Máy lạnh LG Inverter</a> này còn tích hợp <strong>Kw Manager</strong> cho phép người dùng theo dõi và quản lý lượng điện tiêu thụ của máy thông qua ứng dụng trên điện thoại, từ đó dễ dàng điều chỉnh chế độ sử dụng nhằm kiểm soát mức điện năng trong quá trình vận hành.</p>\n\n<p><img alt=\"Máy lạnh LG Inverter 2 HP IEC18M2 - Công nghệ tiết kiệm điện\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/7b/1a/7b1a772a47ab1abe4d178da6925fa71f.jpg\" title=\"Máy lạnh LG Inverter 2 HP IEC18M2 - Công nghệ tiết kiệm điện\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<h3>Khả năng lọc không khí</h3>\n\n<p><a href=\"https://www.dienmayxanh.com/may-lanh-lg\" rel=\"noopener\" target=\"_blank\" title=\"Xêm thêm các máy lạnh LG đang kinh doanh tại Điện máy XANH\">Máy lạnh LG</a> được trang bị màng lọc sơ cấp có khả năng giữ lại bụi bẩn và các hạt bụi có kích thước lớn trong không khí, góp phần duy trì môi trường sinh hoạt sạch hơn trong phòng.</p>\n\n<p>Bên cạnh đó, <strong>bộ lọc PM2.5</strong> hỗ trợ giữ lại các hạt bụi mịn trong không khí, từ đó góp phần cải thiện chất lượng không khí trong phòng và mang lại không gian sinh hoạt dễ chịu hơn cho người dùng.</p>\n\n<p><img alt=\"Máy lạnh LG Inverter 2 HP IEC18M2 - Khả năng lọc không khí\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/aa/84/aa8495e75273890159f070ebb2bb93f7.jpg\" title=\"Máy lạnh LG Inverter 2 HP IEC18M2 - Khả năng lọc không khí\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<h3>Tiện ích</h3>\n\n<p>Thông qua kết nối Wi-Fi, người dùng có thể <a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cac-che-do-thuong-thay-tren-may-lanh-795107#dieu-khien-bang-dien-thoai\" rel=\"noopener\" target=\"_blank\" title=\"điều khiển từ xa qua điện thoại \">điều khiển từ xa qua điện thoại</a>, dễ dàng thay đổi nhiệt độ và chế độ hoạt động ngay trên ứng dụng.</p>\n\n<p><strong>Chức năng tự chẩn đoán lỗi</strong> hiển thị mã lỗi trên remote khi máy gặp sự cố, giúp bạn nhanh chóng nhận biết tình trạng hoạt động của thiết bị để kiểm tra hoặc xử lý.</p>\n\n<p>Chức năng hẹn giờ <a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cac-che-do-thuong-thay-tren-may-lanh-795107#hen-gio\" rel=\"noopener\" target=\"_blank\" title=\"Hẹn giờ bật, tắt máy\">bật, tắt máy</a> cho phép người dùng thiết lập thời gian hoạt động của thiết bị linh hoạt theo nhu cầu sử dụng và thói quen sinh hoạt hằng ngày.</p>\n\n<p><a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/chuc-nang-tu-dong-lam-sach-tren-may-lanh-1080148\" rel=\"noopener\" target=\"_blank\" title=\"Chức năng tự làm sạch trên máy lạnh\">Chức năng tự làm sạch</a> hỗ trợ làm khô dàn lạnh sau khi máy ngừng hoạt động, góp phần hạn chế ẩm mốc và duy trì môi trường bên trong thiết bị sạch hơn.</p>\n\n<p><strong>Chế độ thổi gió dễ chịu</strong> hướng luồng khí mát lên trần nhà thay vì thổi trực tiếp vào người, phù hợp sử dụng trong gia đình có trẻ nhỏ hoặc người lớn tuổi.</p>\n\n<p><strong>Tính năng tự khởi động lại khi có điện</strong> cho phép máy lạnh tiếp tục hoạt động với các cài đặt trước đó sau khi xảy ra sự cố mất điện.</p>\n\n<p><img alt=\"Máy lạnh LG Inverter 2 HP IEC18M2 - Tiện ích\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/f6/82/f6826713b57cbeaccd90530fbdd99dba.jpg\" title=\"Máy lạnh LG Inverter 2 HP IEC18M2 - Tiện ích\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<p><em>Máy lạnh LG Inverter 2 HP IEC18M2 được trang bị Jet Cool giúp làm lạnh nhanh, công nghệ Dual Inverter hỗ trợ tối ưu điện năng và bộ lọc PM2.5 hỗ trợ lọc bụi trong không khí. Thiết bị còn tích hợp nhiều tiện ích giúp việc sử dụng trở nên thuận tiện hơn.</em></p>",
+                                "type": "textarea",
+                                "sort_order": 6
+                            },
+                            "url": {
+                                "label": "URL",
+                                "value": "lg-inverter-2-hp-iec18m2",
+                                "type": "text",
+                                "sort_order": 19
+                            },
+                            "month_warranty": {
+                                "label": "Số tháng bảo hành",
+                                "value": 24,
+                                "type": "number",
+                                "sort_order": 21
+                            },
+                            "key_features": {
+                                "label": "Đặc điểm nổi bật",
+                                "value": "<ul>\n\t<li><strong>Máy lạnh 2 HP</strong> làm mát hiệu quả không gian <strong>20 - 30m²</strong>.</li>\n\t<li><strong>Dual Inverter kết hợp Kw Manager</strong> và <strong>Energy Ctrl 4 mức </strong>giúp kiểm soát điện năng hiệu quả.</li>\n\t<li><strong>Chế độ Jet Cool </strong>hỗ trợ làm lạnh nhanh, đảo gió lên xuống tự động giúp luồng khí mát lan tỏa đều.</li>\n\t<li><strong>Màng lọc sơ cấp kết hợp bộ lọc PM2.5</strong> hỗ trợ giữ bụi thô, bụi mịn, cải thiện chất lượng không khí.</li>\n\t<li><strong>Thổi gió dễ chịu</strong> cho trẻ em, người lớn tuổi kết hợp <strong>chế độ ngủ đêm</strong>, hạn chế cảm giác buốt lạnh.</li>\n\t<li>Kết nối Wi-Fi điều khiển bằng điện thoại, có tự làm sạch và tự chẩn đoán lỗi, sử dụng thuận tiện hằng ngày.</li>\n</ul>",
+                                "type": "textarea",
+                                "sort_order": 28
+                            }
+                        }
+                    },
+                    "product_code": "1751098000188       ",
+                    "variant_code": "10036704",
+                    "specs_information": {
+                        "label": "Thông tin thông số kĩ thuật",
+                        "value": {
+                            "parts_warranty_dmxtskt_option": {
+                                "label": "Bảo hành bộ phận",
+                                "type": "option",
+                                "value": {
+                                    "code": "4",
+                                    "name": "2 năm"
+                                },
+                                "sort_order": 1
+                            },
+                            "type_of_machine_dmxtskt_option": {
+                                "label": "Loại máy",
+                                "value": {
+                                    "code": "3",
+                                    "name": "Máy lạnh 1 chiều (chỉ làm lạnh)"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "output_power_dmxtskt_option": {
+                                "label": "Công suất đầu ra",
+                                "value": null,
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "energysaving_technology_dmxtskt_options": {
+                                "label": "Công nghệ tiết kiệm điện",
+                                "value": [
+                                    {
+                                        "code": "40",
+                                        "name": "Kw Manager"
+                                    },
+                                    {
+                                        "code": "15",
+                                        "name": "Dual Inverter"
+                                    },
+                                    {
+                                        "code": "25",
+                                        "name": "Energy Ctrl - Kiểm soát năng lượng chủ động 4 mức"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "electricity_consumption_dmxtskt_textarea": {
+                                "label": "Điện năng tiêu thụ",
+                                "value": "1",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "utilities_dmxtskt_options": {
+                                "label": "Tiện ích",
+                                "value": [
+                                    {
+                                        "code": "457",
+                                        "name": "Hẹn giờ bật, tắt máy"
+                                    },
+                                    {
+                                        "code": "454",
+                                        "name": "Điều khiển bằng điện thoại, có Wi-Fi"
+                                    },
+                                    {
+                                        "code": "453",
+                                        "name": "Màn hình hiển thị nhiệt độ trên dàn lạnh"
+                                    },
+                                    {
+                                        "code": "445",
+                                        "name": "Thổi gió dễ chịu (cho trẻ em, người già)"
+                                    },
+                                    {
+                                        "code": "444",
+                                        "name": "Chế độ ngủ đêm tránh buốt"
+                                    },
+                                    {
+                                        "code": "380",
+                                        "name": "Công nghệ Gold-Fin chống ăn mòn"
+                                    },
+                                    {
+                                        "code": "372",
+                                        "name": "Chức năng tự chẩn đoán lỗi"
+                                    },
+                                    {
+                                        "code": "446",
+                                        "name": "Tự khởi động lại khi có điện"
+                                    },
+                                    {
+                                        "code": "79",
+                                        "name": "Chức năng tự làm sạch"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "energy_label_dmxtskt_textarea": {
+                                "label": "Nhãn năng lượng",
+                                "value": "5 sao (Hiệu suất năng lượng 5.04)",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "long_copper_pipe_dmxtskt_option": {
+                                "label": "Dài ống đồng",
+                                "value": {
+                                    "code": "27",
+                                    "name": "Tối thiểu 3m - Tối đa 20m"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "installation_height_dmxtskt_option": {
+                                "label": "Cao lắp đặt",
+                                "value": {
+                                    "code": "15",
+                                    "name": "15m"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "heat_exchanger_material_dmxtskt_option": {
+                                "label": "Chất liệu dàn tản nhiệt",
+                                "value": {
+                                    "code": "34",
+                                    "name": "Ống dẫn gas bằng Đồng - Lá tản nhiệt bằng Nhôm phủ lớp Gold-Fin"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "noise_level_dmxtskt_textarea": {
+                                "label": "Độ ồn",
+                                "value": "Dàn lạnh: 45/40/37/32 dB - Dàn nóng: 53 dB",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "input_current_dmxtskt_option": {
+                                "label": "Dòng điện vào",
+                                "value": {
+                                    "code": "1",
+                                    "name": "Dàn nóng hoặc dàn lạnh"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "copper_pipe_size_dmxtskt_option": {
+                                "label": "Kích thước ống đồng",
+                                "value": {
+                                    "code": "26",
+                                    "name": "6/12"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "quantity_dmxtskt_option": {
+                                "label": "Số lượng",
+                                "value": {
+                                    "code": "1",
+                                    "name": "Khoảng 7000 trang A4"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "main_accessory_length_dmxtskt_textarea": {
+                                "label": "Dài phụ kiện chính",
+                                "value": "99",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "main_accessory_thickness_dmxtskt_textarea": {
+                                "label": "Độ dày phụ kiện chính",
+                                "value": "21",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "main_accessory_volume_dmxtskt_textarea": {
+                                "label": "Khối lượng phụ kiện chính",
+                                "value": "10",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "high_accessories_dmxtskt_textarea": {
+                                "label": "Cao phụ kiện phụ",
+                                "value": "49",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "long_accessory_dmxtskt_textarea": {
+                                "label": "Dài phụ kiện phụ",
+                                "value": "71",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "accessory_thickness_dmxtskt_textarea": {
+                                "label": "Độ dày phụ kiện phụ",
+                                "value": "23",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "quantity_of_accessories_dmxtskt_textarea": {
+                                "label": "Khối lượng phụ kiện phụ",
+                                "value": "23",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "operating_current_dmxtskt_option": {
+                                "label": "Dòng điện hoạt động",
+                                "value": {
+                                    "code": "2",
+                                    "name": "1 pha"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "water_and_dust_resistant_dmxtskt_options": {
+                                "label": "Chuẩn chống nước, bụi",
+                                "value": [
+                                    {
+                                        "code": "52",
+                                        "name": "Màng lọc sơ cấp"
+                                    },
+                                    {
+                                        "code": "89",
+                                        "name": "Bộ lọc PM2.5"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "inverter_type_dmxtskt_option": {
+                                "label": "Loại Inverter",
+                                "value": {
+                                    "code": "2",
+                                    "name": "Máy lạnh Inverter"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "wind_mode_dmxtskt_option": {
+                                "label": "Chế độ gió",
+                                "value": {
+                                    "code": "14",
+                                    "name": "Đảo gió lên xuống tự động, trái phải tùy chỉnh tay"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "made_in_dmxtskt_option": {
+                                "label": "Sản xuất tại",
+                                "value": {
+                                    "code": "10",
+                                    "name": "Thái Lan"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "product_line_dmxtskt_option": {
+                                "label": "Dòng sản phẩm",
+                                "value": {
+                                    "code": "13",
+                                    "name": "2026"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "scope_of_use_dmxtskt_option": {
+                                "label": "Phạm vi sử dụng",
+                                "value": {
+                                    "code": "4",
+                                    "name": "Từ 20 - 30m² (từ 60 đến 80m³)"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "cooling_technology_dmxtskt_option": {
+                                "label": "Công nghệ làm lạnh",
+                                "value": {
+                                    "code": "22",
+                                    "name": "Jet Cool"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "gas_type_dmxtskt_option": {
+                                "label": "Loại Gas",
+                                "value": {
+                                    "code": "10",
+                                    "name": "R-32"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "engine_warranty_dmxtskt_option": {
+                                "label": "Bảo hành động cơ",
+                                "value": {
+                                    "code": "16",
+                                    "name": "Máy nén 10 năm"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "main_accessory_height_dmxtskt_textarea": {
+                                "label": "Cao phụ kiện chính",
+                                "value": "34",
+                                "type": "textarea",
+                                "sort_order": 72
+                            }
+                        }
+                    },
+                    "cdc_timestamp": 1778206692158,
+                    "model_code": "181158",
+                    "is_expired": false,
+                    "sub_model_code": null,
+                    "root_cate_code": "dmx_category",
+                    "category": {
+                        "label": "Danh mục",
+                        "value": {
+                            "category_name": {
+                                "label": "Tên danh mục",
+                                "value": "Máy lạnh"
+                            },
+                            "category_code": {
+                                "label": "Mã danh mục",
+                                "value": "36"
+                            },
+                            "sort_order": {
+                                "label": "Thứ tự",
+                                "value": 21
+                            }
+                        }
+                    },
+                    "variant_erp_infor": {
+                        "label": "Thông tin sản phẩm ERP",
+                        "value": {
+                            "quantity_unit": "Bộ",
+                            "item_id": "2601000161",
+                            "base_sku": "1751098000188",
+                            "main_group_id": 1754,
+                            "vat": 8,
+                            "vehicle_type": 1,
+                            "quantity_unit_id": 2,
+                            "product_name": "Máy lạnh LG IEC18M2",
+                            "brand_id": 6,
+                            "status_id": 4,
+                            "is_check_stock_quantity": true,
+                            "sub_group_id": 1098,
+                            "is_setup_product": true,
+                            "sku": {
+                                "label": "Mã sản phẩm ERP",
+                                "value": "1751098000188",
+                                "type": "text",
+                                "sort_order": 9
+                            }
+                        }
+                    }
+                },
+                {
+                    "end_date": 253402275599000,
+                    "image_information_by_variant": {
+                        "label": "Thông tin hình ảnh theo biến thể",
+                        "value": {
+                            "variant_avt_sku": {
+                                "label": "Hình đại diện của biến thể",
+                                "type": "image",
+                                "value": [
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361654/lg-inverter-25-hp-iec24m2-thumb-639035102467919653-550x160.jpg",
+                                        "name": "lg-inverter-25-hp-iec24m2-thumb-639035102467919653-550x160.jpg"
+                                    }
+                                ],
+                                "sort_order": 7
+                            },
+                            "gallery": {
+                                "label": "Hình gallery",
+                                "value": [
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361654/lg-inverter-25-hp-iec24m2--639035102587616950.jpg",
+                                        "name": "lg-inverter-25-hp-iec24m2--639035102587616950.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361654/lg-inverter-25-hp-iec24m2-2-639086490791783573.jpg",
+                                        "name": "lg-inverter-25-hp-iec24m2-2-639086490791783573.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361654/lg-inverter-25-hp-iec24m2-3-639086491093910696.jpg",
+                                        "name": "lg-inverter-25-hp-iec24m2-3-639086491093910696.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361654/lg-inverter-25-hp-iec24m2-4-639086491259854051.jpg",
+                                        "name": "lg-inverter-25-hp-iec24m2-4-639086491259854051.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361654/lg-inverter-25-hp-iec24m2-5-639086492355487969.jpg",
+                                        "name": "lg-inverter-25-hp-iec24m2-5-639086492355487969.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361654/lg-inverter-25-hp-iec24m2-6-639086492375628838.jpg",
+                                        "name": "lg-inverter-25-hp-iec24m2-6-639086492375628838.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361654/lg-inverter-25-hp-iec24m2-99-639035102622120763.jpg",
+                                        "name": "lg-inverter-25-hp-iec24m2-99-639035102622120763.jpg"
+                                    }
+                                ],
+                                "type": "image",
+                                "sort_order": 8
+                            }
+                        }
+                    },
+                    "family_id": "2d589f10-2ee0-4f07-a94a-d946e87d7719",
+                    "filter_attribute_group": {
+                        "label": "Thuộc tính filter",
+                        "value": {
+                            "inverter_technology_dmxfilter": {
+                                "label": "Công nghệ Inverter",
+                                "type": "options",
+                                "value": [
+                                    {
+                                        "code": "1",
+                                        "name": "Có Inverter"
+                                    }
+                                ],
+                                "sort_order": 1
+                            },
+                            "style_dmxfilter": {
+                                "label": "Kiểu dáng/Phong cách",
+                                "value": [
+                                    {
+                                        "code": "1",
+                                        "name": "Multi Door"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "type_of_machine_dmxfilter": {
+                                "label": "Loại máy",
+                                "value": [
+                                    {
+                                        "code": "16",
+                                        "name": "1 chiều chỉ làm lạnh"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "utilities_dmxfilter": {
+                                "label": "Tiện ích",
+                                "value": [
+                                    {
+                                        "code": "158",
+                                        "name": "Màn hình hiển thị nhiệt độ trên dàn lạnh"
+                                    },
+                                    {
+                                        "code": "292",
+                                        "name": "Có Wifi, chỉnh bằng điện thoại"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "product_line_dmxfilter": {
+                                "label": "Dòng sản phẩm",
+                                "value": [
+                                    {
+                                        "code": "111",
+                                        "name": "2026"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 74
+                            }
+                        }
+                    },
+                    "seo_information": {
+                        "label": "Thông tin SEO",
+                        "value": {
+                            "title": {
+                                "label": "Tiêu đề SEO",
+                                "type": "text",
+                                "value": "Máy lạnh LG Inverter 2.5 HP IEC24M2 - giá tốt, mua trả chậm.",
+                                "sort_order": 11
+                            },
+                            "description": {
+                                "label": "Mô tả SEO",
+                                "value": "Máy lạnh LG Inverter 2.5 HP IEC24M2 giá rẻ chính hãng, mua trả chậm 0% lãi suất, bảo hành chính hãng - Giao hàng tận nơi, lắp đặt nhanh chóng, khuyến mãi hấp dẫn tại Điện máy XANH!",
+                                "type": "textarea",
+                                "sort_order": 11
+                            },
+                            "keyword": {
+                                "label": "Meta Keyword",
+                                "value": "Máy lạnh LG Inverter 2.5 HP IEC24M2, Máy lạnh, Máy lạnh LG, Máy lạnh LG Inverter, Máy lạnh LG Inverter 2.5 HP, Máy lạnh IEC24M2, Máy lạnh LG IEC24M2, LG IEC24M2, LG, IEC24M2",
+                                "type": "text",
+                                "sort_order": 12
+                            }
+                        }
+                    },
+                    "model_id": "cbf08eac-246f-4741-811c-32ecea431dfa",
+                    "common_information": {
+                        "label": "Thông tin chung",
+                        "value": {
+                            "code": {
+                                "label": "Mã",
+                                "value": "181158"
+                            },
+                            "is_activated": {
+                                "label": "Kích hoạt",
+                                "value": true
+                            },
+                            "name": {
+                                "label": "Tên",
+                                "value": "Máy lạnh LG Inverter 1 HP IEC09M2"
+                            },
+                            "created_date": {
+                                "label": "Ngày bắt đầu",
+                                "value": "2026-03-28T15:03:26.403Z"
+                            },
+                            "updated_date": {
+                                "label": "Ngày chỉnh sửa",
+                                "value": "2026-04-26T15:59:14.878Z"
+                            },
+                            "model_name": {
+                                "label": "Tên model",
+                                "value": "Máy lạnh LG Inverter 1 HP IEC09M2",
+                                "type": "text",
+                                "sort_order": 1
+                            },
+                            "image": {
+                                "label": "Hình đại diện của model",
+                                "value": [
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361651/lg-inverter-1-hp-iec09m2-thumb-639034820584739080-550x160.jpg",
+                                        "name": "lg-inverter-1-hp-iec09m2-thumb-639034820584739080-550x160.jpg"
+                                    }
+                                ],
+                                "type": "image",
+                                "sort_order": 3
+                            },
+                            "model_id_cms": {
+                                "label": "Mã sản phẩm CMS của model",
+                                "value": "361651",
+                                "type": "text",
+                                "sort_order": 15
+                            },
+                            "brand_id": {
+                                "label": "Thương hiệu",
+                                "value": "8",
+                                "type": "reference_data_option",
+                                "sort_order": 22
+                            },
+                            "product_shortname_sku": {
+                                "label": "Tên rút gọn hiển thị box sản phẩm của SKU",
+                                "value": "Máy lạnh LG Inverter 2.5 HP IEC24M2",
+                                "type": "text",
+                                "sort_order": 2
+                            },
+                            "product_name_sku": {
+                                "label": "Tên của SKU hiển thị trang chi tiết",
+                                "value": "Máy lạnh LG Inverter 2.5 HP IEC24M2",
+                                "type": "text",
+                                "sort_order": 4
+                            },
+                            "product_articles": {
+                                "label": "Bài viết sản phẩm",
+                                "value": "<p><em><strong><a href=\"https://www.dienmayxanh.com/may-lanh/lg-inverter-25-hp-iec24m2\" rel=\"noopener\" target=\"_blank\" title=\"Máy lạnh LG Inverter 2.5 HP IEC24M2 \">Máy lạnh LG Inverter 2.5 HP IEC24M2</a> phù hợp lắp đặt trong các không gian rộng từ 30 - 40m² như phòng khách lớn, phòng họp hoặc phòng sinh hoạt chung. Thiết bị tích hợp công nghệ làm lạnh nhanh Jet Cool, công nghệ Dual Inverter cùng nhiều tiện ích hỗ trợ sử dụng thuận tiện trong sinh hoạt hằng ngày.</strong></em></p>\n\n<h3>Thiết kế </h3>\n\n<p><strong>Dàn lạnh </strong></p>\n\n<p><a href=\"https://www.dienmayxanh.com/may-lanh-lg\" rel=\"noopener\" target=\"_blank\" title=\"Xêm thêm các máy lạnh LG đang kinh doanh tại Điện máy XANH\">Máy lạnh LG</a> này thuộc dòng điều hòa treo tường với thiết kế gọn gàng cùng tông màu trắng trung tính, phù hợp với nhiều phong cách nội thất từ phòng khách, phòng ngủ đến phòng làm việc.</p>\n\n<p><strong>Màn hình hiển thị nhiệt độ</strong> được tích hợp trên dàn lạnh giúp người dùng dễ dàng quan sát trạng thái hoạt động của thiết bị trong quá trình sử dụng và điều chỉnh nhiệt độ khi cần thiết.</p>\n\n<p><strong>Dàn nóng</strong></p>\n\n<p>Thiết bị sử dụng môi <a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cac-loai-gas-tren-may-lanh-588213#r32\" rel=\"noopener\" target=\"_blank\" title=\"Xem thêm chất lạnh R-32 là gì?\">chất lạnh R-32</a> giúp duy trì hiệu suất làm lạnh ổn định đồng thời giảm tác động đến môi trường.</p>\n\n<p>Dàn nóng sử dụng <strong>ống dẫn gas bằng đồng</strong> kết hợp <strong>lá tản nhiệt nhôm phủ lớp Gold-Fin</strong> giúp tăng độ bền cho thiết bị, đồng thời hạn chế ảnh hưởng từ thời tiết như mưa, độ ẩm hoặc môi trường bên ngoài.</p>\n\n<p><img alt=\"Máy lạnh LG Inverter 2.5 HP IEC24M2 - Thiết kế\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/5f/66/5f66a9ea2ba9fc2cbcfc71a25bc8a144.jpg\" title=\"Máy lạnh LG Inverter 2.5 HP IEC24M2 - Thiết kế\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<h3>Công nghệ làm lạnh</h3>\n\n<p>Với <strong>công suất làm lạnh 2.5 HP - 21.200 BTU</strong>, thiết bị phù hợp lắp đặt trong các phòng có <strong>diện tích từ 30 - 40m²</strong> như phòng khách lớn, phòng họp hoặc không gian sinh hoạt chung.</p>\n\n<p>Khi bật <a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cac-che-do-lam-lanh-nhanh-thuong-gap-tren-may-lanh-837183#jet-cool\" rel=\"noopener\" target=\"_blank\" title=\"Xem thêm chế độ Jet Cool trên máy lạnh LG\">chế độ Jet Cool</a>, thiết bị sẽ tăng cường hoạt động của hệ thống làm lạnh nhằm rút ngắn thời gian làm mát, từ đó giúp không gian nhanh chóng đạt mức nhiệt độ mong muốn.</p>\n\n<p><span data-sheets-root=\"1\">Xem thêm: <a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/tong-hop-chung-nhan-cong-nghe-may-lanh-1581752\" rel=\"noopener\" target=\"_blank\" title=\"Tổng hợp chứng nhận công nghệ trên máy lạnh từ các hãng\" type=\"Tổng hợp chứng nhận công nghệ trên máy lạnh từ các hãng\">Tổng hợp chứng nhận công nghệ trên máy lạnh từ các hãng</a></span></p>\n\n<p><img alt=\"Máy lạnh LG Inverter 2.5 HP IEC24M2 - Công nghệ làm lạnh\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/de/3f/de3fb1a3770157da0b111c41204c7825.jpg\" title=\"Máy lạnh LG Inverter 2.5 HP IEC24M2 - Công nghệ làm lạnh\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<h3>Cơ chế thổi gió</h3>\n\n<p>Cánh đảo gió trên <a href=\"https://www.dienmayxanh.com/may-lanh\" rel=\"noopener\" target=\"_blank\" title=\"Xem thêm máy lạnh đang kinh doanh tại Điện máy XANH\">máy lạnh</a> này có thể tự động chuyển động lên xuống, kết hợp điều chỉnh trái phải bằng tay nhằm phân bổ luồng khí lạnh đến nhiều vị trí trong không gian.</p>\n\n<h3>Công nghệ tiết kiệm điện</h3>\n\n<p><a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cong-nghe-dual-inverter-tren-dieu-hoa-lg-897446\" rel=\"noopener\" target=\"_blank\" title=\"Công nghệ Dual Inverter là gì\">Công nghệ Dual Inverter</a> cho phép máy nén điều chỉnh tốc độ quay linh hoạt trong quá trình vận hành, từ đó giúp duy trì mức nhiệt ổn định trong phòng và góp phần tiết kiệm điện năng.</p>\n\n<p>Tính năng <a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cach-chinh-che-do-kiem-soat-nang-luong-chu-dong-tr-619442\" rel=\"noopener\" target=\"_blank\" title=\"Chế độ Energy Ctrl trên máy lạnh LG là gì và cách sử dụng\">Energy Ctrl</a> giúp thiết lập 4 mức kiểm soát năng lượng khác nhau, từ đó bạn có thể điều chỉnh mức điện năng tiêu thụ dựa trên nhu cầu làm mát và số lượng người trong phòng.</p>\n\n<p>Với <strong>Kw Manager</strong>, người dùng có thể theo dõi mức điện năng tiêu thụ của thiết bị trực tiếp trên ứng dụng điện thoại để dễ dàng điều chỉnh chế độ sử dụng.</p>\n\n<p><img alt=\"Máy lạnh LG Inverter 2.5 HP IEC24M2 - Công nghệ tiết kiệm điện\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/7b/1a/7b1a772a47ab1abe4d178da6925fa71f.jpg\" title=\"Máy lạnh LG Inverter 2.5 HP IEC24M2 - Công nghệ tiết kiệm điện\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<h3>Khả năng lọc không khí</h3>\n\n<p>Nhờ sự kết hợp giữa màng lọc sơ cấp và bộ lọc PM2.5, <a href=\"https://www.dienmayxanh.com/may-lanh-lg-may-lanh-inverter\" rel=\"noopener\" target=\"_blank\" title=\"Xêm thêm các máy lạnh LG Inverter đang kinh doanh tại Điện máy XANH\">máy lạnh LG Inverter</a> này có thể giữ lại bụi bẩn và các hạt bụi mịn trong không khí, từ đó hỗ trợ cải thiện chất lượng không khí trong phòng.</p>\n\n<p><img alt=\"Máy lạnh LG Inverter 2.5 HP IEC24M2 - Khả năng lọc không khí\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/aa/84/aa8495e75273890159f070ebb2bb93f7.jpg\" title=\"Máy lạnh LG Inverter 2.5 HP IEC24M2 - Khả năng lọc không khí\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<h3>Tiện ích</h3>\n\n<p>Khi xảy ra sự cố, <strong>chức năng tự chẩn đoán lỗi</strong> sẽ hiển thị mã lỗi trên remote để người dùng nhận biết tình trạng hoạt động của thiết bị.</p>\n\n<p><strong>Chế độ ngủ đêm</strong> tự động điều chỉnh nhiệt độ theo từng giai đoạn trong khi ngủ nhằm hạn chế cảm giác lạnh buốt và mang lại sự dễ chịu hơn vào ban đêm.</p>\n\n<p>Chức năng hẹn giờ cho phép cài đặt thời gian <a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cac-che-do-thuong-thay-tren-may-lanh-795107#hen-gio\" rel=\"noopener\" target=\"_blank\" title=\"Hẹn giờ bật, tắt máy\">bật, tắt máy</a> linh hoạt theo nhu cầu sinh hoạt hằng ngày.</p>\n\n<p>Sau khi máy ngừng hoạt động, <a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/chuc-nang-tu-dong-lam-sach-tren-may-lanh-1080148\" rel=\"noopener\" target=\"_blank\" title=\"Chức năng tự làm sạch trên máy lạnh\">chức năng tự làm sạch</a> sẽ làm khô dàn lạnh để góp phần hạn chế ẩm mốc bên trong thiết bị.</p>\n\n<p>Thiết bị hỗ trợ kết nối Wi-Fi giúp bạn <a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cac-che-do-thuong-thay-tren-may-lanh-795107#dieu-khien-bang-dien-thoai\" rel=\"noopener\" target=\"_blank\" title=\"điều khiển từ xa qua điện thoại \">điều khiển từ xa qua điện thoại</a>, từ đó có thể dễ dàng thay đổi nhiệt độ hoặc lựa chọn chế độ hoạt động trực tiếp trên ứng dụng.</p>\n\n<p>Tính năng <strong>tự khởi động lại khi có điện</strong> giúp thiết bị tiếp tục hoạt động với các cài đặt đã thiết lập trước đó.</p>\n\n<p><img alt=\"Máy lạnh LG Inverter 2.5 HP IEC24M2 - Tiện ích\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/f6/82/f6826713b57cbeaccd90530fbdd99dba.jpg\" title=\"Máy lạnh LG Inverter 2.5 HP IEC24M2 - Tiện ích\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<p><em>Máy lạnh LG Inverter 2.5 HP IEC24M2 mang đến khả năng làm mát hiệu quả cho các không gian rộng nhờ công nghệ Jet Cool, máy nén Dual Inverter và hệ thống lọc bụi PM2.5. Bên cạnh đó, các tiện ích như điều khiển qua điện thoại, chế độ ngủ đêm và tự làm sạch cũng góp phần nâng cao sự thuận tiện trong quá trình sử dụng.</em></p>",
+                                "type": "textarea",
+                                "sort_order": 6
+                            },
+                            "url": {
+                                "label": "URL",
+                                "value": "lg-inverter-25-hp-iec24m2",
+                                "type": "text",
+                                "sort_order": 19
+                            },
+                            "month_warranty": {
+                                "label": "Số tháng bảo hành",
+                                "value": 24,
+                                "type": "number",
+                                "sort_order": 21
+                            },
+                            "key_features": {
+                                "label": "Đặc điểm nổi bật",
+                                "value": "<ul>\n\t<li><strong>Máy lạnh 2.5 HP</strong> làm mát <strong>không gian 30 - 40m²</strong>, phù hợp phòng khách hoặc khu sinh hoạt chung gia đình.</li>\n\t<li><strong>Dual Inverter, Kw Manager và Energy Ctrl 4 mức</strong> kiểm soát năng lượng, giúp máy vận hành ổn định.</li>\n\t<li><strong>Jet Cool </strong>làm lạnh nhanh,<strong> đảo gió lên xuống tự động</strong> giúp luồng khí mát tỏa đều khắp phòng rộng.</li>\n\t<li><strong>Màng lọc thô và bộ lọc PM2.5 </strong>giữ bụi thô, bụi mịn, cải thiện chất lượng không khí trong phòng.</li>\n\t<li><strong>Thổi gió dễ chịu và chế độ ngủ đêm</strong> hỗ trợ giảm buốt lạnh, phù hợp gia đình có trẻ nhỏ, người lớn tuổi.</li>\n\t<li>Kết nối Wi-Fi điều khiển bằng điện thoại, kết hợp chức năng tự làm sạch dàn lạnh, giúp dùng máy thuận tiện hơn.</li>\n</ul>",
+                                "type": "textarea",
+                                "sort_order": 28
+                            }
+                        }
+                    },
+                    "product_code": "1751098000189       ",
+                    "variant_code": "10036705",
+                    "specs_information": {
+                        "label": "Thông tin thông số kĩ thuật",
+                        "value": {
+                            "parts_warranty_dmxtskt_option": {
+                                "label": "Bảo hành bộ phận",
+                                "type": "option",
+                                "value": {
+                                    "code": "4",
+                                    "name": "2 năm"
+                                },
+                                "sort_order": 1
+                            },
+                            "type_of_machine_dmxtskt_option": {
+                                "label": "Loại máy",
+                                "value": {
+                                    "code": "3",
+                                    "name": "Máy lạnh 1 chiều (chỉ làm lạnh)"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "output_power_dmxtskt_option": {
+                                "label": "Công suất đầu ra",
+                                "value": null,
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "energysaving_technology_dmxtskt_options": {
+                                "label": "Công nghệ tiết kiệm điện",
+                                "value": [
+                                    {
+                                        "code": "40",
+                                        "name": "Kw Manager"
+                                    },
+                                    {
+                                        "code": "15",
+                                        "name": "Dual Inverter"
+                                    },
+                                    {
+                                        "code": "25",
+                                        "name": "Energy Ctrl - Kiểm soát năng lượng chủ động 4 mức"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "electricity_consumption_dmxtskt_textarea": {
+                                "label": "Điện năng tiêu thụ",
+                                "value": "2",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "utilities_dmxtskt_options": {
+                                "label": "Tiện ích",
+                                "value": [
+                                    {
+                                        "code": "457",
+                                        "name": "Hẹn giờ bật, tắt máy"
+                                    },
+                                    {
+                                        "code": "454",
+                                        "name": "Điều khiển bằng điện thoại, có Wi-Fi"
+                                    },
+                                    {
+                                        "code": "453",
+                                        "name": "Màn hình hiển thị nhiệt độ trên dàn lạnh"
+                                    },
+                                    {
+                                        "code": "445",
+                                        "name": "Thổi gió dễ chịu (cho trẻ em, người già)"
+                                    },
+                                    {
+                                        "code": "444",
+                                        "name": "Chế độ ngủ đêm tránh buốt"
+                                    },
+                                    {
+                                        "code": "380",
+                                        "name": "Công nghệ Gold-Fin chống ăn mòn"
+                                    },
+                                    {
+                                        "code": "372",
+                                        "name": "Chức năng tự chẩn đoán lỗi"
+                                    },
+                                    {
+                                        "code": "446",
+                                        "name": "Tự khởi động lại khi có điện"
+                                    },
+                                    {
+                                        "code": "79",
+                                        "name": "Chức năng tự làm sạch"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "energy_label_dmxtskt_textarea": {
+                                "label": "Nhãn năng lượng",
+                                "value": "5 sao (Hiệu suất năng lượng 5.26)",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "long_copper_pipe_dmxtskt_option": {
+                                "label": "Dài ống đồng",
+                                "value": {
+                                    "code": "27",
+                                    "name": "Tối thiểu 3m - Tối đa 20m"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "installation_height_dmxtskt_option": {
+                                "label": "Cao lắp đặt",
+                                "value": {
+                                    "code": "22",
+                                    "name": "20m"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "heat_exchanger_material_dmxtskt_option": {
+                                "label": "Chất liệu dàn tản nhiệt",
+                                "value": {
+                                    "code": "34",
+                                    "name": "Ống dẫn gas bằng Đồng - Lá tản nhiệt bằng Nhôm phủ lớp Gold-Fin"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "noise_level_dmxtskt_textarea": {
+                                "label": "Độ ồn",
+                                "value": "Dàn lạnh: 47/41/37/32 dB - Dàn nóng: 55 dB",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "input_current_dmxtskt_option": {
+                                "label": "Dòng điện vào",
+                                "value": {
+                                    "code": "1",
+                                    "name": "Dàn nóng hoặc dàn lạnh"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "copper_pipe_size_dmxtskt_option": {
+                                "label": "Kích thước ống đồng",
+                                "value": {
+                                    "code": "26",
+                                    "name": "6/12"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "quantity_dmxtskt_option": {
+                                "label": "Số lượng",
+                                "value": {
+                                    "code": "1",
+                                    "name": "Khoảng 7000 trang A4"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "main_accessory_length_dmxtskt_textarea": {
+                                "label": "Dài phụ kiện chính",
+                                "value": "99",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "main_accessory_thickness_dmxtskt_textarea": {
+                                "label": "Độ dày phụ kiện chính",
+                                "value": "21",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "main_accessory_volume_dmxtskt_textarea": {
+                                "label": "Khối lượng phụ kiện chính",
+                                "value": "10",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "high_accessories_dmxtskt_textarea": {
+                                "label": "Cao phụ kiện phụ",
+                                "value": "54",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "long_accessory_dmxtskt_textarea": {
+                                "label": "Dài phụ kiện phụ",
+                                "value": "77",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "accessory_thickness_dmxtskt_textarea": {
+                                "label": "Độ dày phụ kiện phụ",
+                                "value": "28",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "quantity_of_accessories_dmxtskt_textarea": {
+                                "label": "Khối lượng phụ kiện phụ",
+                                "value": "28",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "operating_current_dmxtskt_option": {
+                                "label": "Dòng điện hoạt động",
+                                "value": {
+                                    "code": "2",
+                                    "name": "1 pha"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "water_and_dust_resistant_dmxtskt_options": {
+                                "label": "Chuẩn chống nước, bụi",
+                                "value": [
+                                    {
+                                        "code": "52",
+                                        "name": "Màng lọc sơ cấp"
+                                    },
+                                    {
+                                        "code": "89",
+                                        "name": "Bộ lọc PM2.5"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "inverter_type_dmxtskt_option": {
+                                "label": "Loại Inverter",
+                                "value": {
+                                    "code": "2",
+                                    "name": "Máy lạnh Inverter"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "wind_mode_dmxtskt_option": {
+                                "label": "Chế độ gió",
+                                "value": {
+                                    "code": "14",
+                                    "name": "Đảo gió lên xuống tự động, trái phải tùy chỉnh tay"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "made_in_dmxtskt_option": {
+                                "label": "Sản xuất tại",
+                                "value": {
+                                    "code": "10",
+                                    "name": "Thái Lan"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "product_line_dmxtskt_option": {
+                                "label": "Dòng sản phẩm",
+                                "value": {
+                                    "code": "13",
+                                    "name": "2026"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "scope_of_use_dmxtskt_option": {
+                                "label": "Phạm vi sử dụng",
+                                "value": {
+                                    "code": "6",
+                                    "name": "Từ 30 - 40m² (từ 80 đến 120m³)"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "cooling_technology_dmxtskt_option": {
+                                "label": "Công nghệ làm lạnh",
+                                "value": {
+                                    "code": "22",
+                                    "name": "Jet Cool"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "gas_type_dmxtskt_option": {
+                                "label": "Loại Gas",
+                                "value": {
+                                    "code": "10",
+                                    "name": "R-32"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "engine_warranty_dmxtskt_option": {
+                                "label": "Bảo hành động cơ",
+                                "value": {
+                                    "code": "16",
+                                    "name": "Máy nén 10 năm"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "main_accessory_height_dmxtskt_textarea": {
+                                "label": "Cao phụ kiện chính",
+                                "value": "34",
+                                "type": "textarea",
+                                "sort_order": 72
+                            }
+                        }
+                    },
+                    "cdc_timestamp": 1778206692196,
+                    "model_code": "181158",
+                    "is_expired": false,
+                    "sub_model_code": null,
+                    "root_cate_code": "dmx_category",
+                    "category": {
+                        "label": "Danh mục",
+                        "value": {
+                            "category_name": {
+                                "label": "Tên danh mục",
+                                "value": "Máy lạnh"
+                            },
+                            "category_code": {
+                                "label": "Mã danh mục",
+                                "value": "36"
+                            },
+                            "sort_order": {
+                                "label": "Thứ tự",
+                                "value": 21
+                            }
+                        }
+                    },
+                    "variant_erp_infor": {
+                        "label": "Thông tin sản phẩm ERP",
+                        "value": {
+                            "quantity_unit": "Bộ",
+                            "item_id": "2601000162",
+                            "base_sku": "1751098000189",
+                            "main_group_id": 1754,
+                            "vat": 8,
+                            "vehicle_type": 1,
+                            "quantity_unit_id": 2,
+                            "product_name": "Máy lạnh LG IEC24M2",
+                            "brand_id": 6,
+                            "status_id": 4,
+                            "is_check_stock_quantity": true,
+                            "sub_group_id": 1098,
+                            "is_setup_product": true,
+                            "sku": {
+                                "label": "Mã sản phẩm ERP",
+                                "value": "1751098000189",
+                                "type": "text",
+                                "sort_order": 9
+                            }
+                        }
+                    }
+                },
+                {
+                    "end_date": 253402275599000,
+                    "image_information_by_variant": {
+                        "label": "Thông tin hình ảnh theo biến thể",
+                        "value": {
+                            "variant_avt_sku": {
+                                "label": "Hình đại diện của biến thể",
+                                "type": "image",
+                                "value": [
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361651/lg-inverter-1-hp-iec09m2-thumb-639034820584739080-550x160.jpg",
+                                        "name": "lg-inverter-1-hp-iec09m2-thumb-639034820584739080-550x160.jpg"
+                                    }
+                                ],
+                                "sort_order": 7
+                            },
+                            "gallery": {
+                                "label": "Hình gallery",
+                                "value": [
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361651/lg-inverter-1-hp-iec09m2-1-639034820700784122.jpg",
+                                        "name": "lg-inverter-1-hp-iec09m2-1-639034820700784122.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361651/lg-inverter-1-hp-iec09m2-2-639086468980842430.jpg",
+                                        "name": "lg-inverter-1-hp-iec09m2-2-639086468980842430.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361651/lg-inverter-1-hp-iec09m2-3-639086468990592844.jpg",
+                                        "name": "lg-inverter-1-hp-iec09m2-3-639086468990592844.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361651/lg-inverter-1-hp-iec09m2-5-639086468998257549.jpg",
+                                        "name": "lg-inverter-1-hp-iec09m2-5-639086468998257549.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361651/lg-inverter-1-hp-iec09m2-6-639086469006235940.jpg",
+                                        "name": "lg-inverter-1-hp-iec09m2-6-639086469006235940.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361651/lg-inverter-1-hp-iec09m2-99-639034820730188398.jpg",
+                                        "name": "lg-inverter-1-hp-iec09m2-99-639034820730188398.jpg"
+                                    }
+                                ],
+                                "type": "image",
+                                "sort_order": 8
+                            }
+                        }
+                    },
+                    "family_id": "2d589f10-2ee0-4f07-a94a-d946e87d7719",
+                    "filter_attribute_group": {
+                        "label": "Thuộc tính filter",
+                        "value": {
+                            "inverter_technology_dmxfilter": {
+                                "label": "Công nghệ Inverter",
+                                "type": "options",
+                                "value": [
+                                    {
+                                        "code": "1",
+                                        "name": "Có Inverter"
+                                    }
+                                ],
+                                "sort_order": 1
+                            },
+                            "style_dmxfilter": {
+                                "label": "Kiểu dáng/Phong cách",
+                                "value": [
+                                    {
+                                        "code": "1",
+                                        "name": "Multi Door"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "type_of_machine_dmxfilter": {
+                                "label": "Loại máy",
+                                "value": [
+                                    {
+                                        "code": "16",
+                                        "name": "1 chiều chỉ làm lạnh"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "utilities_dmxfilter": {
+                                "label": "Tiện ích",
+                                "value": [
+                                    {
+                                        "code": "158",
+                                        "name": "Màn hình hiển thị nhiệt độ trên dàn lạnh"
+                                    },
+                                    {
+                                        "code": "292",
+                                        "name": "Có Wifi, chỉnh bằng điện thoại"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "product_line_dmxfilter": {
+                                "label": "Dòng sản phẩm",
+                                "value": [
+                                    {
+                                        "code": "111",
+                                        "name": "2026"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 74
+                            }
+                        }
+                    },
+                    "seo_information": {
+                        "label": "Thông tin SEO",
+                        "value": {
+                            "title": {
+                                "label": "Tiêu đề SEO",
+                                "type": "text",
+                                "value": "Máy lạnh LG Inverter 1 HP IEC09M2 - giá tốt, mua trả chậm.",
+                                "sort_order": 11
+                            },
+                            "description": {
+                                "label": "Mô tả SEO",
+                                "value": "Máy lạnh LG Inverter 1 HP IEC09M2 giá rẻ chính hãng, mua trả chậm 0% lãi suất, bảo hành chính hãng - Giao hàng tận nơi, lắp đặt nhanh chóng, khuyến mãi hấp dẫn tại Điện máy XANH!",
+                                "type": "textarea",
+                                "sort_order": 11
+                            },
+                            "keyword": {
+                                "label": "Meta Keyword",
+                                "value": "Máy lạnh LG Inverter 1 HP IEC09M2, Máy lạnh, Máy lạnh LG, Máy lạnh LG Inverter, Máy lạnh LG Inverter 1 HP, Máy lạnh IEC09M2, Máy lạnh LG IEC09M2, LG IEC09M2, LG, IEC09M2",
+                                "type": "text",
+                                "sort_order": 12
+                            }
+                        }
+                    },
+                    "model_id": "cbf08eac-246f-4741-811c-32ecea431dfa",
+                    "common_information": {
+                        "label": "Thông tin chung",
+                        "value": {
+                            "code": {
+                                "label": "Mã",
+                                "value": "181158"
+                            },
+                            "is_activated": {
+                                "label": "Kích hoạt",
+                                "value": true
+                            },
+                            "name": {
+                                "label": "Tên",
+                                "value": "Máy lạnh LG Inverter 1 HP IEC09M2"
+                            },
+                            "created_date": {
+                                "label": "Ngày bắt đầu",
+                                "value": "2026-03-28T15:03:26.403Z"
+                            },
+                            "updated_date": {
+                                "label": "Ngày chỉnh sửa",
+                                "value": "2026-04-26T15:59:14.878Z"
+                            },
+                            "model_name": {
+                                "label": "Tên model",
+                                "value": "Máy lạnh LG Inverter 1 HP IEC09M2",
+                                "type": "text",
+                                "sort_order": 1
+                            },
+                            "image": {
+                                "label": "Hình đại diện của model",
+                                "value": [
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361651/lg-inverter-1-hp-iec09m2-thumb-639034820584739080-550x160.jpg",
+                                        "name": "lg-inverter-1-hp-iec09m2-thumb-639034820584739080-550x160.jpg"
+                                    }
+                                ],
+                                "type": "image",
+                                "sort_order": 3
+                            },
+                            "model_id_cms": {
+                                "label": "Mã sản phẩm CMS của model",
+                                "value": "361651",
+                                "type": "text",
+                                "sort_order": 15
+                            },
+                            "brand_id": {
+                                "label": "Thương hiệu",
+                                "value": "8",
+                                "type": "reference_data_option",
+                                "sort_order": 22
+                            },
+                            "product_shortname_sku": {
+                                "label": "Tên rút gọn hiển thị box sản phẩm của SKU",
+                                "value": "Máy lạnh LG Inverter 1 HP IEC09M2",
+                                "type": "text",
+                                "sort_order": 2
+                            },
+                            "product_name_sku": {
+                                "label": "Tên của SKU hiển thị trang chi tiết",
+                                "value": "Máy lạnh LG Inverter 1 HP IEC09M2",
+                                "type": "text",
+                                "sort_order": 4
+                            },
+                            "product_articles": {
+                                "label": "Bài viết sản phẩm",
+                                "value": "<p><em><strong><a href=\"https://www.dienmayxanh.com/may-lanh/lg-inverter-1-hp-iec09m2\" rel=\"noopener\" target=\"_blank\" title=\"Máy lạnh LG Inverter 1 HP IEC09M2\">Máy lạnh LG Inverter 1 HP IEC09M2</a> là lựa chọn phù hợp cho phòng nhỏ dưới 15m² với khả năng làm lạnh nhanh Jet Cool, vận hành ổn định nhờ công nghệ Dual Inverter và hỗ trợ điều khiển tiện lợi qua ứng dụng điện thoại.</strong></em></p>\n\n<h3>Thiết kế </h3>\n\n<p><strong>Dàn lạnh </strong></p>\n\n<p><a href=\"https://www.dienmayxanh.com/may-lanh\" rel=\"noopener\" target=\"_blank\" title=\"Xem thêm máy lạnh đang kinh doanh tại Điện máy XANH\">Máy lạnh</a> có thiết kế treo tường với kiểu dáng gọn gàng và gam màu trắng trang nhã, dễ bố trí trong nhiều không gian nội thất khác nhau như phòng ngủ, phòng làm việc hoặc phòng học.</p>\n\n<p><strong>Dàn lạnh</strong> được tích hợp <strong>màn hình hiển thị nhiệt độ</strong> trực quan trên thân máy, từ đó người dùng dễ dàng theo dõi và điều chỉnh khi sử dụng, đặc biệt thuận tiện vào ban đêm hoặc trong điều kiện ánh sáng yếu.</p>\n\n<p><strong>Dàn nóng</strong></p>\n\n<p><strong>Dàn nóng</strong> sử dụng ống dẫn gas bằng đồng kết hợp <strong>lá tản nhiệt nhôm phủ lớp Gold-Fin</strong> giúp tăng độ bền, hạn chế ăn mòn và duy trì hiệu quả trao đổi nhiệt ổn định trong quá trình sử dụng.</p>\n\n<p><img alt=\"Máy lạnh LG Inverter 1 HP IEC09M2 - Thiết kế\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/5f/66/5f66a9ea2ba9fc2cbcfc71a25bc8a144.jpg\" title=\"Máy lạnh LG Inverter 1 HP IEC09M2 - Thiết kế\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<h3>Công nghệ làm lạnh</h3>\n\n<p><strong>Công suất làm lạnh 1 HP - 9.300 BTU</strong> giúp <a href=\"https://www.dienmayxanh.com/may-lanh-lg\" rel=\"noopener\" target=\"_blank\" title=\"Xêm thêm các máy lạnh LG đang kinh doanh tại Điện máy XANH\">máy lạnh LG</a> vận hành hiệu quả trong các không gian nhỏ dưới 15m² như phòng ngủ, phòng làm việc hoặc phòng trọ.</p>\n\n<p><strong>Jet Cool</strong> cho phép máy tăng tốc quá trình làm lạnh, nhanh chóng đưa nhiệt độ phòng về mức cài đặt.</p>\n\n<p><span data-sheets-root=\"1\">Xem thêm: <a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/tong-hop-chung-nhan-cong-nghe-may-lanh-1581752\" rel=\"noopener\" target=\"_blank\" title=\"Tổng hợp chứng nhận công nghệ trên máy lạnh từ các hãng\" type=\"Tổng hợp chứng nhận công nghệ trên máy lạnh từ các hãng\">Tổng hợp chứng nhận công nghệ trên máy lạnh từ các hãng</a></span></p>\n\n<p><img alt=\"Máy lạnh LG Inverter 1 HP IEC09M2 - Công nghệ làm lạnh\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/de/3f/de3fb1a3770157da0b111c41204c7825.jpg\" title=\"Máy lạnh LG Inverter 1 HP IEC09M2 - Công nghệ làm lạnh\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<h3>Cơ chế thổi gió</h3>\n\n<p><strong>IEC09M2</strong> được trang bị cơ chế đảo gió lên xuống tự động kết hợp điều chỉnh trái phải bằng tay, giúp luồng khí lạnh phân bổ đồng đều trong phòng và hạn chế tập trung hơi lạnh tại một vị trí.</p>\n\n<p><img alt=\"Máy lạnh LG Inverter 1 HP IEC09M2 - Cơ chế thổi gió\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/2b/ef/2bef41f46f0bdd7f918a823353800fc6.jpg\" title=\"Máy lạnh LG Inverter 1 HP IEC09M2 - Cơ chế thổi gió\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<h3>Công nghệ tiết kiệm điện</h3>\n\n<p><a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cong-nghe-dual-inverter-tren-dieu-hoa-lg-897446\" rel=\"noopener\" target=\"_blank\" title=\"Công nghệ Dual Inverter là gì\">Dual Inverter</a> sử dụng máy nén kép với khả năng thay đổi tốc độ quay linh hoạt, hỗ trợ duy trì nhiệt độ ổn định và giảm điện năng tiêu thụ trong quá trình vận hành.</p>\n\n<p><a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cach-chinh-che-do-kiem-soat-nang-luong-chu-dong-tr-619442\" rel=\"noopener\" target=\"_blank\" title=\"Chế độ Energy Ctrl trên máy lạnh LG là gì và cách sử dụng\">Energy Ctrl</a> cung cấp 4 mức kiểm soát năng lượng, cho phép thiết lập giới hạn điện năng tiêu thụ dựa trên nhu cầu làm mát thực tế của căn phòng.</p>\n\n<p><strong>Kw Manager </strong>cho phép người dùng theo dõi mức điện năng tiêu thụ của máy lạnh thông qua ứng dụng trên điện thoại, từ đó chủ động điều chỉnh mức sử dụng phù hợp.</p>\n\n<p><img alt=\"Máy lạnh LG Inverter 1 HP IEC09M2 - Công nghệ tiết kiệm điện\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/7b/1a/7b1a772a47ab1abe4d178da6925fa71f.jpg\" title=\"Máy lạnh LG Inverter 1 HP IEC09M2 - Công nghệ tiết kiệm điện\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<h3>Khả năng lọc không khí</h3>\n\n<p>Hệ thống <strong>màng lọc sơ cấp</strong> kết hợp <strong>bộ lọc PM2.5</strong> có khả năng giữ lại bụi bẩn và các hạt bụi mịn, từ đó cải thiện chất lượng không khí trong phòng.</p>\n\n<p><img alt=\"Máy lạnh LG Inverter 1 HP IEC09M2 - Khả năng lọc không khí\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/aa/84/aa8495e75273890159f070ebb2bb93f7.jpg\" title=\"Máy lạnh LG Inverter 1 HP IEC09M2 - Khả năng lọc không khí\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<h3>Tiện ích</h3>\n\n<p><strong>Điều khiển bằng điện thoại qua kết nối Wi-Fi</strong> cho phép thay đổi nhiệt độ, chế độ hoạt động hoặc theo dõi mức tiêu thụ điện của máy lạnh ngay trên ứng dụng.</p>\n\n<p><strong>Chức năng tự chẩn đoán lỗi</strong> hiển thị mã lỗi trên remote, hỗ trợ nhận biết tình trạng hoạt động của thiết bị khi xảy ra sự cố.</p>\n\n<p><strong>Chế độ ngủ đêm</strong> trên <a href=\"https://www.dienmayxanh.com/may-lanh-lg-may-lanh-inverter\" rel=\"noopener\" target=\"_blank\" title=\"Xêm thêm các máy lạnh LG Inverter đang kinh doanh tại Điện máy XANH\">máy lạnh LG Inverter</a> tự động điều chỉnh nhiệt độ theo từng giai đoạn trong lúc ngủ, hạn chế tình trạng lạnh buốt vào ban đêm.</p>\n\n<p><a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cac-che-do-thuong-thay-tren-may-lanh-795107#hen-gio\" rel=\"noopener\" target=\"_blank\" title=\"Hẹn giờ bật, tắt máy\">Hẹn giờ bật, tắt máy</a> cho phép thiết lập thời gian hoạt động linh hoạt theo thói quen sinh hoạt hằng ngày.</p>\n\n<p><strong>Chức năng tự làm sạch</strong> hỗ trợ làm khô dàn lạnh sau khi máy ngừng hoạt động, góp phần hạn chế ẩm mốc và duy trì hiệu suất làm lạnh.</p>\n\n<p><img alt=\"Máy lạnh LG Inverter 1 HP IEC09M2 - Tiện ích\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/f6/82/f6826713b57cbeaccd90530fbdd99dba.jpg\" title=\"Máy lạnh LG Inverter 1 HP IEC09M2 - Tiện ích\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<p><em>Máy lạnh LG Inverter 1 HP IEC09M2 đáp ứng nhu cầu làm mát cho phòng nhỏ với công nghệ Jet Cool làm lạnh nhanh, công nghệ Dual Inverter tối ưu điện năng và bộ lọc PM2.5 hỗ trợ lọc bụi trong không khí. Thiết bị còn tích hợp điều khiển từ xa qua điện thoại cùng nhiều tiện ích hỗ trợ sử dụng hằng ngày.</em></p>",
+                                "type": "textarea",
+                                "sort_order": 6
+                            },
+                            "url": {
+                                "label": "URL",
+                                "value": "lg-inverter-1-hp-iec09m2",
+                                "type": "text",
+                                "sort_order": 19
+                            },
+                            "month_warranty": {
+                                "label": "Số tháng bảo hành",
+                                "value": 24,
+                                "type": "number",
+                                "sort_order": 21
+                            },
+                            "key_features": {
+                                "label": "Đặc điểm nổi bật",
+                                "value": "<ul>\n\t<li><strong>Máy lạnh 1 HP - 9.300 BTU</strong> làm lạnh phòng <strong>dưới 15m²</strong>, phù hợp phòng ngủ nhỏ.</li>\n\t<li><strong>Đảo gió lên xuống tự động</strong>, trái phải chỉnh tay giúp hơi lạnh tỏa đều phòng.</li>\n\t<li><strong>Chế độ thổi gió dễ chịu</strong> và <strong>ngủ đêm giảm buốt lạnh</strong> phù hợp cho trẻ em, người già.</li>\n\t<li><strong>Dual Inverter</strong> kết hợp <strong>Kw Manager, Energy Ctrl 4 </strong>mức giúp kiểm soát năng lượng tiết kiệm điện.</li>\n\t<li><strong>Màng lọc sơ cấp cùng bộ lọc PM2.5</strong> hỗ trợ giữ bụi thô, bụi mịn trong không khí.</li>\n\t<li><strong>Jet Cool</strong> làm lạnh nhanh, tiện khi cần hạ nhiệt phòng ngay sau khi về nhà.</li>\n</ul>",
+                                "type": "textarea",
+                                "sort_order": 28
+                            }
+                        }
+                    },
+                    "product_code": "1751098000186       ",
+                    "variant_code": "10036702",
+                    "specs_information": {
+                        "label": "Thông tin thông số kĩ thuật",
+                        "value": {
+                            "parts_warranty_dmxtskt_option": {
+                                "label": "Bảo hành bộ phận",
+                                "type": "option",
+                                "value": {
+                                    "code": "4",
+                                    "name": "2 năm"
+                                },
+                                "sort_order": 1
+                            },
+                            "type_of_machine_dmxtskt_option": {
+                                "label": "Loại máy",
+                                "value": {
+                                    "code": "3",
+                                    "name": "Máy lạnh 1 chiều (chỉ làm lạnh)"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "output_power_dmxtskt_option": {
+                                "label": "Công suất đầu ra",
+                                "value": null,
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "energysaving_technology_dmxtskt_options": {
+                                "label": "Công nghệ tiết kiệm điện",
+                                "value": [
+                                    {
+                                        "code": "40",
+                                        "name": "Kw Manager"
+                                    },
+                                    {
+                                        "code": "15",
+                                        "name": "Dual Inverter"
+                                    },
+                                    {
+                                        "code": "25",
+                                        "name": "Energy Ctrl - Kiểm soát năng lượng chủ động 4 mức"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "electricity_consumption_dmxtskt_textarea": {
+                                "label": "Điện năng tiêu thụ",
+                                "value": "0",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "utilities_dmxtskt_options": {
+                                "label": "Tiện ích",
+                                "value": [
+                                    {
+                                        "code": "457",
+                                        "name": "Hẹn giờ bật, tắt máy"
+                                    },
+                                    {
+                                        "code": "454",
+                                        "name": "Điều khiển bằng điện thoại, có Wi-Fi"
+                                    },
+                                    {
+                                        "code": "453",
+                                        "name": "Màn hình hiển thị nhiệt độ trên dàn lạnh"
+                                    },
+                                    {
+                                        "code": "445",
+                                        "name": "Thổi gió dễ chịu (cho trẻ em, người già)"
+                                    },
+                                    {
+                                        "code": "444",
+                                        "name": "Chế độ ngủ đêm tránh buốt"
+                                    },
+                                    {
+                                        "code": "380",
+                                        "name": "Công nghệ Gold-Fin chống ăn mòn"
+                                    },
+                                    {
+                                        "code": "372",
+                                        "name": "Chức năng tự chẩn đoán lỗi"
+                                    },
+                                    {
+                                        "code": "446",
+                                        "name": "Tự khởi động lại khi có điện"
+                                    },
+                                    {
+                                        "code": "79",
+                                        "name": "Chức năng tự làm sạch"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "energy_label_dmxtskt_textarea": {
+                                "label": "Nhãn năng lượng",
+                                "value": "5 sao (Hiệu suất năng lượng 5.60)",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "long_copper_pipe_dmxtskt_option": {
+                                "label": "Dài ống đồng",
+                                "value": {
+                                    "code": "28",
+                                    "name": "Tối thiểu 3m - Tối đa 15m"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "installation_height_dmxtskt_option": {
+                                "label": "Cao lắp đặt",
+                                "value": {
+                                    "code": "10",
+                                    "name": "7m"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "heat_exchanger_material_dmxtskt_option": {
+                                "label": "Chất liệu dàn tản nhiệt",
+                                "value": {
+                                    "code": "34",
+                                    "name": "Ống dẫn gas bằng Đồng - Lá tản nhiệt bằng Nhôm phủ lớp Gold-Fin"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "noise_level_dmxtskt_textarea": {
+                                "label": "Độ ồn",
+                                "value": "Dàn lạnh: 39/33/27/21 dB - Dàn nóng: 50 dB",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "input_current_dmxtskt_option": {
+                                "label": "Dòng điện vào",
+                                "value": {
+                                    "code": "1",
+                                    "name": "Dàn nóng hoặc dàn lạnh"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "copper_pipe_size_dmxtskt_option": {
+                                "label": "Kích thước ống đồng",
+                                "value": {
+                                    "code": "25",
+                                    "name": "6/10"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "quantity_dmxtskt_option": {
+                                "label": "Số lượng",
+                                "value": {
+                                    "code": "1",
+                                    "name": "Khoảng 7000 trang A4"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "main_accessory_length_dmxtskt_textarea": {
+                                "label": "Dài phụ kiện chính",
+                                "value": "83",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "main_accessory_thickness_dmxtskt_textarea": {
+                                "label": "Độ dày phụ kiện chính",
+                                "value": "18",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "main_accessory_volume_dmxtskt_textarea": {
+                                "label": "Khối lượng phụ kiện chính",
+                                "value": "7",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "high_accessories_dmxtskt_textarea": {
+                                "label": "Cao phụ kiện phụ",
+                                "value": "49",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "long_accessory_dmxtskt_textarea": {
+                                "label": "Dài phụ kiện phụ",
+                                "value": "71",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "accessory_thickness_dmxtskt_textarea": {
+                                "label": "Độ dày phụ kiện phụ",
+                                "value": "23",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "quantity_of_accessories_dmxtskt_textarea": {
+                                "label": "Khối lượng phụ kiện phụ",
+                                "value": "16",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "operating_current_dmxtskt_option": {
+                                "label": "Dòng điện hoạt động",
+                                "value": {
+                                    "code": "2",
+                                    "name": "1 pha"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "water_and_dust_resistant_dmxtskt_options": {
+                                "label": "Chuẩn chống nước, bụi",
+                                "value": [
+                                    {
+                                        "code": "52",
+                                        "name": "Màng lọc sơ cấp"
+                                    },
+                                    {
+                                        "code": "89",
+                                        "name": "Bộ lọc PM2.5"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "inverter_type_dmxtskt_option": {
+                                "label": "Loại Inverter",
+                                "value": {
+                                    "code": "2",
+                                    "name": "Máy lạnh Inverter"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "wind_mode_dmxtskt_option": {
+                                "label": "Chế độ gió",
+                                "value": {
+                                    "code": "14",
+                                    "name": "Đảo gió lên xuống tự động, trái phải tùy chỉnh tay"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "made_in_dmxtskt_option": {
+                                "label": "Sản xuất tại",
+                                "value": {
+                                    "code": "10",
+                                    "name": "Thái Lan"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "product_line_dmxtskt_option": {
+                                "label": "Dòng sản phẩm",
+                                "value": {
+                                    "code": "13",
+                                    "name": "2026"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "scope_of_use_dmxtskt_option": {
+                                "label": "Phạm vi sử dụng",
+                                "value": {
+                                    "code": "36",
+                                    "name": "Dưới 15m² (từ 30 đến 45m³)"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "cooling_technology_dmxtskt_option": {
+                                "label": "Công nghệ làm lạnh",
+                                "value": {
+                                    "code": "22",
+                                    "name": "Jet Cool"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "gas_type_dmxtskt_option": {
+                                "label": "Loại Gas",
+                                "value": {
+                                    "code": "10",
+                                    "name": "R-32"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "engine_warranty_dmxtskt_option": {
+                                "label": "Bảo hành động cơ",
+                                "value": {
+                                    "code": "16",
+                                    "name": "Máy nén 10 năm"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "main_accessory_height_dmxtskt_textarea": {
+                                "label": "Cao phụ kiện chính",
+                                "value": "30",
+                                "type": "textarea",
+                                "sort_order": 72
+                            }
+                        }
+                    },
+                    "cdc_timestamp": 1778206692059,
+                    "model_code": "181158",
+                    "is_expired": false,
+                    "sub_model_code": null,
+                    "root_cate_code": "dmx_category",
+                    "category": {
+                        "label": "Danh mục",
+                        "value": {
+                            "category_name": {
+                                "label": "Tên danh mục",
+                                "value": "Máy lạnh"
+                            },
+                            "category_code": {
+                                "label": "Mã danh mục",
+                                "value": "36"
+                            },
+                            "sort_order": {
+                                "label": "Thứ tự",
+                                "value": 21
+                            }
+                        }
+                    },
+                    "variant_erp_infor": {
+                        "label": "Thông tin sản phẩm ERP",
+                        "value": {
+                            "quantity_unit": "Bộ",
+                            "item_id": "2601000159",
+                            "base_sku": "1751098000186",
+                            "main_group_id": 1754,
+                            "vat": 8,
+                            "vehicle_type": 1,
+                            "quantity_unit_id": 2,
+                            "product_name": "Máy lạnh LG IEC09M2",
+                            "brand_id": 6,
+                            "status_id": 3,
+                            "is_check_stock_quantity": true,
+                            "sub_group_id": 1098,
+                            "is_setup_product": true,
+                            "sku": {
+                                "label": "Mã sản phẩm ERP",
+                                "value": "1751098000186",
+                                "type": "text",
+                                "sort_order": 9
+                            }
+                        }
+                    }
+                },
+                {
+                    "end_date": 253402275599000,
+                    "image_information_by_variant": {
+                        "label": "Thông tin hình ảnh theo biến thể",
+                        "value": {
+                            "variant_avt_sku": {
+                                "label": "Hình đại diện của biến thể",
+                                "type": "image",
+                                "value": [
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361652/lg-inverter-15-hp-iec12m2-thumb-639034832766361406-550x160.jpg",
+                                        "name": "lg-inverter-15-hp-iec12m2-thumb-639034832766361406-550x160.jpg"
+                                    }
+                                ],
+                                "sort_order": 7
+                            },
+                            "gallery": {
+                                "label": "Hình gallery",
+                                "value": [
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361652/lg-inverter-15-hp-iec12m2-1-639034832938545832.jpg",
+                                        "name": "lg-inverter-15-hp-iec12m2-1-639034832938545832.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361652/lg-inverter-15-hp-iec12m2-2-639086472492878576.jpg",
+                                        "name": "lg-inverter-15-hp-iec12m2-2-639086472492878576.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361652/lg-inverter-15-hp-iec12m2-3-639086472507052015.jpg",
+                                        "name": "lg-inverter-15-hp-iec12m2-3-639086472507052015.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361652/lg-inverter-15-hp-iec12m2-4-639086472518984809.jpg",
+                                        "name": "lg-inverter-15-hp-iec12m2-4-639086472518984809.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361652/lg-inverter-15-hp-iec12m2-5-639086472528767592.jpg",
+                                        "name": "lg-inverter-15-hp-iec12m2-5-639086472528767592.jpg"
+                                    },
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361652/lg-inverter-15-hp-iec12m2-99-639034832981776277.jpg",
+                                        "name": "lg-inverter-15-hp-iec12m2-99-639034832981776277.jpg"
+                                    }
+                                ],
+                                "type": "image",
+                                "sort_order": 8
+                            }
+                        }
+                    },
+                    "family_id": "2d589f10-2ee0-4f07-a94a-d946e87d7719",
+                    "filter_attribute_group": {
+                        "label": "Thuộc tính filter",
+                        "value": {
+                            "inverter_technology_dmxfilter": {
+                                "label": "Công nghệ Inverter",
+                                "type": "options",
+                                "value": [
+                                    {
+                                        "code": "1",
+                                        "name": "Có Inverter"
+                                    }
+                                ],
+                                "sort_order": 1
+                            },
+                            "style_dmxfilter": {
+                                "label": "Kiểu dáng/Phong cách",
+                                "value": [
+                                    {
+                                        "code": "1",
+                                        "name": "Multi Door"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "type_of_machine_dmxfilter": {
+                                "label": "Loại máy",
+                                "value": [
+                                    {
+                                        "code": "16",
+                                        "name": "1 chiều chỉ làm lạnh"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "utilities_dmxfilter": {
+                                "label": "Tiện ích",
+                                "value": [
+                                    {
+                                        "code": "158",
+                                        "name": "Màn hình hiển thị nhiệt độ trên dàn lạnh"
+                                    },
+                                    {
+                                        "code": "292",
+                                        "name": "Có Wifi, chỉnh bằng điện thoại"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "product_line_dmxfilter": {
+                                "label": "Dòng sản phẩm",
+                                "value": [
+                                    {
+                                        "code": "111",
+                                        "name": "2026"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 74
+                            }
+                        }
+                    },
+                    "seo_information": {
+                        "label": "Thông tin SEO",
+                        "value": {
+                            "title": {
+                                "label": "Tiêu đề SEO",
+                                "type": "text",
+                                "value": "Máy lạnh LG Inverter 1.5 HP IEC12M2 - giá tốt, mua trả chậm.",
+                                "sort_order": 11
+                            },
+                            "description": {
+                                "label": "Mô tả SEO",
+                                "value": "Máy lạnh LG Inverter 1.5 HP IEC12M2 giá rẻ chính hãng, mua trả chậm 0% lãi suất, bảo hành chính hãng - Giao hàng tận nơi, lắp đặt nhanh chóng, khuyến mãi hấp dẫn tại Điện máy XANH!",
+                                "type": "textarea",
+                                "sort_order": 11
+                            },
+                            "keyword": {
+                                "label": "Meta Keyword",
+                                "value": "Máy lạnh LG Inverter 1.5 HP IEC12M2, Máy lạnh, Máy lạnh LG, Máy lạnh LG Inverter, Máy lạnh LG Inverter 1.5 HP, Máy lạnh IEC12M2, Máy lạnh LG IEC12M2, LG IEC12M2, LG, IEC12M2",
+                                "type": "text",
+                                "sort_order": 12
+                            }
+                        }
+                    },
+                    "model_id": "cbf08eac-246f-4741-811c-32ecea431dfa",
+                    "common_information": {
+                        "label": "Thông tin chung",
+                        "value": {
+                            "code": {
+                                "label": "Mã",
+                                "value": "181158"
+                            },
+                            "is_activated": {
+                                "label": "Kích hoạt",
+                                "value": true
+                            },
+                            "name": {
+                                "label": "Tên",
+                                "value": "Máy lạnh LG Inverter 1 HP IEC09M2"
+                            },
+                            "created_date": {
+                                "label": "Ngày bắt đầu",
+                                "value": "2026-03-28T15:03:26.403Z"
+                            },
+                            "updated_date": {
+                                "label": "Ngày chỉnh sửa",
+                                "value": "2026-04-26T15:59:14.878Z"
+                            },
+                            "model_name": {
+                                "label": "Tên model",
+                                "value": "Máy lạnh LG Inverter 1 HP IEC09M2",
+                                "type": "text",
+                                "sort_order": 1
+                            },
+                            "image": {
+                                "label": "Hình đại diện của model",
+                                "value": [
+                                    {
+                                        "url": "https://cdnv2.tgdd.vn/mwg-static/dmx/Products/Images/2002/361651/lg-inverter-1-hp-iec09m2-thumb-639034820584739080-550x160.jpg",
+                                        "name": "lg-inverter-1-hp-iec09m2-thumb-639034820584739080-550x160.jpg"
+                                    }
+                                ],
+                                "type": "image",
+                                "sort_order": 3
+                            },
+                            "model_id_cms": {
+                                "label": "Mã sản phẩm CMS của model",
+                                "value": "361651",
+                                "type": "text",
+                                "sort_order": 15
+                            },
+                            "brand_id": {
+                                "label": "Thương hiệu",
+                                "value": "8",
+                                "type": "reference_data_option",
+                                "sort_order": 22
+                            },
+                            "product_shortname_sku": {
+                                "label": "Tên rút gọn hiển thị box sản phẩm của SKU",
+                                "value": "Máy lạnh LG Inverter 1.5 HP IEC12M2",
+                                "type": "text",
+                                "sort_order": 2
+                            },
+                            "product_name_sku": {
+                                "label": "Tên của SKU hiển thị trang chi tiết",
+                                "value": "Máy lạnh LG Inverter 1.5 HP IEC12M2",
+                                "type": "text",
+                                "sort_order": 4
+                            },
+                            "product_articles": {
+                                "label": "Bài viết sản phẩm",
+                                "value": "<p><em><strong><a href=\"https://www.dienmayxanh.com/may-lanh/lg-inverter-15-hp-iec12m2\" rel=\"noopener\" target=\"_blank\" title=\"Máy lạnh LG Inverter 1.5 HP IEC12M2\">Máy lạnh LG Inverter 1.5 HP IEC12M2</a> phù hợp cho các không gian từ 15 - 20m² với khả năng làm mát ổn định, vận hành êm và tích hợp nhiều tiện ích hỗ trợ sử dụng thuận tiện trong sinh hoạt hằng ngày.</strong></em></p>\n\n<h3>Thiết kế </h3>\n\n<p><strong>Dàn lạnh </strong></p>\n\n<p><strong>Máy lạnh LG IEC12M2</strong> thuộc dòng điều hòa treo tường với thiết kế gọn gàng và tông màu trắng trung tính, dễ kết hợp với nhiều kiểu không gian như phòng ngủ, phòng làm việc hoặc phòng sinh hoạt cá nhân.</p>\n\n<p>Dàn lạnh được trang bị <strong>màn hình hiển thị nhiệt độ</strong> ngay trên thân máy, từ đó người dùng dễ dàng quan sát trạng thái hoạt động và điều chỉnh nhiệt độ khi cần thiết.</p>\n\n<p><strong>Dàn nóng</strong></p>\n\n<p>Ống dẫn gas bằng đồng kết hợp <strong>lá tản nhiệt nhôm phủ Gold-Fin</strong> giúp dàn nóng duy trì khả năng tản nhiệt ổn định và hạn chế tình trạng ăn mòn khi hoạt động lâu dài.</p>\n\n<p>Máy sử dụng môi <a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cac-loai-gas-tren-may-lanh-588213#r32\" rel=\"noopener\" target=\"_blank\" title=\"Xem thêm chất lạnh R-32 là gì?\">chất lạnh R-32</a>, góp phần nâng cao hiệu suất làm lạnh và hạn chế ảnh hưởng đến môi trường.</p>\n\n<p><img alt=\"Máy lạnh LG Inverter 1.5 HP IEC12M2 - Thiết kế\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/5f/66/5f66a9ea2ba9fc2cbcfc71a25bc8a144.jpg\" title=\"Máy lạnh LG Inverter 1.5 HP IEC12M2 - Thiết kế\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<h3>Công nghệ làm lạnh</h3>\n\n<p>Với công suất làm lạnh 1.5 HP - 12.300 BTU, <a href=\"https://www.dienmayxanh.com/may-lanh\" rel=\"noopener\" target=\"_blank\" title=\"Xem thêm máy lạnh đang kinh doanh tại Điện máy XANH\">máy lạnh</a> phù hợp sử dụng cho các <strong>không gian từ 15 - 20m²</strong> như phòng ngủ lớn, phòng khách nhỏ hoặc phòng làm việc.</p>\n\n<p><strong>Công nghệ Jet Cool</strong> hỗ trợ tăng tốc quá trình làm lạnh, nhanh chóng hạ nhiệt độ trong phòng và tạo luồng gió mát mạnh để không gian đạt mức nhiệt độ cài đặt trong thời gian ngắn.</p>\n\n<p><span data-sheets-root=\"1\">Xem thêm: <a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/tong-hop-chung-nhan-cong-nghe-may-lanh-1581752\" rel=\"noopener\" target=\"_blank\" title=\"Tổng hợp chứng nhận công nghệ trên máy lạnh từ các hãng\" type=\"Tổng hợp chứng nhận công nghệ trên máy lạnh từ các hãng\">Tổng hợp chứng nhận công nghệ trên máy lạnh từ các hãng</a></span></p>\n\n<p><img alt=\"Máy lạnh LG Inverter 1.5 HP IEC12M2 - Công nghệ làm lạnh\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/de/3f/de3fb1a3770157da0b111c41204c7825.jpg\" title=\"Máy lạnh LG Inverter 1.5 HP IEC12M2 - Công nghệ làm lạnh\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<h3>Cơ chế thổi gió</h3>\n\n<p>Hệ thống cánh đảo gió của <a href=\"https://www.dienmayxanh.com/may-lanh-lg\" rel=\"noopener\" target=\"_blank\" title=\"Xêm thêm các máy lạnh LG đang kinh doanh tại Điện máy XANH\">máy lạnh LG</a> này cho phép chuyển động lên xuống tự động, đồng thời người dùng có thể tùy chỉnh hướng gió trái phải bằng tay để phân bổ hơi lạnh trong phòng.</p>\n\n<p><img alt=\"Máy lạnh LG Inverter 1.5 HP IEC12M2 - Cơ chế thổi gió\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/2b/ef/2bef41f46f0bdd7f918a823353800fc6.jpg\" title=\"Máy lạnh LG Inverter 1.5 HP IEC12M2 - Cơ chế thổi gió\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<h3>Công nghệ tiết kiệm điện</h3>\n\n<p><a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cong-nghe-dual-inverter-tren-dieu-hoa-lg-897446\" rel=\"noopener\" target=\"_blank\" title=\"Công nghệ Dual Inverter là gì\">Công nghệ Dual Inverter</a> sử dụng máy nén kép có khả năng điều chỉnh tốc độ quay linh hoạt, duy trì nhiệt độ ổn định đồng thời tối ưu điện năng tiêu thụ.</p>\n\n<p><a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cach-chinh-che-do-kiem-soat-nang-luong-chu-dong-tr-619442\" rel=\"noopener\" target=\"_blank\" title=\"Chế độ Energy Ctrl trên máy lạnh LG là gì và cách sử dụng\">Energy Ctrl</a> cung cấp 4 mức kiểm soát năng lượng để người dùng chủ động thiết lập mức điện năng tiêu thụ theo nhu cầu làm mát, đồng thời <strong>Kw Manager</strong> cho phép theo dõi và quản lý lượng điện sử dụng của máy lạnh thông qua ứng dụng trên điện thoại.</p>\n\n<p><img alt=\"Máy lạnh LG Inverter 1.5 HP IEC12M2 - Công nghệ tiết kiệm điện\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/7b/1a/7b1a772a47ab1abe4d178da6925fa71f.jpg\" title=\"Máy lạnh LG Inverter 1.5 HP IEC12M2 - Công nghệ tiết kiệm điện\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<h3>Khả năng lọc không khí</h3>\n\n<p><a href=\"https://www.dienmayxanh.com/may-lanh-lg-may-lanh-inverter\" rel=\"noopener\" target=\"_blank\" title=\"Xêm thêm các máy lạnh LG Inverter đang kinh doanh tại Điện máy XANH\">Máy lạnh LG Inverter</a> được trang bị màng lọc sơ cấp kết hợp bộ lọc PM2.5, có khả năng giữ lại bụi bẩn và các hạt bụi mịn trong không khí, từ đó góp phần cải thiện môi trường không khí trong phòng.</p>\n\n<p><img alt=\"Máy lạnh LG Inverter 1.5 HP IEC12M2 - Khả năng lọc không khí\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/aa/84/aa8495e75273890159f070ebb2bb93f7.jpg\" title=\"Máy lạnh LG Inverter 1.5 HP IEC12M2 - Khả năng lọc không khí\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<h3>Tiện ích</h3>\n\n<p>Thiết bị hỗ trợ <a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cac-che-do-thuong-thay-tren-may-lanh-795107#dieu-khien-bang-dien-thoai\" rel=\"noopener\" target=\"_blank\" title=\"điều khiển từ xa qua điện thoại \">điều khiển từ xa qua điện thoại</a> nhờ kết nối Wi-Fi, cho phép người dùng thay đổi nhiệt độ hoặc chế độ hoạt động trực tiếp trên ứng dụng.</p>\n\n<p><strong>Chức năng tự chẩn đoán lỗi</strong> hiển thị mã lỗi trên remote giúp người dùng nhận biết tình trạng hoạt động của máy khi xảy ra sự cố.</p>\n\n<p><strong>Chế độ ngủ đêm</strong> tự động điều chỉnh nhiệt độ theo từng giai đoạn trong khi ngủ để hạn chế cảm giác lạnh buốt, đồng thời <strong>chế độ thổi gió dễ chịu</strong> hướng luồng khí lạnh lên trần nhà thay vì thổi trực tiếp vào người, phù hợp với gia đình có trẻ nhỏ hoặc người lớn tuổi.</p>\n\n<p>Người dùng có thể cài đặt thời gian <a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/cac-che-do-thuong-thay-tren-may-lanh-795107#hen-gio\" rel=\"noopener\" target=\"_blank\" title=\"Hẹn giờ bật, tắt máy\">bật, tắt máy</a> thông qua chức năng hẹn giờ, thuận tiện cho sinh hoạt hằng ngày.</p>\n\n<p><a href=\"https://www.dienmayxanh.com/kinh-nghiem-hay/chuc-nang-tu-dong-lam-sach-tren-may-lanh-1080148\" rel=\"noopener\" target=\"_blank\" title=\"Chức năng tự làm sạch trên máy lạnh\">Chức năng tự làm sạch</a> giúp làm khô dàn lạnh sau khi máy ngừng hoạt động, góp phần hạn chế tình trạng ẩm mốc bên trong thiết bị.</p>\n\n<p><img alt=\"Máy lạnh LG Inverter 1.5 HP IEC12M2 - Tiện ích\" height=\"570\" src=\"https://cdnv2.tgdd.vn/mwg-static/common/Products/2002/333735/f6/82/f6826713b57cbeaccd90530fbdd99dba.jpg\" title=\"Máy lạnh LG Inverter 1.5 HP IEC12M2 - Tiện ích\" width=\"1020\" /></p>\n\n<p><em>*Hình ảnh chỉ mang tính chất minh họa</em></p>\n\n<p><em>Máy lạnh LG Inverter 1.5 HP IEC12M2 mang đến khả năng làm mát hiệu quả cho phòng diện tích vừa với sự hỗ trợ của Jet Cool, Dual Inverter và bộ lọc PM2.5. Bên cạnh đó, các tiện ích như điều khiển qua điện thoại, chế độ ngủ đêm và tự làm sạch cũng góp phần nâng cao trải nghiệm sử dụng.</em></p>",
+                                "type": "textarea",
+                                "sort_order": 6
+                            },
+                            "url": {
+                                "label": "URL",
+                                "value": "lg-inverter-15-hp-iec12m2",
+                                "type": "text",
+                                "sort_order": 19
+                            },
+                            "month_warranty": {
+                                "label": "Số tháng bảo hành",
+                                "value": 24,
+                                "type": "number",
+                                "sort_order": 21
+                            },
+                            "key_features": {
+                                "label": "Đặc điểm nổi bật",
+                                "value": "<ul>\n\t<li><strong>Máy lạnh 1.5 HP làm mát phòng 15 - 20m²</strong>, phù hợp phòng ngủ lớn hoặc phòng khách nhỏ.</li>\n\t<li><strong>Dual Inverter, Kw Manager, Energy Ctrl </strong>tối ưu công suất, vận hành ổn định hơn trong quá trình sử dụng.</li>\n\t<li><strong>Jet Cool </strong>làm lạnh nhanh, đảo gió lên xuống tự động giúp khí lan tỏa đều phòng.</li>\n\t<li><strong>Màng lọc sơ cấp và PM2.5</strong> giữ bụi thô, bụi mịn, cải thiện chất lượng không khí trong phòng.</li>\n\t<li><strong>Thổi gió dễ chịu</strong> cho trẻ em, người già kết hợp <strong>chế độ ngủ đêm</strong>, hạn chế cảm giác buốt lạnh.</li>\n\t<li>Tích hợp nhiều tiện ích như: <strong>chức năng tự làm sạch, tự chẩn đoán lỗi, hẹn giờ bật, tắt máy,</strong>...</li>\n</ul>",
+                                "type": "textarea",
+                                "sort_order": 28
+                            }
+                        }
+                    },
+                    "product_code": "1751098000187       ",
+                    "variant_code": "10036703",
+                    "specs_information": {
+                        "label": "Thông tin thông số kĩ thuật",
+                        "value": {
+                            "parts_warranty_dmxtskt_option": {
+                                "label": "Bảo hành bộ phận",
+                                "type": "option",
+                                "value": {
+                                    "code": "4",
+                                    "name": "2 năm"
+                                },
+                                "sort_order": 1
+                            },
+                            "type_of_machine_dmxtskt_option": {
+                                "label": "Loại máy",
+                                "value": {
+                                    "code": "3",
+                                    "name": "Máy lạnh 1 chiều (chỉ làm lạnh)"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "output_power_dmxtskt_option": {
+                                "label": "Công suất đầu ra",
+                                "value": null,
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "energysaving_technology_dmxtskt_options": {
+                                "label": "Công nghệ tiết kiệm điện",
+                                "value": [
+                                    {
+                                        "code": "40",
+                                        "name": "Kw Manager"
+                                    },
+                                    {
+                                        "code": "15",
+                                        "name": "Dual Inverter"
+                                    },
+                                    {
+                                        "code": "25",
+                                        "name": "Energy Ctrl - Kiểm soát năng lượng chủ động 4 mức"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "electricity_consumption_dmxtskt_textarea": {
+                                "label": "Điện năng tiêu thụ",
+                                "value": "1",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "utilities_dmxtskt_options": {
+                                "label": "Tiện ích",
+                                "value": [
+                                    {
+                                        "code": "457",
+                                        "name": "Hẹn giờ bật, tắt máy"
+                                    },
+                                    {
+                                        "code": "454",
+                                        "name": "Điều khiển bằng điện thoại, có Wi-Fi"
+                                    },
+                                    {
+                                        "code": "453",
+                                        "name": "Màn hình hiển thị nhiệt độ trên dàn lạnh"
+                                    },
+                                    {
+                                        "code": "445",
+                                        "name": "Thổi gió dễ chịu (cho trẻ em, người già)"
+                                    },
+                                    {
+                                        "code": "444",
+                                        "name": "Chế độ ngủ đêm tránh buốt"
+                                    },
+                                    {
+                                        "code": "380",
+                                        "name": "Công nghệ Gold-Fin chống ăn mòn"
+                                    },
+                                    {
+                                        "code": "372",
+                                        "name": "Chức năng tự chẩn đoán lỗi"
+                                    },
+                                    {
+                                        "code": "446",
+                                        "name": "Tự khởi động lại khi có điện"
+                                    },
+                                    {
+                                        "code": "79",
+                                        "name": "Chức năng tự làm sạch"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "energy_label_dmxtskt_textarea": {
+                                "label": "Nhãn năng lượng",
+                                "value": "5 sao (Hiệu suất năng lượng 5.22)",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "long_copper_pipe_dmxtskt_option": {
+                                "label": "Dài ống đồng",
+                                "value": {
+                                    "code": "28",
+                                    "name": "Tối thiểu 3m - Tối đa 15m"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "installation_height_dmxtskt_option": {
+                                "label": "Cao lắp đặt",
+                                "value": {
+                                    "code": "10",
+                                    "name": "7m"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "heat_exchanger_material_dmxtskt_option": {
+                                "label": "Chất liệu dàn tản nhiệt",
+                                "value": {
+                                    "code": "34",
+                                    "name": "Ống dẫn gas bằng Đồng - Lá tản nhiệt bằng Nhôm phủ lớp Gold-Fin"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "noise_level_dmxtskt_textarea": {
+                                "label": "Độ ồn",
+                                "value": "Dàn lạnh: 41/35/27/21 dB - Dàn nóng: 51 dB",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "input_current_dmxtskt_option": {
+                                "label": "Dòng điện vào",
+                                "value": {
+                                    "code": "1",
+                                    "name": "Dàn nóng hoặc dàn lạnh"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "copper_pipe_size_dmxtskt_option": {
+                                "label": "Kích thước ống đồng",
+                                "value": {
+                                    "code": "25",
+                                    "name": "6/10"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "quantity_dmxtskt_option": {
+                                "label": "Số lượng",
+                                "value": {
+                                    "code": "1",
+                                    "name": "Khoảng 7000 trang A4"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "main_accessory_length_dmxtskt_textarea": {
+                                "label": "Dài phụ kiện chính",
+                                "value": "83",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "main_accessory_thickness_dmxtskt_textarea": {
+                                "label": "Độ dày phụ kiện chính",
+                                "value": "18",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "main_accessory_volume_dmxtskt_textarea": {
+                                "label": "Khối lượng phụ kiện chính",
+                                "value": "7",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "high_accessories_dmxtskt_textarea": {
+                                "label": "Cao phụ kiện phụ",
+                                "value": "49",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "long_accessory_dmxtskt_textarea": {
+                                "label": "Dài phụ kiện phụ",
+                                "value": "71",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "accessory_thickness_dmxtskt_textarea": {
+                                "label": "Độ dày phụ kiện phụ",
+                                "value": "23",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "quantity_of_accessories_dmxtskt_textarea": {
+                                "label": "Khối lượng phụ kiện phụ",
+                                "value": "18",
+                                "type": "textarea",
+                                "sort_order": 1
+                            },
+                            "operating_current_dmxtskt_option": {
+                                "label": "Dòng điện hoạt động",
+                                "value": {
+                                    "code": "2",
+                                    "name": "1 pha"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "water_and_dust_resistant_dmxtskt_options": {
+                                "label": "Chuẩn chống nước, bụi",
+                                "value": [
+                                    {
+                                        "code": "52",
+                                        "name": "Màng lọc sơ cấp"
+                                    },
+                                    {
+                                        "code": "89",
+                                        "name": "Bộ lọc PM2.5"
+                                    }
+                                ],
+                                "type": "options",
+                                "sort_order": 1
+                            },
+                            "inverter_type_dmxtskt_option": {
+                                "label": "Loại Inverter",
+                                "value": {
+                                    "code": "2",
+                                    "name": "Máy lạnh Inverter"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "wind_mode_dmxtskt_option": {
+                                "label": "Chế độ gió",
+                                "value": {
+                                    "code": "14",
+                                    "name": "Đảo gió lên xuống tự động, trái phải tùy chỉnh tay"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "made_in_dmxtskt_option": {
+                                "label": "Sản xuất tại",
+                                "value": {
+                                    "code": "10",
+                                    "name": "Thái Lan"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "product_line_dmxtskt_option": {
+                                "label": "Dòng sản phẩm",
+                                "value": {
+                                    "code": "13",
+                                    "name": "2026"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "scope_of_use_dmxtskt_option": {
+                                "label": "Phạm vi sử dụng",
+                                "value": {
+                                    "code": "3",
+                                    "name": "Từ 15 - 20m² (từ 40 đến 60m³)"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "cooling_technology_dmxtskt_option": {
+                                "label": "Công nghệ làm lạnh",
+                                "value": {
+                                    "code": "22",
+                                    "name": "Jet Cool"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "gas_type_dmxtskt_option": {
+                                "label": "Loại Gas",
+                                "value": {
+                                    "code": "10",
+                                    "name": "R-32"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "engine_warranty_dmxtskt_option": {
+                                "label": "Bảo hành động cơ",
+                                "value": {
+                                    "code": "16",
+                                    "name": "Máy nén 10 năm"
+                                },
+                                "type": "option",
+                                "sort_order": 1
+                            },
+                            "main_accessory_height_dmxtskt_textarea": {
+                                "label": "Cao phụ kiện chính",
+                                "value": "30",
+                                "type": "textarea",
+                                "sort_order": 72
+                            }
+                        }
+                    },
+                    "cdc_timestamp": 1778206692112,
+                    "model_code": "181158",
+                    "is_expired": false,
+                    "sub_model_code": null,
+                    "root_cate_code": "dmx_category",
+                    "category": {
+                        "label": "Danh mục",
+                        "value": {
+                            "category_name": {
+                                "label": "Tên danh mục",
+                                "value": "Máy lạnh"
+                            },
+                            "category_code": {
+                                "label": "Mã danh mục",
+                                "value": "36"
+                            },
+                            "sort_order": {
+                                "label": "Thứ tự",
+                                "value": 21
+                            }
+                        }
+                    },
+                    "variant_erp_infor": {
+                        "label": "Thông tin sản phẩm ERP",
+                        "value": {
+                            "quantity_unit": "Bộ",
+                            "item_id": "2601000160",
+                            "base_sku": null,
+                            "main_group_id": 1754,
+                            "vat": 8,
+                            "vehicle_type": 1,
+                            "quantity_unit_id": 2,
+                            "product_name": "Máy lạnh LG IEC12M2",
+                            "brand_id": 6,
+                            "status_id": 3,
+                            "is_check_stock_quantity": true,
+                            "sub_group_id": 1098,
+                            "is_setup_product": true,
+                            "sku": {
+                                "label": "Mã sản phẩm ERP",
+                                "value": "1751098000187",
+                                "type": "text",
+                                "sort_order": 9
+                            }
+                        }
+                    }
+                }
+            ],
+            "model_type": "VARIANT",
+            "root_cate_code": "dmx_category",
+            "model_id": "cbf08eac-246f-4741-811c-32ecea431dfa",
+            "product_variant_codes": [
+                "10036704",
+                "10036705",
+                "10036702",
+                "10036703"
+            ],
+            "product_variant_identify": [
+                {
+                    "sku": "1751098000188",
+                    "variant_code": "10036704",
+                    "power_dmxiden": {
+                        "code": "27",
+                        "lvl": 1,
+                        "name": "2 HP",
+                        "label": "Công suất"
+                    }
+                },
+                {
+                    "sku": "1751098000189",
+                    "variant_code": "10036705",
+                    "power_dmxiden": {
+                        "code": "28",
+                        "lvl": 1,
+                        "name": "2.5 HP",
+                        "label": "Công suất"
+                    }
+                },
+                {
+                    "sku": "1751098000186",
+                    "variant_code": "10036702",
+                    "power_dmxiden": {
+                        "code": "25",
+                        "lvl": 1,
+                        "name": "1 HP",
+                        "label": "Công suất"
+                    }
+                },
+                {
+                    "sku": "1751098000187",
+                    "variant_code": "10036703",
+                    "power_dmxiden": {
+                        "code": "26",
+                        "lvl": 1,
+                        "name": "1.5 HP",
+                        "label": "Công suất"
+                    }
+                }
+            ]
+        }
+    ],
+    "data": null,
+    "toastMessage": null,
+    "errorReason": null,
+    "errorCode": null,
+    "error": false
+}

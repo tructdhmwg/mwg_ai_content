@@ -1,0 +1,870 @@
+{
+    "_meta": {
+        "source": "ai",
+        "ai_agent": "specs_agent",
+        "schema_version": "3.0",
+        "mapping_version": "v4",
+        "origin_file": "85QNED90BSA_spec",
+        "total_attributes": 47,
+        "summary": {
+            "CHINH_XAC": 17,
+            "CAN_KIEM_TRA": 10,
+            "GIA_TRI_MOI": 7,
+            "THUOC_TINH_MOI": 12
+        }
+    },
+    "attributes": [
+        {
+            "section_type": "general_information",
+            "attribute_list": [
+                {
+                    "attribute_name": null,
+                    "label": null,
+                    "is_new_atb": true,
+                    "value": [],
+                    "type": null,
+                    "sort_order": 1,
+                    "origin_atribute_name": "Mã sản phẩm",
+                    "origin_atribute_value": "3041094002185",
+                    "matching_level": "THUOC_TINH_MOI",
+                    "ghi_chu": "\"Mã sản phẩm\" không tồn tại trong schema PIM Tivi. Thuộc tính chưa xác định"
+                }
+            ]
+        },
+        {
+            "section_type": "specs_information",
+            "attribute_list": [
+                {
+                    "attribute_name": null,
+                    "label": null,
+                    "is_new_atb": true,
+                    "value": [],
+                    "type": null,
+                    "sort_order": 1,
+                    "origin_atribute_name": "Mã sản phẩm",
+                    "origin_atribute_value": "3041094002185",
+                    "matching_level": "THUOC_TINH_MOI",
+                    "ghi_chu": "\"Mã sản phẩm\" không tồn tại trong schema PIM Tivi. Thuộc tính chưa xác định"
+                },
+                {
+                    "attribute_name": null,
+                    "label": null,
+                    "is_new_atb": true,
+                    "value": [],
+                    "type": null,
+                    "sort_order": 2,
+                    "origin_atribute_name": "Tên sản phẩm",
+                    "origin_atribute_value": "TIVI QNED LG 85QNED90BSA",
+                    "matching_level": "THUOC_TINH_MOI",
+                    "ghi_chu": "\"Tên sản phẩm\" không tồn tại trong schema PIM Tivi. Thuộc tính chưa xác định"
+                },
+                {
+                    "attribute_name": null,
+                    "label": null,
+                    "is_new_atb": true,
+                    "value": [],
+                    "type": null,
+                    "sort_order": 3,
+                    "origin_atribute_name": "Tên thương hiệu",
+                    "origin_atribute_value": "LG",
+                    "matching_level": "THUOC_TINH_MOI",
+                    "ghi_chu": "\"Tên thương hiệu\" không tồn tại trong schema PIM Tivi. Thuộc tính chưa xác định"
+                },
+                {
+                    "attribute_name": null,
+                    "label": null,
+                    "is_new_atb": true,
+                    "value": [],
+                    "type": null,
+                    "sort_order": 4,
+                    "origin_atribute_name": "Thương hiệu của nước nào",
+                    "origin_atribute_value": "HÀN QUỐC",
+                    "matching_level": "THUOC_TINH_MOI",
+                    "ghi_chu": "\"Thương hiệu của nước nào\" không tồn tại trong schema PIM Tivi. Thuộc tính chưa xác định"
+                },
+                {
+                    "attribute_name": null,
+                    "label": null,
+                    "is_new_atb": true,
+                    "value": [],
+                    "type": null,
+                    "sort_order": 5,
+                    "origin_atribute_name": "Thời gian bảo hành",
+                    "origin_atribute_value": "02 NĂM",
+                    "matching_level": "THUOC_TINH_MOI",
+                    "ghi_chu": "\"Thời gian bảo hành\" không tồn tại trong schema PIM Tivi. Thuộc tính chưa xác định"
+                },
+                {
+                    "attribute_name": null,
+                    "label": null,
+                    "is_new_atb": true,
+                    "value": [],
+                    "type": null,
+                    "sort_order": 6,
+                    "origin_atribute_name": "Màu sắc",
+                    "origin_atribute_value": "ĐEN",
+                    "matching_level": "THUOC_TINH_MOI",
+                    "ghi_chu": "\"Màu sắc\" không tồn tại trong schema PIM Tivi. Thuộc tính chưa xác định"
+                },
+                {
+                    "attribute_name": "product_type_dmxtskt_option",
+                    "label": "Loại sản phẩm",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 47,
+                            "name": "Smart Tivi QNED",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Simple select",
+                    "sort_order": 7,
+                    "origin_atribute_name": "Loại Tivi",
+                    "origin_atribute_value": "4K QNED MiniLED",
+                    "matching_level": "CAN_KIEM_TRA",
+                    "ghi_chu": "Gợi ý: \"4K QNED MiniLED\" → \"Smart Tivi QNED\""
+                },
+                {
+                    "attribute_name": "screen_size_dmxtskt_option",
+                    "label": "Kích thước màn hình",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 318,
+                            "name": "85 inch",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Simple select",
+                    "sort_order": 8,
+                    "origin_atribute_name": "Kích cỡ màn hình (inch)",
+                    "origin_atribute_value": "85 inch",
+                    "matching_level": "CHINH_XAC",
+                    "ghi_chu": null
+                },
+                {
+                    "attribute_name": "resolution_dmxtskt_option",
+                    "label": "Độ phân giải",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 385,
+                            "name": "HD",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Simple select",
+                    "sort_order": 9,
+                    "origin_atribute_name": "Độ phân giải",
+                    "origin_atribute_value": "4K Ultra HD (3,840 x 2,160)",
+                    "matching_level": "CAN_KIEM_TRA",
+                    "ghi_chu": "\"4K Ultra HD (3,840 x 2,160)\" có thể khớp với \"HD\" — cần xác nhận"
+                },
+                {
+                    "attribute_name": null,
+                    "label": null,
+                    "is_new_atb": true,
+                    "value": [],
+                    "type": null,
+                    "sort_order": 10,
+                    "origin_atribute_name": "Tấm nền (Panel)",
+                    "origin_atribute_value": "Hãng không công bố",
+                    "matching_level": "THUOC_TINH_MOI",
+                    "ghi_chu": "Không tìm thấy thuộc tính PIM phù hợp cho \"Tấm nền (Panel)\". Thuộc tính chưa xác định"
+                },
+                {
+                    "attribute_name": "backlit_dmxtskt_option",
+                    "label": "Đèn nền (Backlit)",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 11,
+                            "name": "Mini LED",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Simple select",
+                    "sort_order": 11,
+                    "origin_atribute_name": "Đèn nền (Backlit)",
+                    "origin_atribute_value": "Mini LED",
+                    "matching_level": "CHINH_XAC",
+                    "ghi_chu": null
+                },
+                {
+                    "attribute_name": "operating_system_dmxtskt_option",
+                    "label": "Hệ điều hành",
+                    "is_new_atb": false,
+                    "value": [],
+                    "type": "Simple select",
+                    "sort_order": 12,
+                    "origin_atribute_name": "Hệ điều hành",
+                    "origin_atribute_value": "Web OS 26",
+                    "matching_level": "CAN_KIEM_TRA",
+                    "ghi_chu": "Gợi ý: \"Web OS 26\" → \"webOS 26\" nhưng chưa có trên PIM"
+                },
+                {
+                    "attribute_name": "ram_dmxtskt_option",
+                    "label": "RAM",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 45,
+                            "name": "Hãng không công bố",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Simple select",
+                    "sort_order": 13,
+                    "origin_atribute_name": "RAM",
+                    "origin_atribute_value": "Hãng không công bố",
+                    "matching_level": "CHINH_XAC",
+                    "ghi_chu": null
+                },
+                {
+                    "attribute_name": "rom_dmxtskt_option",
+                    "label": "ROM",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 2,
+                            "name": "Hãng không công bố",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Simple select",
+                    "sort_order": 14,
+                    "origin_atribute_name": "ROM",
+                    "origin_atribute_value": "Hãng không công bố",
+                    "matching_level": "CHINH_XAC",
+                    "ghi_chu": null
+                },
+                {
+                    "attribute_name": "leg_material_dmxtskt_option",
+                    "label": "Chất liệu chân",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 8,
+                            "name": "Nhựa lõi thép",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Simple select",
+                    "sort_order": 15,
+                    "origin_atribute_name": "Chất liệu chân đế",
+                    "origin_atribute_value": "Chân đế lõi kim loại",
+                    "matching_level": "CAN_KIEM_TRA",
+                    "ghi_chu": "\"Chân đế lõi kim loại\" → \"Nhựa lõi thép\""
+                },
+                {
+                    "attribute_name": "frame_material_dmxtskt_option",
+                    "label": "Chất liệu khung viền",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 4,
+                            "name": "Nhựa",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Simple select",
+                    "sort_order": 16,
+                    "origin_atribute_name": "Chất liệu viền tivi",
+                    "origin_atribute_value": "Viền nhựa",
+                    "matching_level": "CAN_KIEM_TRA",
+                    "ghi_chu": "\"Viền nhựa\" → \"Nhựa\""
+                },
+                {
+                    "attribute_name": "made_in_dmxtskt_option",
+                    "label": "Sản xuất tại",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 7,
+                            "name": "Indonesia",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Simple select",
+                    "sort_order": 17,
+                    "origin_atribute_name": "Nơi sản xuất",
+                    "origin_atribute_value": "Indonesia",
+                    "matching_level": "CHINH_XAC",
+                    "ghi_chu": null
+                },
+                {
+                    "attribute_name": "release_date_dmxtskt_option",
+                    "label": "Thời gian ra mắt",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 18,
+                            "name": "2026",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Simple select",
+                    "sort_order": 18,
+                    "origin_atribute_name": "Năm ra mắt",
+                    "origin_atribute_value": "2026",
+                    "matching_level": "CHINH_XAC",
+                    "ghi_chu": null
+                },
+                {
+                    "attribute_name": "processor_cpu_dmxtskt_option",
+                    "label": "Chip xử lý (CPU)",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 768,
+                            "name": "Bộ xử lý α8 AI Processor 4K Gen2",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Simple select",
+                    "sort_order": 19,
+                    "origin_atribute_name": "Bộ xử lý",
+                    "origin_atribute_value": "Bộ xử lý α8 AI Processor 4K Gen2",
+                    "matching_level": "CHINH_XAC",
+                    "ghi_chu": null
+                },
+                {
+                    "attribute_name": "scanning_frequency_dmxtskt_options",
+                    "label": "Tần số quét",
+                    "is_new_atb": false,
+                    "value": [],
+                    "type": "Multi select",
+                    "sort_order": 20,
+                    "origin_atribute_name": "Tần số quét thực (không lấy tần số quét up to)",
+                    "origin_atribute_value": "120Hz Native (VRR 144Hz)",
+                    "matching_level": "GIA_TRI_MOI",
+                    "ghi_chu": "Giá trị \"120Hz Native (VRR 144Hz)\" chưa tồn tại trong PIM — cần tạo mới"
+                },
+                {
+                    "attribute_name": "control_via_phone_dmxtskt_options",
+                    "label": "Điều khiển bằng điện thoại",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 30,
+                            "name": "Ứng dụng LG ThinQ",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Multi select",
+                    "sort_order": 21,
+                    "origin_atribute_name": "Điều khiển tivi bằng điện thoại",
+                    "origin_atribute_value": "LG ThinQ",
+                    "matching_level": "CAN_KIEM_TRA",
+                    "ghi_chu": "\"LG ThinQ\" có thể khớp với \"Ứng dụng LG ThinQ\" — cần xác nhận"
+                },
+                {
+                    "attribute_name": "voice_control_dmxtskt_options",
+                    "label": "Điều khiển bằng giọng nói",
+                    "is_new_atb": false,
+                    "value": [],
+                    "type": "Multi select",
+                    "sort_order": 22,
+                    "origin_atribute_name": "Điều khiển bằng giọng nói",
+                    "origin_atribute_value": "Google Cast",
+                    "matching_level": "GIA_TRI_MOI",
+                    "ghi_chu": "Giá trị \"Google Cast\" chưa tồn tại trong PIM — cần tạo mới"
+                },
+                {
+                    "attribute_name": "utilities_dmxtskt_options",
+                    "label": "Tiện ích",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 3739,
+                            "name": "Điều khiển qua giọng nói Tiếng Việt (ứng dụng AI)",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Multi select",
+                    "sort_order": 23,
+                    "origin_atribute_name": "SP có điều khiển bằng giọng nói tiếng Việt trên ứng dụng YouTube không",
+                    "origin_atribute_value": "Có",
+                    "matching_level": "CAN_KIEM_TRA",
+                    "ghi_chu": "Tên thuộc tính dạng câu hỏi boolean → map name thành giá trị PIM. [Tiện ích] \"Điều khiển qua giọng nói Tiếng Việt (ứng dụng AI)\" (score=23, cov=80%)"
+                },
+                {
+                    "attribute_name": "utilities_dmxtskt_options",
+                    "label": "Tiện ích",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 4177,
+                            "name": "Micro tích hợp trên TV - điều khiển giọng nói rảnh tay",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Multi select",
+                    "sort_order": 24,
+                    "origin_atribute_name": "SP có micro tích hợp trên tivi để điều khiển rảnh tay không cần remote hoặc ứng dụng điện thoại không",
+                    "origin_atribute_value": "Có",
+                    "matching_level": "CAN_KIEM_TRA",
+                    "ghi_chu": "Tên thuộc tính dạng câu hỏi boolean → map name thành giá trị PIM. [Tiện ích] \"Micro tích hợp trên TV - điều khiển giọng nói rảnh tay\" (score=23, cov=73%)"
+                },
+                {
+                    "attribute_name": "share_screen_dmxtskt_options",
+                    "label": "Share screen",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 3,
+                            "name": "AirPlay 2",
+                            "is_new_value": false
+                        },
+                        {
+                            "code": 13,
+                            "name": "Google Cast",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Multi select",
+                    "sort_order": 25,
+                    "origin_atribute_name": "Chiếu hình từ điện thoại lên TV",
+                    "origin_atribute_value": "Airplay 2",
+                    "matching_level": "CHINH_XAC",
+                    "ghi_chu": null
+                },
+                {
+                    "attribute_name": "smart_remote_dmxtskt_option",
+                    "label": "Remote thông minh",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 3,
+                            "name": "Magic Remote tích hợp micro tìm kiếm giọng nói",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Simple select",
+                    "sort_order": 26,
+                    "origin_atribute_name": "Remote thông minh",
+                    "origin_atribute_value": "AI Magic Remote MR26",
+                    "matching_level": "CAN_KIEM_TRA",
+                    "ghi_chu": "\"AI Magic Remote MR26\" → \"Magic Remote tích hợp micro tìm kiếm giọng nói\""
+                },
+                {
+                    "attribute_name": "compatibility_dmxtskt_options",
+                    "label": "Tương thích",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 835,
+                            "name": "Google Cast",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Multi select",
+                    "sort_order": 27,
+                    "origin_atribute_name": "Kết nối ứng dụng các thiết bị trong nhà",
+                    "origin_atribute_value": "Google Cast",
+                    "matching_level": "GIA_TRI_MOI",
+                    "ghi_chu": null
+                },
+                {
+                    "attribute_name": "utilities_dmxtskt_options",
+                    "label": "Tiện ích",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 4181,
+                            "name": "Tích hợp MS Copilot",
+                            "is_new_value": false
+                        },
+                        {
+                            "code": 2435,
+                            "name": "LG ThinQ giúp điều khiển từ xa qua Wi-Fi",
+                            "is_new_value": false
+                        },
+                        {
+                            "code": 4180,
+                            "name": "Trình duyệt web toàn màn hình",
+                            "is_new_value": false
+                        },
+                        {
+                            "code": 1938,
+                            "name": "-",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Multi select",
+                    "sort_order": 28,
+                    "origin_atribute_name": "Tiện ích thông minh khác",
+                    "origin_atribute_value": "Các tính năng AI (AI Agent, AI Concierge, AI Chatbot, AI Search)",
+                    "matching_level": "GIA_TRI_MOI",
+                    "ghi_chu": "Giá trị \"Các tính năng AI (AI Agent, AI Concierge, AI Chatbot, AI Search)\" chưa tồn tại trong PIM — cần tạo mới"
+                },
+                {
+                    "attribute_name": "total_speaker_power_dmxtskt_textarea",
+                    "label": "Tổng công suất loa",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": null,
+                            "name": "40W (WF 20W, 10W per channel), 2.2 ch",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Text Area",
+                    "sort_order": 29,
+                    "origin_atribute_name": "Tổng công suất loa",
+                    "origin_atribute_value": "40W (WF 20W, 10W per channel), 2.2 ch",
+                    "matching_level": "CHINH_XAC",
+                    "ghi_chu": "Text Area — nhập tự do"
+                },
+                {
+                    "attribute_name": "quantity_dmxtskt_option",
+                    "label": "Số lượng",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 186,
+                            "name": "4",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Simple select",
+                    "sort_order": 30,
+                    "origin_atribute_name": "Số lượng loa",
+                    "origin_atribute_value": "4",
+                    "matching_level": "CHINH_XAC",
+                    "ghi_chu": null
+                },
+                {
+                    "attribute_name": "voice_filtering_mode_dmxtskt_options",
+                    "label": "Chế độ lọc thoại",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 5,
+                            "name": "Chế độ lọc thoại Clear Voice Pro",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Multi select",
+                    "sort_order": 31,
+                    "origin_atribute_name": "Chế độ lọc thoại",
+                    "origin_atribute_value": "Clear Voice Pro -  AI Object Remastering Pro",
+                    "matching_level": "CAN_KIEM_TRA",
+                    "ghi_chu": "\"Clear Voice Pro -  AI Object Remastering Pro\" → \"Chế độ lọc thoại Clear Voice Pro\""
+                },
+                {
+                    "attribute_name": "audio_technology_dmxtskt_options",
+                    "label": "Công nghệ âm thanh",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 112,
+                            "name": "α8 AI Sound Pro (Virtual 9.1.2 Up-mix)",
+                            "is_new_value": false
+                        },
+                        {
+                            "code": 184,
+                            "name": "Chế độ lọc thoại Clear Voice Pro",
+                            "is_new_value": false
+                        },
+                        {
+                            "code": 158,
+                            "name": "Điều chỉnh âm thanh tự động AI Acoustic Tuning",
+                            "is_new_value": false
+                        },
+                        {
+                            "code": 236,
+                            "name": "Đồng bộ hóa âm thanh LG Sound Sync",
+                            "is_new_value": false
+                        },
+                        {
+                            "code": 509,
+                            "name": "TV Sound Mode Share",
+                            "is_new_value": false
+                        },
+                        {
+                            "code": 113,
+                            "name": "WOW Orchestra",
+                            "is_new_value": false
+                        },
+                        {
+                            "code": 168,
+                            "name": "Không",
+                            "is_new_value": false
+                        },
+                        {
+                            "code": 854,
+                            "name": "Realtek 7.1 Surround Sound High Definition Audio CODEC",
+                            "is_new_value": false
+                        },
+                        {
+                            "code": 222,
+                            "name": "Dolby Digital",
+                            "is_new_value": false
+                        },
+                        {
+                            "code": 508,
+                            "name": "AAC",
+                            "is_new_value": false
+                        },
+                        {
+                            "code": 300,
+                            "name": "Linear PCM",
+                            "is_new_value": false
+                        },
+                        {
+                            "code": 335,
+                            "name": "WMA",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Multi select",
+                    "sort_order": 32,
+                    "origin_atribute_name": "Các công nghệ khác",
+                    "origin_atribute_value": "α8 AI Sound Pro (Virtual 9.1.2 Up-mix)",
+                    "matching_level": "GIA_TRI_MOI",
+                    "ghi_chu": null
+                },
+                {
+                    "attribute_name": "internet_connection_dmxtskt_options",
+                    "label": "Kết nối Internet",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 4,
+                            "name": "Cổng mạng LAN",
+                            "is_new_value": false
+                        },
+                        {
+                            "code": 2,
+                            "name": "Wi-Fi",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Multi select",
+                    "sort_order": 33,
+                    "origin_atribute_name": "Kết nối Internet",
+                    "origin_atribute_value": "Cổng LAN",
+                    "matching_level": "SUY_LUAN",
+                    "ghi_chu": "\"Cổng LAN\" → \"Cổng mạng LAN\""
+                },
+                {
+                    "attribute_name": "connect_dmxtskt_option",
+                    "label": "Kết nối",
+                    "is_new_atb": false,
+                    "value": [],
+                    "type": "Simple select",
+                    "sort_order": 34,
+                    "origin_atribute_name": "Kết nối không dây",
+                    "origin_atribute_value": "Bluetooth v 5.3",
+                    "matching_level": "GIA_TRI_MOI",
+                    "ghi_chu": "Giá trị \"Bluetooth v 5.3\" chưa tồn tại trong PIM — cần tạo mới"
+                },
+                {
+                    "attribute_name": "usb_a_dmxtskt_textarea",
+                    "label": "USB A",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": null,
+                            "name": "2 cổng 2.0",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Text Area",
+                    "sort_order": 35,
+                    "origin_atribute_name": "Số USB A",
+                    "origin_atribute_value": "2 cổng 2.0",
+                    "matching_level": "CHINH_XAC",
+                    "ghi_chu": "Text Area — nhập tự do"
+                },
+                {
+                    "attribute_name": "usb_type_c_dmxtskt_textarea",
+                    "label": "USB Type C",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": null,
+                            "name": "0",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Text Area",
+                    "sort_order": 36,
+                    "origin_atribute_name": "Số USB Type C",
+                    "origin_atribute_value": "0",
+                    "matching_level": "CHINH_XAC",
+                    "ghi_chu": "Text Area — nhập tự do"
+                },
+                {
+                    "attribute_name": "hdmi_dmxtskt_textarea",
+                    "label": "HDMI",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": null,
+                            "name": "4ea (supports 4K 120Hz, eARC, VRR, ALLM, QMS, QFT)",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Text Area",
+                    "sort_order": 37,
+                    "origin_atribute_name": "Số cổng HDMI",
+                    "origin_atribute_value": "4ea (supports 4K 120Hz, eARC, VRR, ALLM, QMS, QFT)",
+                    "matching_level": "CHINH_XAC",
+                    "ghi_chu": "Text Area — nhập tự do"
+                },
+                {
+                    "attribute_name": "composite_dmxtskt_textarea",
+                    "label": "Composite",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": null,
+                            "name": "Không",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Text Area",
+                    "sort_order": 38,
+                    "origin_atribute_name": "Cổng Composite",
+                    "origin_atribute_value": "Không",
+                    "matching_level": "CHINH_XAC",
+                    "ghi_chu": "Text Area — nhập tự do"
+                },
+                {
+                    "attribute_name": null,
+                    "label": null,
+                    "is_new_atb": true,
+                    "value": [],
+                    "type": null,
+                    "sort_order": 39,
+                    "origin_atribute_name": "Cổng Component",
+                    "origin_atribute_value": "Không",
+                    "matching_level": "THUOC_TINH_MOI",
+                    "ghi_chu": "\"Cổng Component\" không tồn tại trong schema PIM Tivi. Thuộc tính chưa xác định"
+                },
+                {
+                    "attribute_name": null,
+                    "label": null,
+                    "is_new_atb": true,
+                    "value": [],
+                    "type": null,
+                    "sort_order": 40,
+                    "origin_atribute_name": "Cổng VGA",
+                    "origin_atribute_value": "Không",
+                    "matching_level": "THUOC_TINH_MOI",
+                    "ghi_chu": "\"Cổng VGA\" không tồn tại trong schema PIM Tivi. Thuộc tính chưa xác định"
+                },
+                {
+                    "attribute_name": null,
+                    "label": null,
+                    "is_new_atb": true,
+                    "value": [],
+                    "type": null,
+                    "sort_order": 41,
+                    "origin_atribute_name": "Cổng tai nghe/headphone (Cổng 3.5 mm)",
+                    "origin_atribute_value": "Không",
+                    "matching_level": "THUOC_TINH_MOI",
+                    "ghi_chu": "\"Cổng tai nghe/headphone (Cổng 3.5 mm)\" không tồn tại trong schema PIM Tivi. Thuộc tính chưa xác định"
+                },
+                {
+                    "attribute_name": "arcearc_dmxtskt_option",
+                    "label": "ARC/eARC",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": 2,
+                            "name": "1 cổng eARC (ARC)",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Simple select",
+                    "sort_order": 42,
+                    "origin_atribute_name": "eARC/ARC",
+                    "origin_atribute_value": "SPDIF (Optical Digital Audio Out)",
+                    "matching_level": "GIA_TRI_MOI",
+                    "ghi_chu": "Giá trị \"SPDIF (Optical Digital Audio Out)\" chưa tồn tại trong PIM — cần tạo mới"
+                },
+                {
+                    "attribute_name": "optical_port_dmxtskt_textarea",
+                    "label": "Cổng Optical",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": null,
+                            "name": "Có",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Text Area",
+                    "sort_order": 43,
+                    "origin_atribute_name": "Cổng Optical",
+                    "origin_atribute_value": "Có",
+                    "matching_level": "CHINH_XAC",
+                    "ghi_chu": "Text Area — nhập tự do"
+                },
+                {
+                    "attribute_name": null,
+                    "label": null,
+                    "is_new_atb": true,
+                    "value": [],
+                    "type": null,
+                    "sort_order": 44,
+                    "origin_atribute_name": "Kích thước có chân, đặt bàn",
+                    "origin_atribute_value": "Ngang: 189 cm Cao: 118 cm Dày: 44.8 cm",
+                    "matching_level": "THUOC_TINH_MOI",
+                    "ghi_chu": "Không tìm thấy thuộc tính PIM phù hợp cho \"Kích thước có chân, đặt bàn\". Thuộc tính chưa xác định"
+                },
+                {
+                    "attribute_name": "machine_weight_dmxtskt_textarea",
+                    "label": "Khối lượng máy",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": null,
+                            "name": "34.2 kg",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Text Area",
+                    "sort_order": 45,
+                    "origin_atribute_name": "Khối lượng có chân",
+                    "origin_atribute_value": "34.2 kg",
+                    "matching_level": "CHINH_XAC",
+                    "ghi_chu": "Text Area — nhập tự do"
+                },
+                {
+                    "attribute_name": null,
+                    "label": null,
+                    "is_new_atb": true,
+                    "value": [],
+                    "type": null,
+                    "sort_order": 46,
+                    "origin_atribute_name": "Kích thước không chân, treo tường",
+                    "origin_atribute_value": "Ngang: 189 cm Cao: 108.1 cm Dày: 5.99 cm",
+                    "matching_level": "THUOC_TINH_MOI",
+                    "ghi_chu": "Không tìm thấy thuộc tính PIM phù hợp cho \"Kích thước không chân, treo tường\". Thuộc tính chưa xác định"
+                },
+                {
+                    "attribute_name": "legless_mass_dmxtskt_textarea",
+                    "label": "Khối lượng không chân",
+                    "is_new_atb": false,
+                    "value": [
+                        {
+                            "code": null,
+                            "name": "33 kg",
+                            "is_new_value": false
+                        }
+                    ],
+                    "type": "Text Area",
+                    "sort_order": 47,
+                    "origin_atribute_name": "Khối lượng không chân",
+                    "origin_atribute_value": "33 kg",
+                    "matching_level": "CHINH_XAC",
+                    "ghi_chu": "Text Area — nhập tự do"
+                }
+            ]
+        }
+    ]
+}
