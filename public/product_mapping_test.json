@@ -615,7 +615,7 @@
                         {
                             "code": 335,
                             "name": "WMA",
-                            "is_new_value": false
+                            "is_new_value": true
                         }
                     ],
                     "type": "Multi select",

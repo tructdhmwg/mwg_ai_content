@@ -256,6 +256,8 @@ export const useProductStore = create<ProductStore>((set) => ({
           id: `PIM-${variantCode}`,
           model_code: obj.model_code || '181158',
           variantcode: variantCode,
+          variant_name: obj.variant_name || variantCode.replace(/_/g, ' - ').replace(/LG/i, 'LG'),
+          product_code_erp: obj.product_code_erp || `${1751098000100 + Math.floor(Math.random() * 900)}`,
           name,
           site_id,
           nganh_hang,

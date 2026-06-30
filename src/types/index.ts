@@ -161,6 +161,8 @@ export interface Product {
   id: string // Mã sản phẩm PIM (vd: PIM-9901)
   model_code: string // Mã model (vd: IPHONE16PM)
   variantcode: string // Mã biến thể (vd: IPHONE16PM_256)
+  variant_name?: string // Tên biến thể (vd: LG - Black)
+  product_code_erp?: string // Mã sản phẩm ERP (vd: 1751098000187)
   name: string // Tên sản phẩm
   site_id: SiteId
   nganh_hang: string

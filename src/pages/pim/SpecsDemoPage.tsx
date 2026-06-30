@@ -337,54 +337,55 @@ export function SpecsDemoPage() {
     }
 
     if (normalizedType === 'multi select') {
+      // Shared dropdown rendered once; individual value rows call this to get the panel
       return (
         <div className="relative min-w-[220px]">
           {openDropdown === dropdownKey && (
-            <div className="fixed inset-0 z-10" onClick={() => setOpenDropdown(null)} />
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setOpenDropdown(null)} />
+              <div className="absolute left-0 right-0 z-30 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-white p-1 shadow-lg">
+                {options.length === 0 ? (
+                  <div className="px-2.5 py-2 text-xs text-gray-400">Chưa có option</div>
+                ) : (
+                  options.map((option, optionIndex) => {
+                    const isSelected = selectedNames.includes(option.name)
+                    return (
+                      <button
+                        key={`${option.name}-${option.code ?? optionIndex}`}
+                        type="button"
+                        onClick={() => {
+                          const nextValue = isSelected
+                            ? values.filter((value) => value.name !== option.name)
+                            : [...values, option]
+                          updateMappingValue(rowIndex, nextValue)
+                        }}
+                        className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-xs font-semibold text-gray-700 hover:bg-cyan-50/60"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          readOnly
+                          className="h-3 w-3 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500"
+                        />
+                        <span>{option.name}</span>
+                      </button>
+                    )
+                  })
+                )}
+              </div>
+            </>
           )}
           <button
             type="button"
             onClick={() => setOpenDropdown(openDropdown === dropdownKey ? null : dropdownKey)}
-            className="relative z-20 flex min-h-[34px] w-full items-center rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-left text-xs font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+            className="relative z-20 flex min-h-[34px] w-full items-center rounded-lg border border-cyan-400 bg-cyan-50 px-2.5 py-1.5 text-left text-xs font-medium text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-500"
           >
             {selectedNames.length === 0 ? (
               <span className="text-gray-400">-- Chọn nhiều giá trị --</span>
             ) : (
-              <span className="line-clamp-2">{selectedNames.join(', ')}</span>
+              <span className="text-cyan-700 font-semibold">{selectedNames.length} giá trị đã chọn</span>
             )}
           </button>
-          {openDropdown === dropdownKey && (
-            <div className="absolute left-0 right-0 z-30 mt-1 max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-white p-1 shadow-lg">
-              {options.length === 0 ? (
-                <div className="px-2.5 py-2 text-xs text-gray-400">Chưa có option</div>
-              ) : (
-                options.map((option, optionIndex) => {
-                  const isSelected = selectedNames.includes(option.name)
-                  return (
-                    <button
-                      key={`${option.name}-${option.code ?? optionIndex}`}
-                      type="button"
-                      onClick={() => {
-                        const nextValue = isSelected
-                          ? values.filter((value) => value.name !== option.name)
-                          : [...values, option]
-                        updateMappingValue(rowIndex, nextValue)
-                      }}
-                      className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-xs font-semibold text-gray-700 hover:bg-cyan-50/60"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        readOnly
-                        className="h-3 w-3 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500"
-                      />
-                      <span>{option.name}</span>
-                    </button>
-                  )
-                })
-              )}
-            </div>
-          )}
         </div>
       )
     }
@@ -539,17 +540,22 @@ export function SpecsDemoPage() {
                       key={variant.id}
                       type="button"
                       onClick={() => navigateToVariant(variant.id)}
-                      className={`group flex min-h-[54px] min-w-[240px] flex-1 items-center justify-between gap-3 rounded-[18px] border-2 px-3 py-2 text-left transition-all duration-200 motion-reduce:transition-none ${
+                      className={`group flex min-h-[72px] min-w-[260px] flex-1 flex-col gap-1.5 rounded-[18px] border-2 px-3.5 py-2.5 text-left transition-all duration-200 motion-reduce:transition-none ${
                         isActive
                           ? 'border-[#0071E3] bg-white text-[#1D1D1F] shadow-[0_1px_2px_rgba(0,0,0,0.05),0_8px_18px_rgba(0,113,227,0.14)]'
                           : 'border-black/[0.08] bg-white text-[#6E6E73] shadow-sm hover:border-black/[0.16] hover:text-[#1D1D1F]'
                       }`}
                     >
-                      <span className="min-w-0 truncate font-mono text-[11px] font-bold">{variant.variantcode}</span>
-                      <span className="inline-flex min-w-0 shrink-0 items-center gap-1.5 whitespace-nowrap text-[10px] font-semibold">
-                        <span className={`h-1.5 w-1.5 rounded-full ${getVariantStatusDotClass(statusMeta.className)}`} />
-                        <span className="truncate">{statusMeta.label}</span>
-                      </span>
+                      <div className="flex w-full items-center justify-between gap-2">
+                        <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[10px] font-semibold">
+                          <span className={`h-1.5 w-1.5 rounded-full ${getVariantStatusDotClass(statusMeta.className)}`} />
+                          <span className="truncate">{statusMeta.label}</span>
+                        </span>
+                      </div>
+                      <div className="flex w-full flex-wrap gap-x-4 gap-y-0.5 text-[10px]">
+                        <span className="text-[#6E6E73]">ERP: <span className="font-mono font-semibold text-[#1D1D1F]">{variant.product_code_erp || '—'}</span></span>
+                        <span className="text-[#6E6E73]">Variant: <span className="font-mono font-semibold text-[#1D1D1F]">{variant.variantcode}</span></span>
+                      </div>
                     </button>
                   )
                 })}
@@ -579,16 +585,17 @@ export function SpecsDemoPage() {
             <Button
               size="sm"
               variant="ghost"
-              className="w-fit rounded-full text-xs text-[#0071E3] hover:bg-[#0071E3]/5 hover:text-[#0071E3]"
+              className={`w-fit rounded-full text-xs transition-all ${
+                extractingSpecs
+                  ? 'bg-[#E6F1FB] text-[#185FA5] border border-[#B5D4F4] hover:bg-[#E6F1FB] cursor-not-allowed'
+                  : 'text-[#0071E3] hover:bg-[#0071E3]/5 hover:text-[#0071E3]'
+              }`}
               onClick={handleExtractSpecs}
               disabled={extractingSpecs}
             >
-              {extractingSpecs ? (
-                <Loader2 size={12} className="animate-spin mr-1" />
-              ) : (
-                <Sparkles size={12} className="mr-1 text-[#0071E3]" />
-              )}
-              Trích xuất Specs AI (WF1)
+              <Loader2 size={12} className={`mr-1 ${extractingSpecs ? 'animate-spin' : 'hidden'}`} />
+              <Sparkles size={12} className={`mr-1 text-[#0071E3] ${extractingSpecs ? 'hidden' : ''}`} />
+              {extractingSpecs ? 'AI đang trích xuất…' : 'Trích xuất Specs AI (WF1)'}
             </Button>
             <Button
               size="sm"
@@ -723,8 +730,43 @@ export function SpecsDemoPage() {
               </div>
             )}
 
+            {extractingSpecs && (
+              <div className="mb-3 flex items-center gap-2 rounded-full bg-[#E6F1FB] px-3 py-1.5 text-[11px] font-semibold text-[#185FA5] w-fit">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#378ADD] animate-pulse" />
+                specs_agent#238 đang xử lý
+              </div>
+            )}
+
             <div className="max-w-full overflow-x-auto rounded-[24px] bg-[#FAFAFB] p-2">
-              {mappingLoading ? (
+              {extractingSpecs ? (
+                <table className="w-full min-w-[1120px] overflow-hidden rounded-[20px] bg-white text-xs">
+                  <thead className="bg-[#F5F5F7] text-[10px] uppercase tracking-[0.14em] text-[#6E6E73]">
+                    <tr>
+                      <th className="w-[170px] px-4 py-3 text-left font-bold">Thuộc tính gốc</th>
+                      <th className="w-[210px] px-4 py-3 text-left font-bold">Giá trị gốc</th>
+                      <th className="w-[220px] px-4 py-3 text-left font-bold">Thuộc tính PIM</th>
+                      <th className="w-[330px] px-4 py-3 text-left font-bold">Giá trị PIM</th>
+                      <th className="w-[180px] px-4 py-3 text-left font-bold">Trạng thái mapping</th>
+                      <th className="w-[90px] px-4 py-3 text-center font-bold">Chọn</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-black/[0.06] bg-white">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <tr key={i} className="animate-pulse">
+                        <td className="px-4 py-3"><div className="h-3 rounded-md bg-gray-100" style={{ width: `${55 + (i % 3) * 15}%` }} /></td>
+                        <td className="px-4 py-3"><div className="h-3 rounded-md bg-gray-100" style={{ width: `${45 + (i % 4) * 10}%` }} /></td>
+                        <td className="px-4 py-3">
+                          <div className="h-3 rounded-md bg-gray-100 mb-1.5" style={{ width: '70%' }} />
+                          <div className="h-2.5 rounded-md bg-gray-100" style={{ width: '50%' }} />
+                        </td>
+                        <td className="px-4 py-3"><div className="h-8 rounded-lg bg-gray-100 w-full" /></td>
+                        <td className="px-4 py-3"><div className="h-6 rounded-full bg-gray-100" style={{ width: `${i % 2 === 0 ? 70 : 80}px` }} /></td>
+                        <td className="px-4 py-3 text-center"><div className="h-4 w-4 rounded bg-gray-100 mx-auto" /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : mappingLoading ? (
                 <div className="flex items-center justify-center gap-2 py-10 text-xs font-semibold text-gray-400">
                   <Loader2 size={14} className="animate-spin" />
                   Đang tải dữ liệu mapping...
@@ -744,17 +786,122 @@ export function SpecsDemoPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-black/[0.06] bg-white">
-                    {visibleMappingRows.map((row) => {
+                    {visibleMappingRows.flatMap((row) => {
                       const sourceRowIndex = mappingRows.indexOf(row)
                       const rowKey = getMappingRowKey(row, sourceRowIndex)
-                      return (
+                      const normalizedType = (row.type || '').toLowerCase()
+                      const isMultiSelect = normalizedType === 'multi select'
+                      const values = row.value || []
+                      const dropdownKey = `${row.attribute_name || row.origin_atribute_name}-${sourceRowIndex}`
+
+                      if (isMultiSelect && hasExtractedSpecs && values.length > 0) {
+                        const options = getMappingOptions(row)
+                        const selectedNames = values.map((v) => v.name).filter(Boolean)
+
+                        const getValueStatus = (val: MappingValue) => {
+                          if (val.is_new_value) return 'GIA_TRI_MOI'
+                          return 'CHINH_XAC'
+                        }
+
+                        return values.map((val, valIndex) => {
+                          const isFirst = valIndex === 0
+                          const subRowKey = `${rowKey}-val-${valIndex}`
+                          const valStatus = getValueStatus(val)
+
+                          return (
+                            <tr key={subRowKey} className="align-middle transition-colors hover:bg-[#FAFAFB]">
+                              {isFirst && (
+                                <>
+                                  <td rowSpan={values.length} className="px-4 py-3 font-semibold text-[#1D1D1F] align-top border-r border-black/[0.04]">{row.origin_atribute_name}</td>
+                                  <td rowSpan={values.length} className="px-4 py-3 leading-relaxed text-[#6E6E73] align-top border-r border-black/[0.04]">{row.origin_atribute_value || '-'}</td>
+                                  <td rowSpan={values.length} className="px-4 py-3 align-top border-r border-black/[0.04]">
+                                    <div className="font-semibold text-[#1D1D1F]">{row.label || '-'}</div>
+                                    {row.attribute_name && (
+                                      <div className="mt-1 break-all font-mono text-[10px] text-[#6E6E73]">{row.attribute_name}</div>
+                                    )}
+                                  </td>
+                                </>
+                              )}
+                              <td className="px-4 py-3">
+                                <div className="relative min-w-[220px]">
+                                  {isFirst && openDropdown === dropdownKey && (
+                                    <>
+                                      <div className="fixed inset-0 z-10" onClick={() => setOpenDropdown(null)} />
+                                      <div className="absolute left-0 z-30 mt-1 w-72 max-h-60 overflow-y-auto rounded-lg border border-gray-200 bg-white p-1 shadow-lg" style={{ top: '100%' }}>
+                                        {options.length === 0 ? (
+                                          <div className="px-2.5 py-2 text-xs text-gray-400">Chưa có option</div>
+                                        ) : (
+                                          options.map((option, optIdx) => {
+                                            const isSelected = selectedNames.includes(option.name)
+                                            return (
+                                              <button
+                                                key={`${option.name}-${option.code ?? optIdx}`}
+                                                type="button"
+                                                onClick={() => {
+                                                  const nextValue = isSelected
+                                                    ? values.filter((v) => v.name !== option.name)
+                                                    : [...values, option]
+                                                  updateMappingValue(sourceRowIndex, nextValue)
+                                                }}
+                                                className="flex w-full items-center gap-2 rounded-md px-2.5 py-1.5 text-left text-xs font-semibold text-gray-700 hover:bg-cyan-50/60"
+                                              >
+                                                <input
+                                                  type="checkbox"
+                                                  checked={isSelected}
+                                                  readOnly
+                                                  className="h-3 w-3 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500"
+                                                />
+                                                <span>{option.name}</span>
+                                              </button>
+                                            )
+                                          })
+                                        )}
+                                      </div>
+                                    </>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={() => setOpenDropdown(openDropdown === dropdownKey ? null : dropdownKey)}
+                                    className="flex w-full items-center gap-2 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-left text-xs font-medium text-gray-800 hover:border-cyan-400 hover:bg-cyan-50/40 focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-colors"
+                                  >
+                                    <span className="flex-1 truncate">{val.name}</span>
+                                    <svg className="h-3 w-3 flex-shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                                  </button>
+                                </div>
+                              </td>
+                              <td className="px-4 py-3">
+                                <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-bold ${getMappingStatusClass(valStatus)}`}>
+                                  <span className={`h-1.5 w-1.5 rounded-full ${getMappingStatusDotClass(valStatus)}`} />
+                                  {MAPPING_LEVEL_LABEL[valStatus]}
+                                </span>
+                                {isFirst && row.ghi_chu && (
+                                  <p className="mt-2 text-[10px] leading-relaxed text-[#6E6E73]">{row.ghi_chu}</p>
+                                )}
+                              </td>
+                              {isFirst && (
+                                <td rowSpan={values.length} className="px-4 py-3 text-center align-top">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedMappingRows[rowKey] ?? true}
+                                    onChange={(e) => setSelectedMappingRows((prev) => ({ ...prev, [rowKey]: e.target.checked }))}
+                                    aria-label={`Chọn ${row.origin_atribute_name}`}
+                                    className="h-4 w-4 rounded border-gray-300 text-[#0071E3] focus:ring-[#0071E3]"
+                                  />
+                                </td>
+                              )}
+                            </tr>
+                          )
+                        })
+                      }
+
+                      return [(
                         <tr key={rowKey} className="align-top transition-colors hover:bg-[#FAFAFB]">
                           <td className="px-4 py-3 font-semibold text-[#1D1D1F]">{row.origin_atribute_name}</td>
                           <td className="px-4 py-3 leading-relaxed text-[#6E6E73]">{row.origin_atribute_value || '-'}</td>
                           <td className="px-4 py-3">
                             <div className="font-semibold text-[#1D1D1F]">{row.label || '-'}</div>
                             {row.attribute_name && (
-                              <div className="mt-1 break-all font-mono text-[10px] text-[#6E6E73]">{row.attribute_name}</div>
+                              <div className="mt-1 break-all font-mono text-[#6E6E73] font-mono text-[10px]">{row.attribute_name}</div>
                             )}
                           </td>
                           <td className="px-4 py-3">
@@ -781,7 +928,7 @@ export function SpecsDemoPage() {
                             />
                           </td>
                         </tr>
-                      )
+                      )]
                     })}
                   </tbody>
                 </table>
