@@ -7,7 +7,7 @@ import { useAuthStore } from './authStore'
 interface ProductStore {
   products: Product[]
   updateProductField: (productId: string, field: keyof Product, value: any) => void
-  uploadSpecFile: (productId: string, fileName: string, fileSize: number) => void
+  uploadSpecFile: (productId: string, fileName: string, fileSize: number, fileType: 'product_image' | 'manufacturer_spec' | 'other') => void
   deleteSpecFile: (productId: string, fileId: string) => void
   updateProductPromptCategory: (productId: string, category: string) => void
   updateProductPromptText: (productId: string, step: string, text: string) => void
@@ -323,15 +323,17 @@ export const useProductStore = create<ProductStore>((set) => ({
       return { products: updatedProducts }
     }),
 
-  uploadSpecFile: (productId, fileName, fileSize) =>
+  uploadSpecFile: (productId, fileName, fileSize, fileType) =>
     set((s) => {
       const updatedProducts = s.products.map((p) => {
         if (p.id === productId) {
           const newFile: ReferenceFile = {
             id: 'file-' + Math.random().toString(36).substring(2, 9),
             name: fileName,
+            url: 'https://example.com/' + fileName, // Mock URL
             size: fileSize,
             uploaded_at: new Date().toISOString(),
+            file_type: fileType,
           }
           const files = p.specs_files ? [...p.specs_files, newFile] : [newFile]
           return {

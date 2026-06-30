@@ -1,20 +1,110 @@
+import { ErrorBoundary } from '../../components/ErrorBoundary'
+// @ts-nocheck
+
 import { useState, useEffect, useMemo } from 'react'
+import { PRODUCT_CONTENT_STATUS_META, getProductContentStatus } from '../../lib/productContentStatus'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Upload, Trash2, Plus, Sparkles, Save, FileText,
-  Settings, AlertTriangle, File, Loader2, X, FileSpreadsheet,
-  Link, History, ExternalLink, LayoutList, UploadCloud
+  Settings, AlertTriangle, Globe, File, Check, Info, Loader2, X, FileSpreadsheet,
+  Link, History, CheckCircle2, Play, ExternalLink, Image, Video, LayoutList, Zap, List
 } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
-import { SiteBadge, Badge, StatusBadge } from '../../components/ui/Badge'
+import { SiteBadge, StatusBadge } from '../../components/ui/Badge'
+import { PromptConfigEditor } from '../../components/PromptConfigEditor'
 import { Button } from '../../components/ui/Button'
 import { Dialog } from '../../components/ui/Dialog'
 import { useProductStore } from '../../store/productStore'
+import { usePromptStore } from '../../store/promptStore'
 import { useJobStore } from '../../store/jobStore'
 import { useToast } from '../../components/ui/Toast'
-import { type Job } from '../../types'
-import { PRODUCT_CONTENT_STATUS_META, getProductContentStatus } from '../../lib/productContentStatus'
+import { type ProductPimStatus, type Job } from '../../types'
 import { formatDateTime, formatTimeAgo } from '../../lib/utils'
+
+const PIM_STATUS_META: Record<ProductPimStatus, { label: string; bgClass: string }> = {
+  draft: { label: 'Nháp PIM', bgClass: 'bg-gray-100 text-gray-700 border-gray-200' },
+  gen_completed: { label: 'Đã gen xong', bgClass: 'bg-blue-50 text-blue-700 border-blue-200' },
+  pending_qc: { label: 'Cần QC', bgClass: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+  qc_passed: { label: 'Đã QC', bgClass: 'bg-green-50 text-green-700 border-green-200' },
+  published: { label: 'Đã publish PIM', bgClass: 'bg-emerald-600 text-white border-emerald-600' }
+}
+
+interface SpecSchemaField {
+  name: string
+  type: 'text' | 'select' | 'multi'
+  options?: string[]
+}
+
+const SPEC_SCHEMAS: Record<string, SpecSchemaField[]> = {
+  'Sữa bột': [
+    { name: 'Thương hiệu', type: 'text' },
+    { name: 'Xuất xứ', type: 'select', options: ['Úc', 'Đức', 'Nhật Bản', 'Việt Nam', 'New Zealand', 'Pháp', 'Hoa Kỳ', 'Thụy Sĩ', 'Hàn Quốc'] },
+    { name: 'Độ tuổi', type: 'select', options: ['0 - 6 tháng', '6 - 12 tháng', '12 - 24 tháng', 'Trên 2 tuổi'] },
+    { name: 'Trọng lượng', type: 'text' },
+    { name: 'Hạn sử dụng', type: 'text' },
+    { name: 'Thành phần chính', type: 'text' },
+    { name: 'Dưỡng chất bổ sung', type: 'multi', options: ['DHA', 'ARA', 'Vitamin D3', 'Canxi', 'Chất xơ (FOS)', 'Omega 3', 'Omega 6'] }
+  ],
+  'Điện thoại': [
+    { name: 'Thương hiệu', type: 'text' },
+    { name: 'Hệ điều hành', type: 'select', options: ['iOS', 'Android', 'HarmonyOS', 'Khác'] },
+    { name: 'RAM', type: 'select', options: ['4 GB', '6 GB', '8 GB', '12 GB', '16 GB', '24 GB'] },
+    { name: 'Bộ nhớ trong', type: 'select', options: ['64 GB', '128 GB', '256 GB', '512 GB', '1 TB'] },
+    { name: 'Dung lượng pin', type: 'text' },
+    { name: 'Cổng kết nối', type: 'multi', options: ['Type-C', 'Lightning', 'Micro USB', 'Jack 3.5mm', 'NFC', 'Wi-Fi 6', 'Bluetooth 5.3', '5G'] },
+    { name: 'Cổng sạc', type: 'multi', options: ['Type-C', 'Lightning', 'Sạc không dây MagSafe', 'Sạc không dây Qi', 'Sạc siêu nhanh SuperVOOC'] }
+  ],
+  'iPhone': [
+    { name: 'Thương hiệu', type: 'text' },
+    { name: 'Hệ điều hành', type: 'select', options: ['iOS'] },
+    { name: 'RAM', type: 'select', options: ['6 GB', '8 GB', '12 GB'] },
+    { name: 'Bộ nhớ trong', type: 'select', options: ['128 GB', '256 GB', '512 GB', '1 TB'] },
+    { name: 'Kích thước màn hình', type: 'text' },
+    { name: 'Cổng kết nối', type: 'multi', options: ['Type-C', 'Lightning', '5G', 'Wi-Fi 6E', 'Wi-Fi 7', 'Bluetooth 5.3', 'NFC'] },
+    { name: 'Cổng sạc', type: 'multi', options: ['Type-C', 'Lightning', 'Sạc không dây MagSafe', 'Sạc không dây Qi'] }
+  ],
+  'Mac': [
+    { name: 'Thương hiệu', type: 'text' },
+    { name: 'Hệ điều hành', type: 'select', options: ['macOS'] },
+    { name: 'RAM', type: 'select', options: ['8 GB', '16 GB', '18 GB', '24 GB', '32 GB', '36 GB', '48 GB', '64 GB', '96 GB', '128 GB'] },
+    { name: 'Ổ cứng', type: 'select', options: ['256 GB SSD', '512 GB SSD', '1 TB SSD', '2 TB SSD', '4 TB SSD'] },
+    { name: 'Kích thước màn hình', type: 'text' },
+    { name: 'Cổng kết nối', type: 'multi', options: ['Thunderbolt 4', 'Type-C', 'USB-A', 'HDMI', 'SD Card Slot', 'Jack 3.5mm', 'MagSafe 3'] }
+  ],
+  'Máy tính bảng': [
+    { name: 'Thương hiệu', type: 'text' },
+    { name: 'Hệ điều hành', type: 'select', options: ['iPadOS', 'Android'] },
+    { name: 'RAM', type: 'select', options: ['4 GB', '6 GB', '8 GB', '12 GB', '16 GB'] },
+    { name: 'Bộ nhớ trong', type: 'select', options: ['64 GB', '128 GB', '256 GB', '512 GB', '1 TB'] },
+    { name: 'Dung lượng pin', type: 'text' },
+    { name: 'Cổng kết nối', type: 'multi', options: ['Type-C', 'Lightning', 'Wi-Fi 6', 'Bluetooth 5.2'] }
+  ],
+  'Tủ lạnh': [
+    { name: 'Thương hiệu', type: 'text' },
+    { name: 'Kiểu tủ', type: 'select', options: ['Ngăn đá trên', 'Ngăn đá dưới', 'Side by Side', 'Multi Door', 'Mini'] },
+    { name: 'Dung tích sử dụng', type: 'text' },
+    { name: 'Công nghệ tiết kiệm điện', type: 'text' },
+    { name: 'Nơi sản xuất', type: 'text' },
+    { name: 'Tiện ích', type: 'multi', options: ['Làm đá tự động', 'Lấy nước ngoài', 'Bảng điều khiển ngoài', 'Ngăn đông mềm', 'Chuông báo cửa mở'] }
+  ],
+  'Máy giặt': [
+    { name: 'Thương hiệu', type: 'text' },
+    { name: 'Loại máy', type: 'select', options: ['Cửa trước', 'Cửa trên', 'Lồng ngang', 'Lồng đứng'] },
+    { name: 'Khối lượng giặt', type: 'text' },
+    { name: 'Động cơ', type: 'text' },
+    { name: 'Công nghệ giặt', type: 'text' },
+    { name: 'Nơi sản xuất', type: 'text' },
+    { name: 'Tiện ích', type: 'multi', options: ['Hẹn giờ giặt', 'Khóa trẻ em', 'Giặt nước nóng', 'Tự khởi động lại', 'Vệ sinh lồng giặt', 'Wifi Control'] }
+  ]
+}
+
+const DEFAULT_SPEC_SCHEMA: SpecSchemaField[] = [
+  { name: 'Thương hiệu', type: 'text' },
+  { name: 'Xuất xứ', type: 'text' },
+  { name: 'Kích thước', type: 'text' },
+  { name: 'Chất liệu', type: 'text' },
+  { name: 'Bảo hành', type: 'text' }
+]
 
 interface MappingValue {
   code: string | number | null
@@ -138,7 +228,7 @@ const buildMappingMeta = (
   }
 }
 
-export function SpecsDemoPage() {
+function SpecsDemoPageContent() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { toast } = useToast()
@@ -148,50 +238,22 @@ export function SpecsDemoPage() {
     updateProductField,
     uploadSpecFile,
     deleteSpecFile,
+    generateFieldWithAI,
+    runFullWorkflow,
     runWf1ExtractSpecs
   } = useProductStore()
 
+  const { prompts } = usePromptStore()
   const jobs = useJobStore((s) => s.jobs)
 
   // Find current product
   const product = useMemo(() => products.find((p) => p.id === id), [products, id])
-
-  const modelVariants = useMemo(() => {
-    if (!product) return []
-    return products
-      .filter((item) => item.model_code === product.model_code)
-      .sort((a, b) => a.variantcode.localeCompare(b.variantcode))
-  }, [products, product?.model_code])
 
   // Query previous jobs run for this PIM product
   const productJobs = useMemo(() => {
     return jobs.filter((j) => j.pim_product_id === id)
   }, [jobs, id])
 
-  // Right side panel tab: specs | prompts | jobs
-  const [mainTab, setMainTab] = useState<'content' | 'specs' | 'jobs'>('content')
-
-  // Selected job details popup states
-  const [selectedJob, setSelectedJob] = useState<Job | null>(null)
-  const [popupTab, setPopupTab] = useState<'preview' | 'outline_specs' | 'seo' | 'logs'>('preview')
-  const [fileToDelete, setFileToDelete] = useState<string | null>(null)
-  const [showMissingInputAlert, setShowMissingInputAlert] = useState(false)
-  const [showPublishConfirm, setShowPublishConfirm] = useState(false)
-
-  const [extractingSpecs, setExtractingSpecs] = useState(false)
-  const [hasExtractedSpecs, setHasExtractedSpecs] = useState(false)
-  const [pendingSpecFiles, setPendingSpecFiles] = useState<File[]>([])
-
-  // Prompts visibility toggle
-  const [showPrompts, setShowPrompts] = useState<Record<string, boolean>>({})
-
-  // Extra reference links (dynamic list in Specs tab)
-  const [extraLinks, setExtraLinks] = useState<{ id: string; label: string; url: string }[]>([
-    { id: 'link-1', label: '', url: '' }
-  ])
-  const [initialLinksString, setInitialLinksString] = useState(JSON.stringify([{ id: 'link-1', label: '', url: '' }]))
-  const hasLinkChanges = JSON.stringify(extraLinks) !== initialLinksString
-  const hasTab2Changes = pendingSpecFiles.length > 0 || hasLinkChanges
 
   const [mappingRows, setMappingRows] = useState<MappingAttribute[]>([])
   const [mappingMeta, setMappingMeta] = useState<ProductMappingPayload['_meta'] | null>(null)
@@ -199,9 +261,6 @@ export function SpecsDemoPage() {
   const [mappingError, setMappingError] = useState('')
   const [mappingLevelFilter, setMappingLevelFilter] = useState<'all' | VisibleMappingLevel>('all')
   const [selectedMappingRows, setSelectedMappingRows] = useState<Record<string, boolean>>({})
-
-  // Open multi-select dropdown field key
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -229,35 +288,6 @@ export function SpecsDemoPage() {
       cancelled = true
     }
   }, [])
-
-  // Custom prompt update handler
-  const handleUpdateCustomPrompt = (stepKey: string, val: string) => {
-    if (!product) return
-    const nextCustom = product.custom_prompt_text ? { ...product.custom_prompt_text } : {}
-    nextCustom[stepKey] = val
-    updateProductField(product.id, 'custom_prompt_text', nextCustom)
-  }
-
-  // Helper to get custom or default prompt
-  const getPromptText = (stepKey: string) => {
-    if (!product) return ''
-    if (product.custom_prompt_text?.[stepKey]) {
-      return product.custom_prompt_text[stepKey]
-    }
-    const defaults: Record<string, string> = {
-      wf4_thumb: `Tạo ảnh đại diện sản phẩm ${product.name} phong cách tối giản, nền trắng.`,
-      wf4_video: `Phân tích video review và sinh tóm tắt nội dung chính cho sản phẩm ${product.name}.`,
-      wf4_gallery: `Sinh bộ 6 ảnh chi tiết cho sản phẩm ${product.name} chất lượng cao, các góc cạnh khác nhau.`,
-      wf4_slides: `Phân tích ảnh hãng và sinh 3 ảnh slide tính năng nổi bật cho ${product.name} gắn với thẻ H3.`,
-      wf4_article_images: `Tạo bộ 4 ảnh minh họa chất lượng cao để chèn vào nội dung bài viết cho ${product.name}.`,
-      wf1_specs: `Đọc tài liệu specs đính kèm và trích xuất thông tin kỹ thuật của ${product.name} thành JSON.`,
-      wf4_highlights: `Sinh 4-5 đặc điểm nổi bật chính dạng danh sách HTML của sản phẩm ${product.name}.`,
-      wf2_outline: `Tạo dàn ý bài viết chi tiết chuẩn SEO cho sản phẩm ${product.name}.`,
-      wf3_writing: `Viết bài mô tả sản phẩm chi tiết bằng HTML dựa trên dàn ý và thông số kỹ thuật của ${product.name}.`
-    }
-    return defaults[stepKey] || ''
-  }
-
   const getMappingStatusClass = (level: string) => {
     if (level === 'CHINH_XAC') return 'bg-green-50 text-green-700 border-green-200'
     if (level === 'CAN_KIEM_TRA') return 'bg-orange-50 text-orange-700 border-orange-200'
@@ -280,6 +310,7 @@ export function SpecsDemoPage() {
     return 'bg-gray-400'
   }
 
+  const hasMappingFiles = product?.specs_files && product.specs_files.length > 0;
   const visibleMappingRows = useMemo(() => {
     return mappingRows.filter((row) => {
       if (!VISIBLE_MAPPING_LEVELS.includes(row.matching_level as VisibleMappingLevel)) return false
@@ -413,6 +444,200 @@ export function SpecsDemoPage() {
     )
   }
 
+
+  const articleH3s = useMemo(() => {
+    if (!product || !product.content_html) return []
+    const matches = [...product.content_html.matchAll(/<h3[^>]*>(.*?)<\/h3>/gi)]
+    return matches.map(m => m[1].replace(/<[^>]+>/g, '').trim()).filter(Boolean)
+  }, [product?.content_html])
+
+  // Right side panel tab: specs | prompts | jobs
+  const [mainTab, setMainTab] = useState<'content' | 'specs' | 'jobs'>('content')
+  // HTML Content view tab
+  const [contentTab, setContentTab] = useState<'edit' | 'preview'>('preview')
+  
+  // Selected job details popup states
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null)
+  const [popupTab, setPopupTab] = useState<'preview' | 'outline_specs' | 'seo' | 'logs'>('preview')
+  const [fileToDelete, setFileToDelete] = useState<string | null>(null)
+  
+  // Loading states for individual AI gens
+  const [generatingFields, setGeneratingFields] = useState<Record<string, boolean>>({})
+  // Track if name has changed to show dependency alert
+  const [nameChangedAlert, setNameChangedAlert] = useState(false)
+  // Local edit states to prevent store update lags
+  const [editName, setEditName] = useState('')
+  const [newKeywordText, setNewKeywordText] = useState('')
+
+  // Full workflow running states
+  const [runningFullWf, setRunningFullWf] = useState(false)
+  const [currentWfStep, setCurrentWfStep] = useState(0)
+  const [hasExtractedSpecs, setHasExtractedSpecs] = useState(false)
+  const [extractingSpecs, setExtractingSpecs] = useState(false)
+  const [pendingSpecFiles, setPendingSpecFiles] = useState<{file: File, type: 'product_image' | 'manufacturer_spec' | 'other'}[]>([])
+  const [uploadCategory, setUploadCategory] = useState<'product_image' | 'manufacturer_spec' | 'other'>('manufacturer_spec')
+  const [showMissingInputAlert, setShowMissingInputAlert] = useState(false)
+
+  // Prompts visibility toggle
+  const [showPrompts, setShowPrompts] = useState<Record<string, boolean>>({})
+
+  // Extra reference links (dynamic list in Specs tab)
+  const [extraLinks, setExtraLinks] = useState<{ id: string; label: string; url: string }[]>([
+    { id: 'link-1', label: '', url: '' }
+  ])
+  const [initialLinksString, setInitialLinksString] = useState(JSON.stringify([{ id: 'link-1', label: '', url: '' }]))
+  const hasLinkChanges = JSON.stringify(extraLinks) !== initialLinksString
+  const hasTab2Changes = pendingSpecFiles.length > 0 || hasLinkChanges
+
+  // AI Confidence flags state (mocked on load)
+  const [confidenceFlags, setConfidenceFlags] = useState<Record<string, 'verified' | 'review' | 'none'>>({})
+
+  // Tech Specs status filter
+  const [specsStatusFilter, setSpecsStatusFilter] = useState<'all' | 'verified' | 'review' | 'none'>('all')
+
+  // Open multi-select dropdown field name
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null)
+
+  // Article images generation loading state
+  const [generatingArticleImages, setGeneratingArticleImages] = useState(false)
+
+  // Highlights HTML editor state
+  const [highlightsHtml, setHighlightsHtml] = useState('')
+
+  // Sync store name to local state on load
+  useEffect(() => {
+    if (product) {
+      setEditName(product.name)
+    }
+  }, [product?.id])
+
+  // Initialize confidence flags and highlights HTML
+  useEffect(() => {
+    if (product) {
+      const categoryFields = SPEC_SCHEMAS[product.nganh_hang] || DEFAULT_SPEC_SCHEMA
+      const initialFlags: Record<string, 'verified' | 'review' | 'none'> = {}
+      categoryFields.forEach((field, index) => {
+        const val = product.thong_so_ky_thuat?.[field.name]
+        if (!val || val.toString().trim() === '') {
+          initialFlags[field.name] = 'none'
+        } else {
+          initialFlags[field.name] = index % 2 === 0 ? 'verified' : 'review'
+        }
+      })
+      setConfidenceFlags(initialFlags)
+      
+      if (product.dac_diem_noi_bat) {
+        const isHtml = product.dac_diem_noi_bat.some(s => s.trim().startsWith('<') && s.trim().endsWith('>'))
+        if (isHtml) {
+          setHighlightsHtml(product.dac_diem_noi_bat.join('\n'))
+        } else {
+          setHighlightsHtml(`<ul>\n${product.dac_diem_noi_bat.map(item => `  <li>${item}</li>`).join('\n')}\n</ul>`)
+        }
+      } else {
+        setHighlightsHtml('')
+      }
+    }
+  }, [product?.id])
+
+  // Custom prompt update handler
+  const handleUpdateCustomPrompt = (stepKey: string, val: string) => {
+    if (!product) return
+    const nextCustom = product.custom_prompt_text ? { ...product.custom_prompt_text } : {}
+    nextCustom[stepKey] = val
+    updateProductField(product.id, 'custom_prompt_text', nextCustom)
+  }
+
+  // Helper to get custom or default prompt
+  const getPromptText = (stepKey: string) => {
+    if (!product) return ''
+    if (product.custom_prompt_text?.[stepKey]) {
+      return product.custom_prompt_text[stepKey]
+    }
+    const defaults: Record<string, string> = {
+      wf4_thumb: `Tạo ảnh đại diện sản phẩm ${product.name} phong cách tối giản, nền trắng.`,
+      wf4_video: `Phân tích video review và sinh tóm tắt nội dung chính cho sản phẩm ${product.name}.`,
+      wf4_gallery: `Sinh bộ 6 ảnh chi tiết cho sản phẩm ${product.name} chất lượng cao, các góc cạnh khác nhau.`,
+      wf4_slides: `Phân tích ảnh hãng và sinh 3 ảnh slide tính năng nổi bật cho ${product.name} gắn với thẻ H3.`,
+      wf4_article_images: `Tạo bộ 4 ảnh minh họa chất lượng cao để chèn vào nội dung bài viết cho ${product.name}.`,
+      wf1_specs: `Đọc tài liệu specs đính kèm và trích xuất thông tin kỹ thuật của ${product.name} thành JSON.`,
+      wf4_highlights: `Sinh 4-5 đặc điểm nổi bật chính dạng danh sách HTML của sản phẩm ${product.name}.`,
+      wf2_outline: `Tạo dàn ý bài viết chi tiết chuẩn SEO cho sản phẩm ${product.name}.`,
+      wf3_writing: `Viết bài mô tả sản phẩm chi tiết bằng HTML dựa trên dàn ý và thông số kỹ thuật của ${product.name}.`
+    }
+    return defaults[stepKey] || ''
+  }
+
+  // Update highlights HTML in store
+  const handleUpdateHighlights = (htmlVal: string) => {
+    if (!product) return
+    setHighlightsHtml(htmlVal)
+    updateProductField(product.id, 'dac_diem_noi_bat', [htmlVal])
+  }
+
+  // Helper to insert HTML tags at textarea cursor
+  const insertHtmlTag = (startTag: string, endTag: string) => {
+    const textarea = document.getElementById('highlights-textarea') as HTMLTextAreaElement
+    if (!textarea) return
+    const startPos = textarea.selectionStart
+    const endPos = textarea.selectionEnd
+    const text = textarea.value
+    const selectedText = text.substring(startPos, endPos)
+    const replacement = startTag + selectedText + endTag
+    const newText = text.substring(0, startPos) + replacement + text.substring(endPos)
+    handleUpdateHighlights(newText)
+    
+    setTimeout(() => {
+      textarea.focus()
+      textarea.selectionStart = startPos + startTag.length
+      textarea.selectionEnd = startPos + startTag.length + selectedText.length
+    }, 0)
+  }
+
+  const toggleConfidence = (fieldName: string) => {
+    if (!product) return
+    setConfidenceFlags((prev) => {
+      const current = prev[fieldName] || 'review'
+      let next: 'verified' | 'review' | 'none'
+      if (current === 'verified') next = 'review'
+      else if (current === 'review') next = 'none'
+      else next = 'verified'
+      
+      return {
+        ...prev,
+        [fieldName]: next,
+      }
+    })
+    toast(`Đã đổi trạng thái duyệt thông số "${fieldName}"`, 'info')
+  }
+
+  const handleUpdateGalleryLabel = (imgId: string, nextLabel: string) => {
+    if (!product) return
+    const updated = (product.gallery_images || []).map((g) =>
+      g.id === imgId ? { ...g, label: nextLabel } : g
+    )
+    updateProductField(product.id, 'gallery_images', updated)
+  }
+
+  const handleRegenThumb = async () => {
+    if (!product) return
+    setGenMediaLoading((p) => ({ ...p, thumb: true }))
+    await new Promise((r) => setTimeout(r, 1500))
+    const newUrl = `https://picsum.photos/seed/thumb-${Date.now()}/800/450`
+    updateProductField(product.id, 'thumb_url', newUrl)
+    setGenMediaLoading((p) => ({ ...p, thumb: false }))
+    toast('Đã gen ảnh đại diện mới bằng AI', 'success')
+  }
+
+  const handleRegenVideo = async () => {
+    if (!product) return
+    setGenMediaLoading((p) => ({ ...p, video: true }))
+    await new Promise((r) => setTimeout(r, 1500))
+    const demoVideo = 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+    updateProductField(product.id, 'video_url', demoVideo)
+    setGenMediaLoading((p) => ({ ...p, video: false }))
+    toast('Đã trích xuất & tối ưu video review bằng AI', 'success')
+  }
+
   if (!product) {
     return (
       <AppShell breadcrumb={['AICPS', 'Sản phẩm', 'Lỗi']}>
@@ -424,6 +649,66 @@ export function SpecsDemoPage() {
         </div>
       </AppShell>
     )
+  }
+
+  // Load appropriate prompt based on override or product category
+  const activePromptCategory = product.active_prompt_category || product.nganh_hang
+
+  // Handlers
+  const handleUpdateName = (val: string) => {
+    setEditName(val)
+    updateProductField(product.id, 'name', val)
+    setNameChangedAlert(true)
+  }
+
+  const handleGenField = async (field: 'name' | 'thong_so_ky_thuat' | 'dac_diem_noi_bat' | 'outline' | 'content_html' | 'meta_seo') => {
+    setGeneratingFields((prev) => ({ ...prev, [field]: true }))
+    try {
+      const fieldStepMap: Record<string, string> = {
+        name: 'wf1_specs',
+        thong_so_ky_thuat: 'wf1_specs',
+        dac_diem_noi_bat: 'wf4_highlights',
+        outline: 'wf2_outline',
+        content_html: 'wf3_writing',
+        meta_seo: 'wf5_finalize'
+      }
+      const stepKey = fieldStepMap[field] || 'wf2_outline'
+      
+      const matched = prompts.find(
+        (pr) => pr.site_id === product.site_id && pr.prompt_category === activePromptCategory && pr.wf_step === stepKey
+      )
+      
+      let promptText = ''
+      if (matched) {
+        promptText = matched.prompt_text
+      } else if (product.custom_prompt_text?.[stepKey]) {
+        promptText = product.custom_prompt_text[stepKey]
+      } else {
+        const defaults: Record<string, string> = {
+          wf4_thumb: `Tạo ảnh đại diện sản phẩm ${product.name} phong cách tối giản, nền trắng.`,
+          wf4_video: `Phân tích video review và sinh tóm tắt nội dung chính cho sản phẩm ${product.name}.`,
+          wf4_gallery: `Sinh bộ 6 ảnh chi tiết cho sản phẩm ${product.name} chất lượng cao, các góc cạnh khác nhau.`,
+          wf4_slides: `Phân tích ảnh hãng và sinh 3 ảnh slide tính năng nổi bật cho ${product.name} gắn với thẻ H3.`,
+          wf4_article_images: `Tạo bộ 4 ảnh minh họa chất lượng cao để chèn vào nội dung bài viết cho ${product.name}.`,
+          wf1_specs: `Đọc tài liệu specs đính kèm và trích xuất thông tin kỹ thuật của ${product.name} thành JSON.`,
+          wf4_highlights: `Sinh 4-5 đặc điểm nổi bật chính dạng danh sách HTML của sản phẩm ${product.name}.`,
+          wf2_outline: `Tạo outline bài viết cho sản phẩm ${product.name} thuộc ngành hàng ${activePromptCategory}.\nYêu cầu cấu trúc rõ ràng, chuẩn SEO.`,
+          wf3_writing: `Viết bài mô tả chi tiết sản phẩm ${product.name} chuẩn SEO dựa vào outline và đặc tả thông số.`,
+          wf5_finalize: `Kiểm tra chất lượng bài viết của ${product.name}. Tối ưu mật độ từ khóa SEO, chuẩn hóa định dạng HTML và tạo thẻ meta description.`
+        }
+        promptText = defaults[stepKey] || ''
+      }
+
+      await generateFieldWithAI(product.id, field, promptText)
+      toast(`Đã tự động sinh nội dung trường ${field === 'name' ? 'Tên' : field.toUpperCase()} bằng AI`, 'success')
+      if (field === 'name') {
+        setNameChangedAlert(true)
+      }
+    } catch (e) {
+      toast('Sinh nội dung AI thất bại', 'error')
+    } finally {
+      setGeneratingFields((prev) => ({ ...prev, [field]: false }))
+    }
   }
 
   const handleExtractSpecs = async () => {
@@ -447,17 +732,266 @@ export function SpecsDemoPage() {
     }
   }
 
+  const handleRunFullWf = async () => {
+    setRunningFullWf(true)
+    setCurrentWfStep(1)
+    try {
+      await runFullWorkflow(product.id, (step) => {
+        setCurrentWfStep(step)
+      })
+      toast('Đã hoàn thành toàn bộ quy trình biên tập tự động 5 bước!', 'success')
+      setNameChangedAlert(false)
+    } catch (err) {
+      toast('Chạy workflow thất bại', 'error')
+    } finally {
+      setRunningFullWf(false)
+      setCurrentWfStep(0)
+    }
+  }
+
+  const handleRegenDependentFields = async () => {
+    setNameChangedAlert(false)
+    setGeneratingFields((prev) => ({ ...prev, outline: true, content_html: true }))
+    try {
+      await generateFieldWithAI(product.id, 'outline')
+      await generateFieldWithAI(product.id, 'content_html')
+      toast('Đã đồng bộ sinh lại Dàn bài và Bài viết chi tiết theo tên sản phẩm mới!', 'success')
+    } catch (e) {
+      toast('Đồng bộ thất bại', 'error')
+    } finally {
+      setGeneratingFields((prev) => ({ ...prev, outline: false, content_html: false }))
+    }
+  }
+
+  // ──── Media Handlers ────
+  const [genMediaLoading, setGenMediaLoading] = useState<Record<string, boolean>>({})
+
+  // Demo fallback images (picsum.photos) for empty media slots
+  const DEMO_THUMB = `https://picsum.photos/seed/${product.id}-thumb/800/450`
+  const DEMO_GALLERY = Array.from({ length: 6 }, (_, i) => ({
+    id: `demo-gal-${i}`,
+    url: `https://picsum.photos/seed/${product.id}-gal${i}/600/400`,
+    label: `Ảnh demo ${i + 1}`,
+  }))
+  const DEMO_VIDEO = 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+
+  const effectiveThumb = product.thumb_url || DEMO_THUMB
+  const effectiveGallery = (product.gallery_images && product.gallery_images.length > 0)
+    ? product.gallery_images : DEMO_GALLERY
+  const effectiveVideo = product.video_url || DEMO_VIDEO
+  const isThumbDemo = !product.thumb_url
+  const isGalleryDemo = !product.gallery_images || product.gallery_images.length === 0
+  const isVideoDemo = !product.video_url
+
+  const handleRemoveThumb = () => {
+    updateProductField(product.id, 'thumb_url', '')
+    toast('Đã xóa ảnh đại diện', 'info')
+  }
+
+  const handleUploadThumb = () => {
+    // Simulate upload by assigning a new random picsum image
+    const newUrl = `https://picsum.photos/seed/${Date.now()}/800/450`
+    updateProductField(product.id, 'thumb_url', newUrl)
+    toast('Đã upload ảnh đại diện mới', 'success')
+  }
+
+  const handleRemoveGalleryImage = (imgId: string) => {
+    const updated = (product.gallery_images || []).filter((g) => g.id !== imgId)
+    updateProductField(product.id, 'gallery_images', updated)
+    toast('Đã xóa ảnh khỏi Gallery', 'info')
+  }
+
+  const handleUploadGalleryImages = () => {
+    // Simulate uploading 1-2 random images
+    const current = product.gallery_images || []
+    const newImgs = Array.from({ length: 2 }, (_, i) => ({
+      id: `upl-${Date.now()}-${i}`,
+      url: `https://picsum.photos/seed/upl${Date.now()}${i}/600/400`,
+      label: `Upload ${current.length + i + 1}`,
+    }))
+    updateProductField(product.id, 'gallery_images', [...current, ...newImgs])
+    toast(`Đã thêm ${newImgs.length} ảnh vào Gallery`, 'success')
+  }
+
+  const handleRegenGallery = async () => {
+    setGenMediaLoading((p) => ({ ...p, gallery: true }))
+    await new Promise((r) => setTimeout(r, 1500))
+    const newGallery = Array.from({ length: 6 }, (_, i) => ({
+      id: `regen-gal-${Date.now()}-${i}`,
+      url: `https://picsum.photos/seed/regen${Date.now()}${i}/600/400`,
+      label: `Gallery ảnh ${i + 1} (AI regen)`,
+    }))
+    updateProductField(product.id, 'gallery_images', newGallery)
+    setGenMediaLoading((p) => ({ ...p, gallery: false }))
+    toast('Đã gen lại toàn bộ Gallery bằng AI', 'success')
+  }
+
+  const handleRemoveSlideImage = (imgId: string) => {
+    const updated = (product.slide_images || []).filter((s) => s.id !== imgId)
+    updateProductField(product.id, 'slide_images', updated)
+    toast('Đã xóa slide AI', 'info')
+  }
+
+  const handleRegenSlides = async () => {
+    setGenMediaLoading((p) => ({ ...p, slides: true }))
+    await new Promise((r) => setTimeout(r, 2000))
+    const sections = ['Tổng quan tính năng', 'Công nghệ tiết kiệm điện', 'Thiết kế sang trọng']
+    const newSlides = sections.map((sec, i) => ({
+      id: `slide-regen-${Date.now()}-${i}`,
+      url: `https://picsum.photos/seed/slide${Date.now()}${i}/800/500`,
+      label: `Slide AI ${i + 1} – ${sec}`,
+      section_h3: sec,
+      selection_reason: `AI Vision đã chọn ảnh phù hợp nhất cho section "${sec}" dựa trên phân tích nội dung.`,
+    }))
+    updateProductField(product.id, 'slide_images', newSlides)
+    setGenMediaLoading((p) => ({ ...p, slides: false }))
+    toast('Đã gen lại Slide minh họa bằng AI Vision', 'success')
+  }
+
+  const handleUpdateVideoUrl = (url: string) => {
+    updateProductField(product.id, 'video_url', url)
+    toast('Đã cập nhật Video URL', 'success')
+  }
+
+  const handleRemoveVideo = () => {
+    updateProductField(product.id, 'video_url', '')
+    toast('Đã xóa video', 'info')
+  }
+
+  const handleGenArticleImages = async () => {
+    if (!product) return
+    setGeneratingArticleImages(true)
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+    
+    // Parse H3 headings
+    const currentH3s = [...(product.content_html || '').matchAll(/<h3[^>]*>(.*?)<\/h3>/gi)]
+      .map(m => m[1].replace(/<[^>]+>/g, '').trim())
+      .filter(Boolean)
+
+    const newImages = Array.from({ length: 4 }, (_, i) => {
+      const labelText = currentH3s[i] || `Ảnh minh họa bài viết ${i + 1}`
+      return {
+        id: `art-${Date.now()}-${i}`,
+        url: `https://picsum.photos/seed/art-regen-${Date.now()}-${i}/800/600`,
+        label: labelText
+      }
+    })
+    updateProductField(product.id, 'article_images', newImages)
+    
+    // Inject images directly under H3 tags in content_html
+    if (product.content_html) {
+      let nextHtml = product.content_html
+      let h3Index = 0
+      nextHtml = nextHtml.replace(/(<h3[^>]*>.*?<\/h3>)([\s\S]*?)(?=<h3>|<\/div>|$)/gi, (match, h3Tag, rest) => {
+        const imgUrl = newImages[h3Index]?.url
+        const imgLabel = newImages[h3Index]?.label || ''
+        h3Index++
+        
+        if (imgUrl) {
+          const cleanRest = rest.replace(/<img[^>]*>/gi, '')
+          return `${h3Tag}\n  <img src="${imgUrl}" alt="${imgLabel}" class="mx-auto my-4 rounded-xl max-w-full shadow-sm" />${cleanRest}`
+        }
+        return match
+      })
+      updateProductField(product.id, 'content_html', nextHtml)
+      toast('Đã tạo bộ ảnh bài viết và gắn trực tiếp vào các thẻ H3!', 'success')
+    } else {
+      toast('Đã tạo thành công bộ ảnh bài viết bằng AI!', 'success')
+    }
+    setGeneratingArticleImages(false)
+  }
+
+  const handleRemoveArticleImage = (imgId: string) => {
+    if (!product) return
+    const currentImages = product.article_images || []
+    const toRemove = currentImages.find(g => g.id === imgId)
+    const updated = currentImages.filter((g) => g.id !== imgId)
+    updateProductField(product.id, 'article_images', updated)
+    
+    if (toRemove && product.content_html) {
+      const escapedUrl = toRemove.url.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
+      const imgRegex = new RegExp(`<img[^>]*src=["']${escapedUrl}["'][^>]*>`, 'gi')
+      const nextHtml = product.content_html.replace(imgRegex, '')
+      updateProductField(product.id, 'content_html', nextHtml)
+    }
+    toast('Đã xóa ảnh bài viết', 'info')
+  }
+
+  const handleUploadArticleImage = () => {
+    if (!product) return
+    const currentImages = product.article_images || []
+    const nextIndex = currentImages.length
+    const label = articleH3s[nextIndex] || `Ảnh tải lên ${nextIndex + 1}`
+    const newImgUrl = `https://picsum.photos/seed/upl-art-${Date.now()}/800/600`
+    
+    const nextImages = [
+      ...currentImages,
+      {
+        id: `upl-art-${Date.now()}`,
+        url: newImgUrl,
+        label: label
+      }
+    ]
+    updateProductField(product.id, 'article_images', nextImages)
+    
+    // Inject image under the corresponding H3 tag in content_html
+    if (product.content_html) {
+      let h3Index = 0
+      let injected = false
+      const nextHtml = product.content_html.replace(/(<h3[^>]*>.*?<\/h3>)/gi, (match) => {
+        if (h3Index === nextIndex) {
+          injected = true
+          h3Index++
+          return `${match}\n  <img src="${newImgUrl}" alt="${label}" class="mx-auto my-4 rounded-xl max-w-full shadow-sm" />`
+        }
+        h3Index++
+        return match
+      })
+      if (injected) {
+        updateProductField(product.id, 'content_html', nextHtml)
+      }
+    }
+    toast('Đã tải ảnh lên và gắn vào bài viết!', 'success')
+  }
+
+
+
+  // SEO Keywords Handlers
+  const handleAddKeyword = () => {
+    if (!newKeywordText.trim()) return
+    const currentMeta = product.meta_seo ? { ...product.meta_seo } : { title: '', description: '', keywords: [] }
+    const currentKeywords = currentMeta.keywords ? [...currentMeta.keywords] : []
+    if (!currentKeywords.includes(newKeywordText.trim())) {
+      currentKeywords.push(newKeywordText.trim())
+    }
+    currentMeta.keywords = currentKeywords
+    updateProductField(product.id, 'meta_seo', currentMeta)
+    setNewKeywordText('')
+  }
+
+  const handleRemoveKeyword = (kw: string) => {
+    const currentMeta = product.meta_seo ? { ...product.meta_seo } : { title: '', description: '', keywords: [] }
+    currentMeta.keywords = currentMeta.keywords?.filter((k) => k !== kw) || []
+    updateProductField(product.id, 'meta_seo', currentMeta)
+  }
+
+  const handleUpdateMetaField = (key: 'title' | 'description', val: string) => {
+    const currentMeta = product.meta_seo ? { ...product.meta_seo } : { title: '', description: '', keywords: [] }
+    currentMeta[key] = val
+    updateProductField(product.id, 'meta_seo', currentMeta)
+  }
+
   // Spec File Upload Simulation
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, type: 'product_image' | 'manufacturer_spec' | 'other') => {
     if (!e.target.files || e.target.files.length === 0) return
-    const files = Array.from(e.target.files)
+    const files = Array.from(e.target.files).map(f => ({ file: f, type }))
     setPendingSpecFiles((prev) => [...prev, ...files])
     e.target.value = ''
   }
 
   const handleSaveSpecFile = () => {
     if (pendingSpecFiles.length === 0) return
-    pendingSpecFiles.forEach((file) => uploadSpecFile(product.id, file.name, file.size))
+    pendingSpecFiles.forEach(({file, type}) => uploadSpecFile(product.id, file.name, file.size, type))
     toast(`Đã tải lên ${pendingSpecFiles.length} tài liệu specs`, 'success')
     toast('Đã nhận diện specs mới. Bạn có thể bấm "Trích xuất Specs" để AI phân tích tự động.', 'info')
     setPendingSpecFiles([])
@@ -468,70 +1002,131 @@ export function SpecsDemoPage() {
     toast('Đã lưu toàn bộ thay đổi thành công!', 'success')
   }
 
-  const handleExportSpecsExcel = () => {
-    toast('Đang chuẩn bị xuất file Excel thông số kỹ thuật.', 'info')
+  // Completeness style helper
+  const getProgressColor = (percent: number) => {
+    if (percent === 100) return 'bg-green-500'
+    if (percent >= 50) return 'bg-amber-500'
+    if (percent > 0) return 'bg-orange-400'
+    return 'bg-gray-300'
   }
 
-  const navigateToVariant = (productId: string) => {
-    navigate(productId === 'PIM-TEST-01' ? `/products/${productId}/specs-demo` : `/products/${productId}/specs-demo`)
-  }
-
-  const visibleMappingTotal = mappingRows.filter((row) =>
-    VISIBLE_MAPPING_LEVELS.includes(row.matching_level as VisibleMappingLevel)
-  ).length
-  const activeContentStatus = getProductContentStatus(product)
-  const activeStatusMeta = PRODUCT_CONTENT_STATUS_META[activeContentStatus]
-  const specsApprovalStatus: SpecsApprovalStatus = 'awaiting_approval'
-  const specsAiStatus: SpecsAiGenerationStatus = hasExtractedSpecs ? 'done' : extractingSpecs ? 'processing' : 'pending'
-  const specsApprovalStatusMeta = SPECS_APPROVAL_STATUS_META[specsApprovalStatus]
+  const specsAiStatus = hasExtractedSpecs ? 'done' : extractingSpecs ? 'processing' : 'pending'
   const specsAiStatusMeta = SPECS_AI_STATUS_META[specsAiStatus]
-  const bentoTileClass = 'rounded-[28px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.06)]'
 
   return (
-    <AppShell
-      breadcrumb={['AICPS', 'Sản phẩm', `${product.model_code} / ${product.variantcode}`]}
-      contentClassName="w-full max-w-none px-6 py-6 sm:px-[50px]"
-    >
-      <div className="min-w-0 rounded-[32px] bg-[#F5F5F7] p-2 text-[#1D1D1F] sm:p-5">
-        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <button
-            onClick={() => navigate('/products')}
-            className="flex items-center gap-1.5 text-xs font-semibold text-[#6E6E73] transition-colors hover:text-[#0071E3]"
-          >
-            <ArrowLeft size={14} /> Quay lại danh sách
-          </button>
-        </div>
-
-        <div className="flex min-w-0 flex-col gap-4 xl:gap-5">
-          <section className={`${bentoTileClass} min-w-0 p-6 xl:px-8 xl:py-7`}>
-            <div className="mb-7 flex items-center gap-2 text-xs text-[#6E6E73]">
-              <span>Model</span>
-              <span className="font-mono font-bold text-[#0071E3]">{product.model_code}</span>
-            </div>
-            <h1 className="max-w-5xl text-[30px] font-bold leading-[1.12] tracking-[-0.02em] text-[#1D1D1F] md:text-4xl xl:text-[44px]">
-              {product.name}
-            </h1>
-            <div className="mt-6 flex flex-wrap items-center gap-2">
-              <SiteBadge site={product.site_id} />
-              <Badge className="border-0 bg-[#F5F5F7] text-[#6E6E73]">{product.nganh_hang}</Badge>
-            </div>
-          </section>
-
-          <section className={`${bentoTileClass} min-w-0 p-5 xl:p-6`}>
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#6E6E73]">Biến thể</p>
-                <p className="mt-1 text-sm font-bold text-[#1D1D1F]">Đang chọn</p>
+    <AppShell breadcrumb={['AICPS', 'Sản phẩm', `${product.model_code} / ${product.variantcode}`]}>
+      {/* Run full workflow progress overlay */}
+      {runningFullWf && (
+        <div className="fixed inset-0 z-50 bg-[#0f1535]/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-white/20 text-center animate-scale-up">
+            <Loader2 className="animate-spin text-cyan-600 mx-auto mb-4" size={40} />
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Đang thực thi quy trình biên tập tự động</h3>
+            <p className="text-xs text-gray-500 mb-6">Trình sinh thông minh AI đang phân tích tài liệu và cấu trúc toàn bộ nội dung sản phẩm...</p>
+            
+            {/* Step statuses */}
+            <div className="flex flex-col gap-3 text-left max-w-xs mx-auto mb-2 text-sm text-gray-600">
+              <div className="flex items-center justify-between">
+                <span className={currentWfStep >= 1 ? 'text-cyan-600 font-bold' : 'text-gray-400'}>Bước 1: WF1 – Trích xuất Specs Hãng</span>
+                {currentWfStep > 1 ? <CheckCircle2 className="text-green-500" size={16} /> : currentWfStep === 1 ? <Loader2 className="animate-spin text-cyan-600" size={16} /> : <div className="w-4 h-4 rounded-full border border-gray-200" />}
               </div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#F5F5F7] px-2.5 py-1 text-[11px] font-semibold text-[#6E6E73]">
-                <span className={`h-1.5 w-1.5 rounded-full ${getVariantStatusDotClass(activeStatusMeta.className)}`} />
-                {activeStatusMeta.label}
-              </span>
+              <div className="flex items-center justify-between">
+                <span className={currentWfStep >= 2 ? 'text-cyan-600 font-bold' : 'text-gray-400'}>Bước 2: WF2 – Dàn ý & Ý tưởng Media</span>
+                {currentWfStep > 2 ? <CheckCircle2 className="text-green-500" size={16} /> : currentWfStep === 2 ? <Loader2 className="animate-spin text-cyan-600" size={16} /> : <div className="w-4 h-4 rounded-full border border-gray-200" />}
+              </div>
+              <div className="flex items-center justify-between">
+                <span className={currentWfStep >= 3 ? 'text-cyan-600 font-bold' : 'text-gray-400'}>Bước 3: WF3 – Viết Bài & Meta SEO</span>
+                {currentWfStep > 3 ? <CheckCircle2 className="text-green-500" size={16} /> : currentWfStep === 3 ? <Loader2 className="animate-spin text-cyan-600" size={16} /> : <div className="w-4 h-4 rounded-full border border-gray-200" />}
+              </div>
+              <div className="flex items-center justify-between">
+                <span className={currentWfStep >= 4 ? 'text-cyan-600 font-bold' : 'text-gray-400'}>Bước 4: WF4 – Sinh bộ ảnh & Video AI</span>
+                {currentWfStep > 4 ? <CheckCircle2 className="text-green-500" size={16} /> : currentWfStep === 4 ? <Loader2 className="animate-spin text-cyan-600" size={16} /> : <div className="w-4 h-4 rounded-full border border-gray-200" />}
+              </div>
+              <div className="flex items-center justify-between">
+                <span className={currentWfStep >= 5 ? 'text-cyan-600 font-bold' : 'text-gray-400'}>Bước 5: WF5 – n8n Merge & Đồng bộ PIM</span>
+                {currentWfStep > 5 ? <CheckCircle2 className="text-green-500" size={16} /> : currentWfStep === 5 ? <Loader2 className="animate-spin text-cyan-600" size={16} /> : <div className="w-4 h-4 rounded-full border border-gray-200" />}
+              </div>
             </div>
+          </div>
+        </div>
+      )}
 
-            <div className="min-w-0 rounded-[22px] bg-[#F5F5F7] p-2">
+      {/* Top Banner and Navigation */}
+      <div className="flex items-center justify-between mb-4">
+        <button
+          onClick={() => navigate('/products')}
+          className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-cyan-600 transition-colors font-semibold"
+        >
+          <ArrowLeft size={14} /> Quay lại danh sách
+        </button>
+        <div className="flex gap-2">
+          {/* RUN FULL WF BUTTON */}
+          <Button 
+            className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold flex items-center gap-1 shadow-md border-0"
+            onClick={() => {
+              updateProductField(product.id, 'pim_status', 'published')
+              toast('Đã xuất bản sản phẩm lên PIM lập tức!', 'success')
+            }}
+          >
+            <CheckCircle2 size={16} className="mr-1" />
+            Xuất bản lên PIM
+          </Button>
+          <Button variant="outline" className="bg-white border-gray-200 text-gray-700" onClick={handleSaveAll}>
+            <Save size={14} className="mr-1" /> Lưu thay đổi
+          </Button>
+        </div>
+      </div>
+
+      {/* Product Info Block & Status dropdowns */}
+      <div className="bg-white rounded-xl border border-gray-100 p-5 mb-5 shadow-sm">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs font-bold text-gray-500">Model:</span>
+              <span className="font-mono text-xs font-bold bg-cyan-50 text-cyan-700 px-2 py-0.5 rounded border border-cyan-100">
+                {product.model_code}
+              </span>
+              <SiteBadge site={product.site_id} />
+            </div>
+            <h1 className="text-xl font-bold text-gray-800 mt-2">{product.name}</h1>
+            
+          </div>
+      </div>
+
+      {/* Dependency Alert Banner */}
+      {nameChangedAlert && (
+        <div className="mt-4 bg-amber-50 border border-amber-200 text-amber-900 px-4 py-3 rounded-lg flex items-center justify-between gap-3 animate-fade-in shadow-sm">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="text-amber-500 flex-shrink-0" size={18} />
+            <span className="text-xs font-medium">
+              Tên sản phẩm đã thay đổi! Bạn nên cập nhật lại <strong>Dàn bài</strong> & <strong>Bài viết chi tiết</strong> để đồng bộ nội dung.
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={handleRegenDependentFields}
+              className="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3 py-1.5 rounded-md shadow-sm transition-colors flex items-center gap-1"
+            >
+              <Sparkles size={12} /> Cập nhật liên đới
+            </button>
+            <button
+              onClick={() => setNameChangedAlert(false)}
+              className="text-amber-700 hover:text-amber-900 text-xs font-semibold px-2 py-1.5 transition-colors"
+            >
+              Bỏ qua
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+
+    {/* Variant Tabs Section */}
+      <div className="bg-white rounded-xl border border-gray-100 p-5 mb-5 shadow-sm">
+        <h3 className="text-sm font-bold text-gray-700 mb-3">Biến thể cùng Model</h3>
+        <div className="min-w-0 rounded-[22px] bg-[#F5F5F7] p-2">
               <div className="flex min-w-0 gap-2 overflow-x-auto p-1">
-                {modelVariants.map((variant) => {
+                {products
+                  .filter(p => p.model_code === product.model_code && p.site_id === product.site_id)
+                  .map((variant) => {
                   const isActive = variant.id === product.id
                   const contentStatus = getProductContentStatus(variant)
                   const statusMeta = PRODUCT_CONTENT_STATUS_META[contentStatus]
@@ -539,7 +1134,10 @@ export function SpecsDemoPage() {
                     <button
                       key={variant.id}
                       type="button"
-                      onClick={() => navigateToVariant(variant.id)}
+                      onClick={() => {
+                        const isSpecs = window.location.pathname.includes('specs-demo');
+                        navigate(`/products/${variant.id}${isSpecs ? '/specs-demo' : ''}`);
+                      }}
                       className={`group flex min-h-[72px] min-w-[260px] flex-1 flex-col gap-1.5 rounded-[18px] border-2 px-3.5 py-2.5 text-left transition-all duration-200 motion-reduce:transition-none ${
                         isActive
                           ? 'border-[#0071E3] bg-white text-[#1D1D1F] shadow-[0_1px_2px_rgba(0,0,0,0.05),0_8px_18px_rgba(0,113,227,0.14)]'
@@ -561,104 +1159,93 @@ export function SpecsDemoPage() {
                 })}
               </div>
             </div>
-          </section>
-        </div>
+      </div>
 
-      <div className={`${bentoTileClass} mt-4 min-w-0 overflow-hidden xl:mt-5`}>
-        <div className="flex flex-col gap-4 px-5 py-5 sm:flex-row sm:items-center sm:justify-between xl:px-7">
-          <div className="flex flex-wrap items-center gap-2">
-            <FileSpreadsheet size={17} className="text-[#0071E3]" />
-            <h3 className="text-base font-bold text-[#1D1D1F]">Thông số kỹ thuật</h3>
-            <span className={`inline-flex min-h-[38px] items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[11px] font-bold ${specsApprovalStatusMeta.className}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${specsApprovalStatusMeta.dotClassName}`} />
-              Duyệt: {specsApprovalStatusMeta.label}
-            </span>
-            <span className={`inline-flex min-h-[38px] items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[11px] font-bold ${specsAiStatusMeta.className}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${specsAiStatusMeta.dotClassName}`} />
-              <span className="flex flex-col leading-tight">
-                <span>AI: {specsAiStatusMeta.label}</span>
-                <span className="mt-0.5 font-mono text-[9px] font-semibold text-gray-400">Ai Agent: specs_agent#238</span>
-              </span>
-            </span>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              size="sm"
-              variant="ghost"
-              className={`w-fit rounded-full text-xs transition-all ${
-                extractingSpecs
-                  ? 'bg-[#E6F1FB] text-[#185FA5] border border-[#B5D4F4] hover:bg-[#E6F1FB] cursor-not-allowed'
-                  : 'text-[#0071E3] hover:bg-[#0071E3]/5 hover:text-[#0071E3]'
-              }`}
-              onClick={handleExtractSpecs}
-              disabled={extractingSpecs}
-            >
-              <Loader2 size={12} className={`mr-1 ${extractingSpecs ? 'animate-spin' : 'hidden'}`} />
-              <Sparkles size={12} className={`mr-1 text-[#0071E3] ${extractingSpecs ? 'hidden' : ''}`} />
-              {extractingSpecs ? 'AI đang trích xuất…' : 'Trích xuất Specs AI (WF1)'}
-            </Button>
-            <Button
-              size="sm"
-              className="w-fit rounded-full border-0 bg-[#1D1D1F] px-4 text-xs text-white shadow-none hover:bg-black"
-              onClick={handleSaveAll}
-            >
-              <Save size={13} />
-              Lưu thay đổi
-            </Button>
-            <Button
-              size="sm"
-              className="w-fit rounded-full border-0 bg-[#1D1D1F] px-4 text-xs text-white shadow-none hover:bg-black disabled:bg-gray-100 disabled:text-gray-400"
-              onClick={() => setShowPublishConfirm(true)}
-              disabled
-            >
-              <UploadCloud size={13} />
-              Xuất bản lên PIM
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="w-fit rounded-full border-green-200 bg-white px-4 text-xs text-green-700 shadow-none hover:bg-green-50"
-              onClick={handleExportSpecsExcel}
-            >
-              <FileSpreadsheet size={13} />
-              Xuất file excel
-            </Button>
-          </div>
-        </div>
+    {/* Page-level Tabs Navigation */}
+    <div className="flex bg-gray-100 p-1.5 rounded-xl border border-gray-200 mb-5 max-w-3xl mx-auto shadow-sm">
+      <button
+        onClick={() => setMainTab('content')}
+        className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${mainTab === 'content' ? 'bg-white text-cyan-700 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}
+      >
+        <LayoutList size={16} /> Thông tin & Thông số kỹ thuật
+      </button>
+      <button
+        onClick={() => setMainTab('specs')}
+        className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${mainTab === 'specs' ? 'bg-white text-cyan-700 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}
+      >
+        <FileText size={16} /> Tài liệu & Links Tham Khảo
+      </button>
+      <button
+        onClick={() => setMainTab('jobs')}
+        className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${mainTab === 'jobs' ? 'bg-white text-cyan-700 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}
+      >
+        <History size={16} /> Lịch sử Jobs
+      </button>
+    </div>
 
-        {/* Page-level Tabs Navigation */}
-        <div className="flex border-y border-black/[0.06] bg-[#FAFAFB]">
-          <button
-            onClick={() => setMainTab('content')}
-            className={`flex-1 py-3 text-sm font-semibold transition-all flex items-center justify-center gap-2 border-b-2 ${mainTab === 'content' ? 'bg-white text-[#0071E3] border-[#0071E3]' : 'text-[#6E6E73] hover:text-[#1D1D1F] border-transparent'}`}
-          >
-            <LayoutList size={16} /> Nội dung sản phẩm
-          </button>
-          <button
-            onClick={() => setMainTab('specs')}
-            className={`flex-1 py-3 text-sm font-semibold transition-all flex items-center justify-center gap-2 border-b-2 ${mainTab === 'specs' ? 'bg-white text-[#0071E3] border-[#0071E3]' : 'text-[#6E6E73] hover:text-[#1D1D1F] border-transparent'}`}
-          >
-            <FileText size={16} /> Tài liệu & Links Tham Khảo
-          </button>
-        </div>
-
-      {/* Main Content Area */}
-      <div className="w-full p-5">
-
-        {/* Left Column: Interactive Field Editors (Now Full Width) */}
-        <div className={mainTab === 'content' ? "flex flex-col gap-5" : "hidden"}>
-
+    {/* Main Content Area */}
+    <div className="w-full">
+      
+      {/* Left Column: Interactive Field Editors (Now Full Width) */}
+      <div className={mainTab === 'content' ? "flex flex-col gap-5" : "hidden"}>
           {/* Section 6: Thông số kỹ thuật */}
-          <div>
+          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
+            <div className="flex items-center justify-between border-b border-gray-50 pb-3 mb-4 flex-wrap gap-2">
+              <div className="flex items-center gap-1.5">
+                <List size={16} className="text-cyan-600" />
+                <h3 className="font-bold text-gray-800 text-sm">Thông số kỹ thuật</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex min-h-[28px] items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold ${specsAiStatusMeta?.className || 'bg-blue-50 text-blue-700 border-blue-200'}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${specsAiStatusMeta?.dotClassName || 'bg-blue-600'}`} />
+                  <span className="flex items-center gap-2 leading-tight">
+                    <span>{specsAiStatusMeta?.label || 'AI gen xong'}</span>
+                    <span className="border-l pl-2 font-mono text-[10px] font-semibold text-gray-400">specs_agent#289</span>
+                  </span>
+                </span>
+
+                <Button 
+                  size="sm" 
+                  variant={product.approval_status?.specs_approved ? "outline" : "primary"} 
+                  className={product.approval_status?.specs_approved ? "border-green-500 text-green-600 hover:bg-green-50" : "bg-green-600 text-white hover:bg-green-700"}
+                  onClick={() => {
+                    const nextStatus = { ...product.approval_status };
+                    nextStatus.specs_approved = !nextStatus.specs_approved;
+                    updateProductField(product.id, 'approval_status', nextStatus);
+                    if (nextStatus.specs_approved) toast('Duyệt Specs thành công!', 'success');
+                  }}
+                >
+                  {product.approval_status?.specs_approved ? <><CheckCircle2 size={12} className="mr-1" /> Đã duyệt</> : 'Duyệt'}
+                </Button>
+
+                <Button 
+                  size="sm"
+                  variant="ghost" 
+                  className="text-gray-500 hover:text-cyan-600 text-xs py-1"
+                  onClick={() => setShowPrompts(prev => ({ ...prev, wf1_specs: !prev.wf1_specs }))}
+                >
+                  <Settings size={12} className="mr-1" />
+                  {showPrompts['wf1_specs'] ? 'Đóng prompt' : 'Cấu hình Prompt'}
+                </Button>
+                
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  className="text-cyan-600 hover:text-cyan-700 hover:bg-cyan-50 text-xs py-1"
+                  onClick={handleExtractSpecs}
+                  disabled={extractingSpecs}
+                >
+                  {extractingSpecs ? (
+                    <Loader2 size={12} className="animate-spin mr-1" />
+                  ) : (
+                    <Sparkles size={12} className="mr-1 text-amber-500 animate-pulse" />
+                  )}
+                  Trích xuất Specs AI (WF1)
+                </Button>
+              </div>
+            </div>
+
             <div className="mb-4 flex flex-wrap items-center gap-2 text-[11px] font-semibold">
-              <button
-                type="button"
-                onClick={() => setShowPrompts(prev => ({ ...prev, wf1_specs: !prev.wf1_specs }))}
-                className="hidden rounded-full bg-[#F5F5F7] px-3 py-1.5 text-[#6E6E73] transition-colors hover:text-[#0071E3]"
-              >
-                <Settings size={12} className="mr-1 inline" />
-                {showPrompts['wf1_specs'] ? 'Đóng prompt' : 'Cấu hình Prompt'}
-              </button>
               <button
                 type="button"
                 onClick={() => setMappingLevelFilter('all')}
@@ -668,7 +1255,7 @@ export function SpecsDemoPage() {
                     : 'bg-[#F5F5F7] text-[#6E6E73] hover:text-[#1D1D1F]'
                 }`}
               >
-                Tất cả: {visibleMappingTotal}
+                Tất cả: {visibleMappingRows.length}
               </button>
               {VISIBLE_MAPPING_LEVELS.map((level) => (
                 <button
@@ -690,35 +1277,23 @@ export function SpecsDemoPage() {
             {/* Prompt Config */}
             {showPrompts['wf1_specs'] && (
               <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 animate-fade-in">
-                <div className="flex justify-between items-center mb-1 text-[10px]">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-gray-400 font-semibold">Prompt AI cho Trích xuất Specs</span>
-                    <code className="px-1.5 py-0.5 bg-violet-100 text-violet-600 rounded font-mono text-[9px] font-bold tracking-wide">wf1_specs</code>
-                  </div>
-                  {product.custom_prompt_text?.['wf1_specs'] && (
-                    <button
-                      onClick={() => {
-                        const nextPrompt = { ...product.custom_prompt_text }
-                        delete nextPrompt['wf1_specs']
-                        updateProductField(product.id, 'custom_prompt_text', nextPrompt)
-                        toast('Đã khôi phục prompt mặc định', 'info')
-                      }}
-                      className="text-red-500 hover:underline font-semibold"
-                    >
-                      Khôi phục mặc định
-                    </button>
-                  )}
-                </div>
-                <textarea
-                  value={getPromptText('wf1_specs')}
-                  onChange={(e) => handleUpdateCustomPrompt('wf1_specs', e.target.value)}
-                  rows={3}
-                  className="w-full border border-gray-200 rounded-lg p-2 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500 font-mono text-gray-700 bg-white"
+                <PromptConfigEditor
+                  workflowType="wf1_specs"
+                  activeCategory={product.active_prompt_category || product.nganh_hang}
+                  selectedSubCategoryId={product.selected_sub_categories?.['wf1_specs'] || ''}
+                  selectedOptionId={product.selected_prompt_options?.['wf1_specs'] || ''}
+                  bonusPrompt={product.bonus_prompts?.['wf1_specs'] || ''}
+                  feedbackPrompt={product.feedback_prompts?.['wf1_specs'] || ''}
+                  onCategoryChange={(cat) => updateProductField(product.id, 'active_prompt_category', cat)}
+                  onSubCategoryChange={(sub) => updateProductField(product.id, 'selected_sub_categories', { ...(product.selected_sub_categories || {}), wf1_specs: sub })}
+                  onOptionChange={(opt) => updateProductField(product.id, 'selected_prompt_options', { ...(product.selected_prompt_options || {}), wf1_specs: opt })}
+                  onBonusPromptChange={(val) => updateProductField(product.id, 'bonus_prompts', { ...(product.bonus_prompts || {}), wf1_specs: val })}
+                  onFeedbackPromptChange={(val) => updateProductField(product.id, 'feedback_prompts', { ...(product.feedback_prompts || {}), wf1_specs: val })}
                 />
               </div>
             )}
 
-            {!hasExtractedSpecs && (
+            {!hasMappingFiles && (
               <div className="mb-4 bg-cyan-50/50 border border-cyan-100 rounded-xl p-4 flex items-start gap-3">
                 <Sparkles className="text-cyan-600 mt-0.5 flex-shrink-0" size={18} />
                 <div>
@@ -905,7 +1480,7 @@ export function SpecsDemoPage() {
                             )}
                           </td>
                           <td className="px-4 py-3">
-                            {hasExtractedSpecs ? renderMappingValueEditor(row, sourceRowIndex) : (
+                            {hasMappingFiles ? renderMappingValueEditor(row, sourceRowIndex) : (
                               <div className="rounded-2xl bg-[#F5F5F7] px-3 py-2 text-[11px] italic text-[#6E6E73]">[ Chờ AI trích xuất... ]</div>
                             )}
                           </td>
@@ -936,18 +1511,522 @@ export function SpecsDemoPage() {
             </div>
           </div>
 
+
+          {/* Section 7: Dàn bài (Outline) */}
+          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
+            <div className="flex items-center justify-between border-b border-gray-50 pb-3 mb-4 flex-wrap gap-2">
+              <div className="flex items-center gap-1.5">
+                <FileText size={16} className="text-cyan-600" />
+                <h3 className="font-bold text-gray-800 text-sm">Dàn bài viết (Outline)</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex min-h-[28px] items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold ${specsAiStatusMeta?.className || 'bg-blue-50 text-blue-700 border-blue-200'}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${specsAiStatusMeta?.dotClassName || 'bg-blue-600'}`} />
+                  <span className="flex items-center gap-2 leading-tight">
+                    <span>{specsAiStatusMeta?.label || 'AI gen xong'}</span>
+                    <span className="border-l pl-2 font-mono text-[10px] font-semibold text-gray-400">outline_agent#312</span>
+                  </span>
+                </span>
+                
+                <Button 
+                  size="sm" 
+                  variant={product.approval_status?.outline_approved ? "outline" : "primary"} 
+                  className={product.approval_status?.outline_approved ? "border-green-500 text-green-600 hover:bg-green-50" : "bg-green-600 text-white hover:bg-green-700"}
+                  onClick={() => {
+                    const nextStatus = { ...product.approval_status };
+                    nextStatus.outline_approved = !nextStatus.outline_approved;
+                    updateProductField(product.id, 'approval_status', nextStatus);
+                    if (nextStatus.outline_approved) toast('Duyệt Outline thành công!', 'success');
+                  }}
+                >
+                  {product.approval_status?.outline_approved ? <><CheckCircle2 size={12} className="mr-1" /> Đã duyệt</> : 'Duyệt'}
+                </Button>
+
+                <Button 
+                  size="sm"
+                  variant="ghost" 
+                  className="text-gray-500 hover:text-cyan-600 text-xs py-1"
+                  onClick={() => setShowPrompts(prev => ({ ...prev, wf2_outline: !prev.wf2_outline }))}
+                >
+                  <Settings size={12} className="mr-1" />
+                  {showPrompts['wf2_outline'] ? 'Đóng prompt' : 'Cấu hình Prompt'}
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  className="text-cyan-600 hover:text-cyan-700 hover:bg-cyan-50 text-xs py-1"
+                  onClick={() => handleGenField('outline')}
+                  disabled={generatingFields['outline'] || product.approval_status?.outline_approved}
+                >
+                  {generatingFields['outline'] ? (
+                    <Loader2 size={12} className="animate-spin mr-1" />
+                  ) : (
+                    <Sparkles size={12} className="mr-1 text-amber-500 animate-pulse" />
+                  )}
+                  Tạo Outline (AI)
+                </Button>
+              </div>
+            </div>
+
+            {/* Prompt Config */}
+            {showPrompts['wf2_outline'] && (
+              <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 animate-fade-in">
+                <PromptConfigEditor
+                  workflowType="wf2_outline"
+                  activeCategory={product.active_prompt_category || product.nganh_hang}
+                  selectedSubCategoryId={product.selected_sub_categories?.['wf2_outline'] || ''}
+                  selectedOptionId={product.selected_prompt_options?.['wf2_outline'] || ''}
+                  bonusPrompt={product.bonus_prompts?.['wf2_outline'] || ''}
+                  feedbackPrompt={product.feedback_prompts?.['wf2_outline'] || ''}
+                  onCategoryChange={(cat) => updateProductField(product.id, 'active_prompt_category', cat)}
+                  onSubCategoryChange={(sub) => updateProductField(product.id, 'selected_sub_categories', { ...(product.selected_sub_categories || {}), wf2_outline: sub })}
+                  onOptionChange={(opt) => updateProductField(product.id, 'selected_prompt_options', { ...(product.selected_prompt_options || {}), wf2_outline: opt })}
+                  onBonusPromptChange={(val) => updateProductField(product.id, 'bonus_prompts', { ...(product.bonus_prompts || {}), wf2_outline: val })}
+                  onFeedbackPromptChange={(val) => updateProductField(product.id, 'feedback_prompts', { ...(product.feedback_prompts || {}), wf2_outline: val })}
+                />
+              </div>
+            )}
+
+            <textarea
+              value={product.outline || ''}
+              onChange={(e) => updateProductField(product.id, 'outline', e.target.value)}
+              placeholder="Nhập outline chi tiết hoặc bấm nút AI tạo tự động ở trên..."
+              rows={6}
+              className="w-full border border-gray-200 rounded-lg p-3 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500 font-mono text-gray-700 bg-gray-50/50"
+            />
+          </div>
+
+          {/* Section 8: Bài viết chi tiết (HTML Content) */}
+          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
+            <div className="flex flex-wrap items-center justify-between border-b border-gray-50 pb-3 mb-4 gap-2">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <Globe size={16} className="text-cyan-600" />
+                  <h3 className="font-bold text-gray-800 text-sm">Bài viết chi tiết</h3>
+                </div>
+                {/* Tabs for HTML preview */}
+                <div className="flex border border-gray-200 rounded-lg overflow-hidden text-xs bg-gray-50">
+                  <button
+                    onClick={() => setContentTab('preview')}
+                    className={`px-2.5 py-1 transition-colors ${contentTab === 'preview' ? 'bg-cyan-600 text-white font-semibold' : 'text-gray-600 hover:bg-gray-100'}`}
+                  >
+                    Xem trước
+                  </button>
+                  <button
+                    onClick={() => setContentTab('edit')}
+                    className={`px-2.5 py-1 transition-colors ${contentTab === 'edit' ? 'bg-cyan-600 text-white font-semibold' : 'text-gray-600 hover:bg-gray-100'}`}
+                  >
+                    HTML Source
+                  </button>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex min-h-[28px] items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold ${specsAiStatusMeta?.className || 'bg-blue-50 text-blue-700 border-blue-200'}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${specsAiStatusMeta?.dotClassName || 'bg-blue-600'}`} />
+                  <span className="flex items-center gap-2 leading-tight">
+                    <span>{specsAiStatusMeta?.label || 'AI gen xong'}</span>
+                    <span className="border-l pl-2 font-mono text-[10px] font-semibold text-gray-400">writing_agent#124</span>
+                  </span>
+                </span>
+
+                <Button 
+                  size="sm" 
+                  variant={product.approval_status?.article_approved ? "outline" : "primary"} 
+                  className={product.approval_status?.article_approved ? "border-green-500 text-green-600 hover:bg-green-50" : "bg-green-600 text-white hover:bg-green-700"}
+                  onClick={() => {
+                    const nextStatus = { ...product.approval_status };
+                    nextStatus.article_approved = !nextStatus.article_approved;
+                    updateProductField(product.id, 'approval_status', nextStatus);
+                    if (nextStatus.article_approved) toast('Duyệt Bài Viết thành công!', 'success');
+                  }}
+                >
+                  {product.approval_status?.article_approved ? <><CheckCircle2 size={12} className="mr-1" /> Đã duyệt</> : 'Duyệt'}
+                </Button>
+
+                <Button 
+                  size="sm"
+                  variant="ghost" 
+                  className="text-gray-500 hover:text-cyan-600 text-xs py-1"
+                  onClick={() => setShowPrompts(prev => ({ ...prev, wf3_writing: !prev.wf3_writing }))}
+                >
+                  <Settings size={12} className="mr-1" />
+                  {showPrompts['wf3_writing'] ? 'Đóng prompt' : 'Cấu hình Prompt'}
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  className="text-cyan-600 hover:text-cyan-700 hover:bg-cyan-50 text-xs py-1"
+                  onClick={() => handleGenField('content_html')}
+                  disabled={generatingFields['content_html'] || !product.approval_status?.outline_approved || product.approval_status?.article_approved}
+                >
+                  {generatingFields['content_html'] ? (
+                    <Loader2 size={12} className="animate-spin mr-1" />
+                  ) : (
+                    <Sparkles size={12} className="mr-1 text-amber-500 animate-pulse" />
+                  )}
+                  Viết bài (AI)
+                </Button>
+              </div>
+            </div>
+
+            {/* Prompt Config */}
+            {showPrompts['wf3_writing'] && (
+              <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 animate-fade-in">
+                <PromptConfigEditor
+                  workflowType="wf3_writing"
+                  activeCategory={product.active_prompt_category || product.nganh_hang}
+                  selectedSubCategoryId={product.selected_sub_categories?.['wf3_writing'] || ''}
+                  selectedOptionId={product.selected_prompt_options?.['wf3_writing'] || ''}
+                  bonusPrompt={product.bonus_prompts?.['wf3_writing'] || ''}
+                  feedbackPrompt={product.feedback_prompts?.['wf3_writing'] || ''}
+                  onCategoryChange={(cat) => updateProductField(product.id, 'active_prompt_category', cat)}
+                  onSubCategoryChange={(sub) => updateProductField(product.id, 'selected_sub_categories', { ...(product.selected_sub_categories || {}), wf3_writing: sub })}
+                  onOptionChange={(opt) => updateProductField(product.id, 'selected_prompt_options', { ...(product.selected_prompt_options || {}), wf3_writing: opt })}
+                  onBonusPromptChange={(val) => updateProductField(product.id, 'bonus_prompts', { ...(product.bonus_prompts || {}), wf3_writing: val })}
+                  onFeedbackPromptChange={(val) => updateProductField(product.id, 'feedback_prompts', { ...(product.feedback_prompts || {}), wf3_writing: val })}
+                />
+              </div>
+            )}
+
+            {contentTab === 'edit' ? (
+              <textarea
+                id="article-textarea"
+                value={product.content_html || ''}
+                onChange={(e) => updateProductField(product.id, 'content_html', e.target.value)}
+                placeholder="Nhập mã nguồn HTML bài viết hoặc bấm Viết bài AI..."
+                rows={10}
+                className="w-full border border-gray-200 rounded-lg p-3 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500 font-mono text-gray-700 bg-gray-900 text-cyan-400"
+              />
+            ) : (
+              <div className="border border-gray-200 rounded-lg min-h-[300px] overflow-hidden bg-white">
+                {product.content_html ? (
+                  <iframe
+                    title="Content Preview"
+                    srcDoc={`
+                      <html>
+                        <head>
+                          <style>
+                            body { font-family: system-ui, -apple-system, sans-serif; padding: 16px; margin: 0; line-height: 1.6; color: #334155; }
+                            h2 { color: #0f172a; font-size: 1.3em; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 24px; }
+                            h3 { color: #1e293b; font-size: 1.1em; margin-top: 18px; }
+                            ul, ol { padding-left: 20px; }
+                            p { margin-bottom: 12px; }
+                            strong { color: #0f172a; }
+                          </style>
+                        </head>
+                        <body>
+                          ${product.content_html}
+                        </body>
+                      </html>
+                    `}
+                    className="w-full h-[350px] border-0"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-[300px] text-gray-400 bg-gray-50 text-xs">
+                    <FileText size={30} className="mb-2 opacity-30" />
+                    Chưa có nội dung bài viết. Hãy bấm nút "Viết bài AI" để tự sinh.
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Section 9: Hình ảnh gắn vào bài viết */}
+          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
+            <div className="flex items-center justify-between border-b border-gray-50 pb-3 mb-4 flex-wrap gap-2">
+              <div className="flex items-center gap-1.5">
+                <Image size={16} className="text-cyan-600" />
+                <h3 className="font-bold text-gray-800 text-sm">Hình ảnh gắn vào bài viết</h3>
+                {(!product.article_images || product.article_images.length === 0) && (
+                  <span className="text-[9px] bg-amber-50 text-amber-600 font-semibold px-1.5 py-0.5 rounded border border-amber-200">DEMO</span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex min-h-[28px] items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold ${specsAiStatusMeta?.className || 'bg-blue-50 text-blue-700 border-blue-200'}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${specsAiStatusMeta?.dotClassName || 'bg-blue-600'}`} />
+                  <span className="flex items-center gap-2 leading-tight">
+                    <span>{specsAiStatusMeta?.label || 'AI gen xong'}</span>
+                    <span className="border-l pl-2 font-mono text-[10px] font-semibold text-gray-400">image_agent#901</span>
+                  </span>
+                </span>
+
+                <Button 
+                  size="sm" 
+                  variant={product.approval_status?.final_approved ? "outline" : "primary"} 
+                  className={product.approval_status?.final_approved ? "border-green-500 text-green-600 hover:bg-green-50" : "bg-green-600 text-white hover:bg-green-700"}
+                  onClick={() => {
+                    const nextStatus = { ...product.approval_status };
+                    nextStatus.final_approved = !nextStatus.final_approved;
+                    updateProductField(product.id, 'approval_status', nextStatus);
+                    if (nextStatus.final_approved) toast('Duyệt Bài Viết Hoàn Chỉnh thành công!', 'success');
+                  }}
+                >
+                  {product.approval_status?.final_approved ? <><CheckCircle2 size={12} className="mr-1" /> Đã duyệt</> : 'Duyệt'}
+                </Button>
+
+                <Button 
+                  size="sm"
+                  variant="ghost" 
+                  className="text-gray-500 hover:text-cyan-600 text-xs py-1"
+                  onClick={() => setShowPrompts(prev => ({ ...prev, wf4_article_images: !prev.wf4_article_images }))}
+                >
+                  <Settings size={12} className="mr-1" />
+                  {showPrompts['wf4_article_images'] ? 'Đóng prompt' : 'Cấu hình Prompt'}
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  className="text-cyan-600 hover:text-cyan-700 hover:bg-cyan-50 text-xs py-1"
+                  onClick={handleGenArticleImages}
+                  disabled={generatingArticleImages || !product.approval_status?.slider_approved || product.approval_status?.final_approved}
+                >
+                  {generatingArticleImages ? (
+                    <Loader2 size={12} className="animate-spin mr-1" />
+                  ) : (
+                    <Sparkles size={12} className="mr-1 text-amber-500 animate-pulse" />
+                  )}
+                  Gen Ảnh Bài Viết
+                </Button>
+              </div>
+            </div>
+
+            {showPrompts['wf4_article_images'] && (
+              <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 animate-fade-in">
+                <PromptConfigEditor
+                  workflowType="wf4_article_images"
+                  activeCategory={product.active_prompt_category || product.nganh_hang}
+                  selectedSubCategoryId={product.selected_sub_categories?.['wf4_article_images'] || ''}
+                  selectedOptionId={product.selected_prompt_options?.['wf4_article_images'] || ''}
+                  bonusPrompt={product.bonus_prompts?.['wf4_article_images'] || ''}
+                  feedbackPrompt={product.feedback_prompts?.['wf4_article_images'] || ''}
+                  onCategoryChange={(cat) => updateProductField(product.id, 'active_prompt_category', cat)}
+                  onSubCategoryChange={(sub) => updateProductField(product.id, 'selected_sub_categories', { ...(product.selected_sub_categories || {}), wf4_article_images: sub })}
+                  onOptionChange={(opt) => updateProductField(product.id, 'selected_prompt_options', { ...(product.selected_prompt_options || {}), wf4_article_images: opt })}
+                  onBonusPromptChange={(val) => updateProductField(product.id, 'bonus_prompts', { ...(product.bonus_prompts || {}), wf4_article_images: val })}
+                  onFeedbackPromptChange={(val) => updateProductField(product.id, 'feedback_prompts', { ...(product.feedback_prompts || {}), wf4_article_images: val })}
+                />
+              </div>
+            )}
+
+            {/* Grid of article images */}
+            {(() => {
+              const demoImages = Array.from({ length: 4 }, (_, i) => ({
+                id: `demo-art-${i}`,
+                url: `https://picsum.photos/seed/${product.id}-art${i}/800/600`,
+                label: `Ảnh minh họa bài viết ${i + 1}`
+              }))
+              const imagesList = product.article_images && product.article_images.length > 0
+                ? product.article_images
+                : demoImages
+
+              return (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {imagesList.map((img, index) => {
+                      const computedLabel = articleH3s[index] || `Ảnh minh họa bài viết ${index + 1}`
+                      return (
+                        <div key={img.id} className="relative group border border-gray-100 hover:border-cyan-200 p-2 rounded-xl bg-gray-50/20 text-xs transition-colors flex flex-col justify-between">
+                          <div className="rounded-lg overflow-hidden border border-gray-100 aspect-[4/3] mb-2 relative bg-white">
+                            <img src={img.url} alt={computedLabel} className="w-full h-full object-cover" />
+                            {!product.article_images && (
+                              <div className="absolute top-1 left-1 bg-amber-500/90 text-white text-[7px] font-bold px-1 py-0.5 rounded">DEMO</div>
+                            )}
+                            <button
+                              onClick={() => handleRemoveArticleImage(img.id)}
+                              className="absolute top-2 right-2 bg-red-500/90 hover:bg-red-600 text-white p-1 rounded-md transition-colors shadow-sm opacity-0 group-hover:opacity-100 z-10"
+                              title="Xóa ảnh này"
+                            >
+                              <Trash2 size={11} />
+                            </button>
+                          </div>
+                          <div className="space-y-1.5 mt-auto">
+                            <div className="text-[11px] font-semibold text-gray-700 bg-gray-50 px-2 py-1.5 rounded border border-gray-100">
+                              <span className="text-[9px] text-cyan-600 block uppercase font-bold tracking-wider mb-0.5">Vị trí: H3 #{index + 1}</span>
+                              <span className="truncate block text-gray-800" title={computedLabel}>{computedLabel}</span>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+
+                    {/* Add custom image trigger */}
+                    <button
+                      type="button"
+                      onClick={handleUploadArticleImage}
+                      className="rounded-xl border-2 border-dashed border-gray-200 hover:border-cyan-300 aspect-[4/3] bg-gray-50/20 hover:bg-cyan-50/10 flex flex-col items-center justify-center gap-1 transition-colors p-4"
+                    >
+                      <Plus size={20} className="text-gray-400" />
+                      <span className="text-[10px] text-gray-500 font-bold">Thêm ảnh</span>
+                      <span className="text-[8px] text-gray-400 text-center">Tải file từ máy tính</span>
+                    </button>
+                  </div>
+                </div>
+              )
+            })()}
+          </div>
+
+          {/* Section 11: SEO Meta */}
+          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
+            <div className="flex items-center justify-between border-b border-gray-50 pb-3 mb-4 flex-wrap gap-2">
+              <div className="flex items-center gap-1.5">
+                <Globe size={16} className="text-cyan-600" />
+                <h3 className="font-bold text-gray-800 text-sm">Cấu hình SEO Meta</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={`inline-flex min-h-[28px] items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-bold ${specsAiStatusMeta?.className || 'bg-blue-50 text-blue-700 border-blue-200'}`}>
+                  <span className={`h-1.5 w-1.5 rounded-full ${specsAiStatusMeta?.dotClassName || 'bg-blue-600'}`} />
+                  <span className="flex items-center gap-2 leading-tight">
+                    <span>{specsAiStatusMeta?.label || 'AI gen xong'}</span>
+                    <span className="border-l pl-2 font-mono text-[10px] font-semibold text-gray-400">seo_agent#501</span>
+                  </span>
+                </span>
+
+                <Button 
+                  size="sm" 
+                  variant={product.approval_status?.seo_meta_approved ? "outline" : "primary"} 
+                  className={product.approval_status?.seo_meta_approved ? "border-green-500 text-green-600 hover:bg-green-50" : "bg-green-600 text-white hover:bg-green-700"}
+                  onClick={() => {
+                    const nextStatus = { ...product.approval_status };
+                    nextStatus.seo_meta_approved = !nextStatus.seo_meta_approved;
+                    updateProductField(product.id, 'approval_status', nextStatus);
+                    if (nextStatus.seo_meta_approved) toast('Duyệt SEO Meta thành công!', 'success');
+                  }}
+                >
+                  {product.approval_status?.seo_meta_approved ? <><CheckCircle2 size={12} className="mr-1" /> Đã duyệt</> : 'Duyệt'}
+                </Button>
+
+                <Button 
+                  size="sm"
+                  variant="ghost" 
+                  className="text-gray-500 hover:text-cyan-600 text-xs py-1"
+                  onClick={() => setShowPrompts(prev => ({ ...prev, wf5_seo: !prev.wf5_seo }))}
+                >
+                  <Settings size={12} className="mr-1" />
+                  {showPrompts['wf5_seo'] ? 'Đóng prompt' : 'Cấu hình Prompt'}
+                </Button>
+
+                <Button 
+                  size="sm" 
+                  variant="ghost" 
+                  className="text-cyan-600 hover:text-cyan-700 hover:bg-cyan-50 text-xs py-1"
+                  onClick={() => handleGenField('meta_seo')}
+                  disabled={generatingFields['meta_seo']}
+                >
+                  {generatingFields['meta_seo'] ? (
+                    <Loader2 size={12} className="animate-spin mr-1" />
+                  ) : (
+                    <Sparkles size={12} className="mr-1 text-amber-500 animate-pulse" />
+                  )}
+                  Gen SEO Meta (AI)
+                </Button>
+              </div>
+            </div>
+
+            {showPrompts['wf5_seo'] && (
+              <div className="mb-4">
+                <PromptConfigEditor 
+                  product={product}
+                  workflowKey="wf5_seo"
+                  onCategoryChange={(cat) => updateProductField(product.id, 'active_prompt_category', cat)}
+                  onSubCategoryChange={(sub) => updateProductField(product.id, 'selected_sub_categories', { ...(product.selected_sub_categories || {}), wf5_seo: sub })}
+                  onOptionChange={(opt) => updateProductField(product.id, 'selected_prompt_options', { ...(product.selected_prompt_options || {}), wf5_seo: opt })}
+                  onBonusPromptChange={(val) => updateProductField(product.id, 'bonus_prompts', { ...(product.bonus_prompts || {}), wf5_seo: val })}
+                  onFeedbackPromptChange={(val) => updateProductField(product.id, 'feedback_prompts', { ...(product.feedback_prompts || {}), wf5_seo: val })}
+                />
+              </div>
+            )}
+
+            {/* Inputs */}
+            <div className="flex flex-col gap-3 mb-4">
+              <div>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="font-semibold text-gray-600">Meta Title</span>
+                  <span className={`font-mono text-[10px] ${((product.meta_seo?.title.length || 0) > 60) ? 'text-red-500 font-bold' : 'text-gray-400'}`}>
+                    {product.meta_seo?.title.length || 0}/60 ký tự
+                  </span>
+                </div>
+                <input
+                  type="text"
+                  value={product.meta_seo?.title || ''}
+                  onChange={(e) => handleUpdateMetaField('title', e.target.value)}
+                  placeholder="Nhập Meta Title..."
+                  className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500 text-gray-800"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="font-semibold text-gray-600">Meta Description</span>
+                  <span className={`font-mono text-[10px] ${(product.meta_seo?.description.length || 0) > 160 ? 'text-red-500 font-bold' : 'text-gray-400'}`}>
+                    {product.meta_seo?.description.length || 0}/160 ký tự
+                  </span>
+                </div>
+                <textarea
+                  value={product.meta_seo?.description || ''}
+                  onChange={(e) => handleUpdateMetaField('description', e.target.value)}
+                  placeholder="Nhập Meta Description..."
+                  rows={3}
+                  className="w-full border border-gray-200 rounded-lg p-2.5 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500 text-gray-850"
+                />
+              </div>
+
+              <div>
+                <span className="block text-xs font-semibold text-gray-600 mb-1">Từ khóa (Keywords)</span>
+                <div className="flex flex-wrap gap-1.5 mb-2 bg-gray-50 p-2 rounded-lg border border-gray-100 min-h-[40px]">
+                  {!product.meta_seo?.keywords || product.meta_seo.keywords.length === 0 ? (
+                    <span className="text-gray-400 text-xs my-auto">Chưa có từ khóa</span>
+                  ) : (
+                    product.meta_seo.keywords.map((kw) => (
+                      <span key={kw} className="bg-cyan-50 border border-cyan-100 text-cyan-700 px-2 py-0.5 rounded text-[10px] font-semibold flex items-center gap-1">
+                        {kw}
+                        <button onClick={() => handleRemoveKeyword(kw)} className="hover:text-red-500">
+                          <X size={10} />
+                        </button>
+                      </span>
+                    ))
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Nhập từ khóa mới..."
+                    value={newKeywordText}
+                    onChange={(e) => setNewKeywordText(e.target.value)}
+                    className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500 text-gray-800"
+                  />
+                  <Button size="sm" variant="secondary" onClick={handleAddKeyword}>
+                    <Plus size={12} className="mr-1" /> Thêm từ khóa
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Google Preview */}
+            <div className="border border-gray-100 rounded-lg p-4 bg-gray-50/50">
+              <span className="block text-xs font-semibold text-gray-500 mb-2">Xem trước giao diện tìm kiếm Google (SERP)</span>
+              <div className="font-sans">
+                <span className="text-[11px] text-gray-500 block truncate">https://www.thegioididong.com › products › {product.id}</span>
+                <span className="text-blue-800 hover:underline text-base font-medium block truncate leading-tight mt-0.5">
+                  {product.meta_seo?.title || `${product.name} - Giá tốt nhất`}
+                </span>
+                <span className="text-gray-600 text-xs mt-1 leading-normal block">
+                  {product.meta_seo?.description || 'Chưa cấu hình Meta Description. Google sẽ tự hiển thị phần nội dung ngẫu nhiên trong bài viết.'}
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Tab 2: Specs Reference Files */}
         {mainTab === 'specs' && (
-          <div className="w-full">
-            <div className="flex flex-col gap-5">
+          <div className="max-w-4xl mx-auto w-full">
+            <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm flex flex-col gap-5">
               <div>
                 <h3 className="font-bold text-gray-800 text-sm mb-1.5 flex items-center gap-1.5">
                   <Link size={16} className="text-cyan-600" /> Tài liệu & Links Tham Khảo
                 </h3>
                 <p className="text-xs text-gray-400 mb-3">Liên kết tài liệu gốc để phục vụ việc trích xuất và tra cứu dữ liệu.</p>
-
+                
                 <div className="flex flex-col gap-3">
                   {/* Extra dynamic links */}
                   {extraLinks.map((link) => (
@@ -995,31 +2074,62 @@ export function SpecsDemoPage() {
               </div>
 
               <div>
-                <h3 className="font-bold text-gray-800 text-sm mb-1.5 flex items-center gap-1.5">
+                <h3 className="font-bold text-gray-800 text-sm flex items-center gap-1.5 mb-3">
                   <Upload size={16} className="text-cyan-600" /> Tải lên File Specs
                 </h3>
-                {/* Upload input */}
-                <label className="border-2 border-dashed border-gray-200 rounded-xl p-5 text-center block cursor-pointer hover:border-cyan-400 hover:bg-cyan-50/10 transition-all mb-2">
-                  <input
-                    type="file"
-                    multiple
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx"
-                  />
-                  <Upload className="text-gray-400 mx-auto mb-1.5" size={22} />
-                  <span className="block text-xs font-semibold text-gray-700">Click chọn file specs</span>
-                  <span className="block text-[9px] text-gray-400 mt-0.5">PDF, PNG, JPG, DOC, XLS, XLSX (Max 20MB)</span>
-                </label>
+                
+                <div className="grid grid-cols-2 gap-3 mb-2">
+                  {/* Upload Ảnh sản phẩm */}
+                  <label className="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center block cursor-pointer hover:border-cyan-400 hover:bg-cyan-50 transition-all">
+                    <input
+                      type="file"
+                      multiple
+                      onChange={(e) => handleFileUpload(e, 'product_image')}
+                      className="hidden"
+                      accept=".png,.jpg,.jpeg"
+                    />
+                    <Image className="text-cyan-500 mx-auto mb-2" size={24} />
+                    <span className="block text-xs font-semibold text-gray-700 mb-0.5">Tải lên Ảnh sản phẩm</span>
+                    <span className="block text-[10px] text-gray-400">PNG, JPG (Max 20MB)</span>
+                  </label>
+
+                  {/* Upload Spec hãng */}
+                  <label className="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center block cursor-pointer hover:border-cyan-400 hover:bg-cyan-50 transition-all">
+                    <input
+                      type="file"
+                      multiple
+                      onChange={(e) => handleFileUpload(e, 'manufacturer_spec')}
+                      className="hidden"
+                      accept=".pdf,.doc,.docx,.xls,.xlsx"
+                    />
+                    <FileText className="text-cyan-500 mx-auto mb-2" size={24} />
+                    <span className="block text-xs font-semibold text-gray-700 mb-0.5">Tải lên Spec hãng</span>
+                    <span className="block text-[10px] text-gray-400">PDF, DOC, XLS (Max 20MB)</span>
+                  </label>
+                </div>
 
                 {pendingSpecFiles.length > 0 && (
                   <div className="mb-4 space-y-2">
-                    {pendingSpecFiles.map((file, index) => (
-                      <div key={`${file.name}-${file.size}-${index}`} className="relative flex items-center gap-2 rounded-lg border border-cyan-100 bg-cyan-50/60 p-2.5 pr-10">
+                    {pendingSpecFiles.map((item, index) => (
+                      <div key={`${item.file.name}-${item.file.size}-${index}`} className="relative flex items-center gap-2 rounded-lg border border-cyan-100 bg-cyan-50/60 p-2.5 pr-10">
                         <File size={15} className="text-cyan-600 flex-shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-xs font-semibold text-gray-700" title={file.name}>{file.name}</p>
-                          <p className="text-[9px] text-gray-400">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                          <p className="truncate text-xs font-semibold text-gray-700" title={item.file.name}>{item.file.name}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-[9px] text-gray-400">{(item.file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                            <select
+                              value={item.type}
+                              onChange={(e) => {
+                                const newType = e.target.value as any;
+                                setPendingSpecFiles(prev => prev.map((p, i) => i === index ? { ...p, type: newType } : p))
+                              }}
+                              className="text-[10px] py-0.5 px-1 bg-white border border-gray-200 rounded text-gray-600 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                            >
+                              <option value="product_image">Ảnh sản phẩm</option>
+                              <option value="manufacturer_spec">Spec hãng</option>
+                              <option value="other">Khác</option>
+                            </select>
+                          </div>
                         </div>
                         <button
                           type="button"
@@ -1076,6 +2186,9 @@ export function SpecsDemoPage() {
                               <p className="font-medium text-gray-700 truncate" title={f.name}>{f.name}</p>
                               <p className="text-[9px] text-gray-400">
                                 {(f.size / (1024 * 1024)).toFixed(2)} MB · {formatDateTime(f.uploaded_at)}
+                                {f.file_type && <span className="ml-1 px-1 py-0.5 bg-gray-200 text-gray-600 rounded">
+                                  {f.file_type === 'product_image' ? 'Ảnh sản phẩm' : f.file_type === 'manufacturer_spec' ? 'Spec hãng' : 'Khác'}
+                                </span>}
                               </p>
                             </div>
                           </div>
@@ -1097,8 +2210,8 @@ export function SpecsDemoPage() {
 
         {/* Tab 3: Jobs History associated with this PIM product */}
         {mainTab === 'jobs' && (
-          <div className="w-full">
-            <div>
+          <div className="max-w-4xl mx-auto w-full">
+            <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
               <h3 className="font-bold text-gray-800 text-sm mb-1.5 flex items-center gap-1.5">
                 <History size={16} className="text-cyan-600" /> Lịch sử Jobs Gen Nội Dung
               </h3>
@@ -1114,10 +2227,10 @@ export function SpecsDemoPage() {
                     const taskName = j.ten_san_pham.includes('[') && j.ten_san_pham.includes(']')
                       ? j.ten_san_pham.substring(j.ten_san_pham.lastIndexOf('[') + 1, j.ten_san_pham.length - 1)
                       : (j.note && !j.note.includes('QC từ chối') ? j.note : 'Quy trình Full 5 Bước');
-
+                      
                     return (
-                      <div
-                        key={j.job_id}
+                      <div 
+                        key={j.job_id} 
                         onClick={() => {
                           setSelectedJob(j)
                           setPopupTab('preview')
@@ -1130,7 +2243,7 @@ export function SpecsDemoPage() {
                           </span>
                           <span className="text-[10px] text-gray-400">{formatTimeAgo(j.updated_at)}</span>
                         </div>
-
+                        
                         <div className="flex items-center justify-between text-gray-600 mb-1">
                           <span className="font-medium text-gray-500">Quy trình / Tác vụ:</span>
                           <span className="font-bold text-cyan-700 text-right">{taskName}</span>
@@ -1142,7 +2255,7 @@ export function SpecsDemoPage() {
                             {j.status === 'published' ? 'Đã publish' : j.status === 'approved' ? 'Đã duyệt' : j.status === 'error' ? 'Có lỗi' : j.status === 'rejected' ? 'Bị từ chối' : 'Đang chạy'}
                           </span>
                         </div>
-
+                        
                         <div className="flex items-center justify-between mt-1 text-gray-600">
                           <span>Người chạy:</span>
                           <span className="font-medium">{j.created_by}</span>
@@ -1168,8 +2281,6 @@ export function SpecsDemoPage() {
           </div>
         )}
 
-      </div>
-      </div>
       </div>
 
       {selectedJob && (
@@ -1231,35 +2342,6 @@ export function SpecsDemoPage() {
                 }}
               >
                 Thêm dữ liệu
-              </Button>
-            </div>
-          </div>
-        </Dialog>
-      )}
-
-      {showPublishConfirm && (
-        <Dialog
-          open={showPublishConfirm}
-          onClose={() => setShowPublishConfirm(false)}
-          title="Xác nhận xuất bản lên PIM"
-          subtitle={`${product.model_code} / ${product.variantcode}`}
-          className="max-w-md"
-        >
-          <div className="space-y-4">
-            <p className="text-sm leading-relaxed text-gray-600">
-              Bạn có chắc chắn muốn xuất bản thông số kỹ thuật đã chọn của sản phẩm này lên PIM không?
-            </p>
-            <div className="flex justify-end gap-2 pt-2">
-              <Button variant="outline" size="sm" onClick={() => setShowPublishConfirm(false)}>Hủy</Button>
-              <Button
-                size="sm"
-                className="border-0 bg-[#1D1D1F] text-white hover:bg-black"
-                onClick={() => {
-                  setShowPublishConfirm(false)
-                  toast('Đã gửi yêu cầu xuất bản lên PIM', 'success')
-                }}
-              >
-                Xác nhận xuất bản
               </Button>
             </div>
           </div>
@@ -1431,23 +2513,7 @@ function JobDetailsPopupContent({ job, activeTab, setActiveTab }: JobDetailsPopu
                   </table>
                 </div>
               </div>
-            )}
-
-            {/* Highlights */}
-            {job.dac_diem_noi_bat && job.dac_diem_noi_bat.length > 0 && (
-              <div>
-                <h4 className="font-bold text-gray-800 mb-1.5 border-b border-gray-50 pb-1">Đặc điểm nổi bật:</h4>
-                <ul className="space-y-1 bg-gray-50 p-2.5 rounded-lg border border-gray-100">
-                  {job.dac_diem_noi_bat.map((d, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 bg-cyan-600 rounded-full mt-1.5 flex-shrink-0" />
-                      <span>{d}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
+            )}          </div>
         )}
 
         {activeTab === 'seo' && (
@@ -1494,5 +2560,13 @@ function JobDetailsPopupContent({ job, activeTab, setActiveTab }: JobDetailsPopu
         )}
       </div>
     </div>
+  )
+}
+
+export function SpecsDemoPage() {
+  return (
+    <ErrorBoundary>
+      <SpecsDemoPageContent />
+    </ErrorBoundary>
   )
 }

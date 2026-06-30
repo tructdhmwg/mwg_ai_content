@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { PRODUCT_CONTENT_STATUS_META, getProductContentStatus } from '../../lib/productContentStatus'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Upload, Trash2, Plus, Sparkles, Save, FileText,
@@ -116,7 +117,7 @@ export function ProductDetailPage() {
     runWf1ExtractSpecs
   } = useProductStore()
 
-  const { prompts } = usePromptStore()
+  const { categories: prompts } = usePromptStore()
   const jobs = useJobStore((s) => s.jobs)
 
   // Find current product
@@ -320,7 +321,15 @@ export function ProductDetailPage() {
   }
 
   if (!product) {
-    return (
+    const getVariantStatusDotClass = (statusClassName: string) => {
+    const percent = parseInt(statusClassName.match(/w-\[(\d+)%\]/)?.[1] || '0')
+    if (percent === 100) return 'bg-emerald-500'
+    if (percent > 50) return 'bg-amber-400'
+    if (percent > 0) return 'bg-orange-400'
+    return 'bg-gray-300'
+  }
+
+  return (
       <AppShell breadcrumb={['AICPS', 'Sản phẩm', 'Lỗi']}>
         <div className="bg-white rounded-xl border border-gray-100 p-8 text-center shadow-sm">
           <AlertTriangle className="text-red-500 mx-auto mb-3" size={40} />
@@ -355,14 +364,15 @@ export function ProductDetailPage() {
       }
       const stepKey = fieldStepMap[field] || 'wf2_outline'
       
-      const matched = prompts.find(
-        (pr) => pr.site_id === product.site_id && pr.nganh_hang === activePromptCategory && pr.wf_step === stepKey
-      )
+      const category = prompts.find((c: any) => c.site_id === product.site_id && c.id === activePromptCategory)
+      const subCategory = category?.sub_categories.find((s: any) => s.workflow_type === stepKey)
+      const subCatId = product.selected_sub_categories?.[stepKey]
+      const actualSubCategory = category?.sub_categories.find((s: any) => s.id === subCatId) || subCategory
+      const optionId = product.selected_prompt_options?.[stepKey]
+      const matchedOption = actualSubCategory?.options.find((o: any) => o.id === optionId) || actualSubCategory?.options[0]
       
-      let promptText = ''
-      if (matched) {
-        promptText = matched.prompt_text
-      } else if (product.custom_prompt_text?.[stepKey]) {
+      let promptText = matchedOption ? matchedOption.template_content : ''
+      if (!promptText && product.custom_prompt_text?.[stepKey]) {
         promptText = product.custom_prompt_text[stepKey]
       } else {
         const defaults: Record<string, string> = {
@@ -672,7 +682,7 @@ export function ProductDetailPage() {
 
   const handleSaveSpecFile = () => {
     if (pendingSpecFiles.length === 0) return
-    pendingSpecFiles.forEach((file) => uploadSpecFile(product.id, file.name, file.size))
+    pendingSpecFiles.forEach((file) => uploadSpecFile(product.id, file.name, file.size, 'other'))
     toast(`Đã tải lên ${pendingSpecFiles.length} tài liệu specs`, 'success')
     toast('Đã nhận diện specs mới. Bạn có thể bấm "Trích xuất Specs" để AI phân tích tự động.', 'info')
     setPendingSpecFiles([])
@@ -799,6 +809,7 @@ export function ProductDetailPage() {
               </div>
             </div>
             <h1 className="text-xl font-bold text-gray-800 mt-2">{product.name}</h1>
+            
           </div>
 
           <div className="flex items-center gap-4 bg-gray-50 px-4 py-3 rounded-lg border border-gray-100 min-w-[220px]">
@@ -843,6 +854,48 @@ export function ProductDetailPage() {
         </div>
       )}
     </div>
+
+    {/* Variant Tabs Section */}
+      <div className="bg-white rounded-xl border border-gray-100 p-5 mb-5 shadow-sm">
+        <h3 className="text-sm font-bold text-gray-700 mb-3">Biến thể cùng Model</h3>
+        <div className="min-w-0 rounded-[22px] bg-[#F5F5F7] p-2">
+              <div className="flex min-w-0 gap-2 overflow-x-auto p-1">
+                {products
+                  .filter(p => p.model_code === product.model_code && p.site_id === product.site_id)
+                  .map((variant) => {
+                  const isActive = variant.id === product.id
+                  const contentStatus = getProductContentStatus(variant)
+                  const statusMeta = PRODUCT_CONTENT_STATUS_META[contentStatus]
+                  return (
+                    <button
+                      key={variant.id}
+                      type="button"
+                      onClick={() => {
+                        const isSpecs = window.location.pathname.includes('specs-demo');
+                        navigate(`/products/${variant.id}${isSpecs ? '/specs-demo' : ''}`);
+                      }}
+                      className={`group flex min-h-[72px] min-w-[260px] flex-1 flex-col gap-1.5 rounded-[18px] border-2 px-3.5 py-2.5 text-left transition-all duration-200 motion-reduce:transition-none ${
+                        isActive
+                          ? 'border-[#0071E3] bg-white text-[#1D1D1F] shadow-[0_1px_2px_rgba(0,0,0,0.05),0_8px_18px_rgba(0,113,227,0.14)]'
+                          : 'border-black/[0.08] bg-white text-[#6E6E73] shadow-sm hover:border-black/[0.16] hover:text-[#1D1D1F]'
+                      }`}
+                    >
+                      <div className="flex w-full items-center justify-between gap-2">
+                        <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[10px] font-semibold">
+                          <span className={`h-1.5 w-1.5 rounded-full ${getVariantStatusDotClass(statusMeta.className)}`} />
+                          <span className="truncate">{statusMeta.label}</span>
+                        </span>
+                      </div>
+                      <div className="flex w-full flex-wrap gap-x-4 gap-y-0.5 text-[10px]">
+                        <span className="text-[#6E6E73]">ERP: <span className="font-mono font-semibold text-[#1D1D1F]">{variant.product_code_erp || '—'}</span></span>
+                        <span className="text-[#6E6E73]">Variant: <span className="font-mono font-semibold text-[#1D1D1F]">{variant.variantcode}</span></span>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+      </div>
 
     {/* Page-level Tabs Navigation */}
     <div className="flex bg-gray-100 p-1.5 rounded-xl border border-gray-200 mb-5 max-w-3xl mx-auto shadow-sm">
@@ -1924,11 +1977,18 @@ export function ProductDetailPage() {
                     </button>
                   )}
                 </div>
-                <textarea
-                  value={getPromptText('wf4_article_images')}
-                  onChange={(e) => handleUpdateCustomPrompt('wf4_article_images', e.target.value)}
-                  rows={3}
-                  className="w-full border border-gray-200 rounded-lg p-2 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500 font-mono text-gray-700 bg-white"
+                <PromptConfigEditor
+                  workflowType="wf4_article_images"
+                  activeCategory={product.active_prompt_category || product.nganh_hang}
+                  selectedSubCategoryId={product.selected_sub_categories?.['wf4_article_images'] || ''}
+                  selectedOptionId={product.selected_prompt_options?.['wf4_article_images'] || ''}
+                  bonusPrompt={product.bonus_prompts?.['wf4_article_images'] || ''}
+                  feedbackPrompt={product.feedback_prompts?.['wf4_article_images'] || ''}
+                  onCategoryChange={(cat) => updateProductField(product.id, 'active_prompt_category', cat)}
+                  onSubCategoryChange={(sub) => updateProductField(product.id, 'selected_sub_categories', { ...(product.selected_sub_categories || {}), wf4_article_images: sub })}
+                  onOptionChange={(opt) => updateProductField(product.id, 'selected_prompt_options', { ...(product.selected_prompt_options || {}), wf4_article_images: opt })}
+                  onBonusPromptChange={(val) => updateProductField(product.id, 'bonus_prompts', { ...(product.bonus_prompts || {}), wf4_article_images: val })}
+                  onFeedbackPromptChange={(val) => updateProductField(product.id, 'feedback_prompts', { ...(product.feedback_prompts || {}), wf4_article_images: val })}
                 />
               </div>
             )}
@@ -2275,9 +2335,23 @@ export function ProductDetailPage() {
               </div>
 
               <div>
-                <h3 className="font-bold text-gray-800 text-sm mb-1.5 flex items-center gap-1.5">
-                  <Upload size={16} className="text-cyan-600" /> Tải lên File Specs
-                </h3>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-bold text-gray-800 text-sm flex items-center gap-1.5">
+                    <Upload size={16} className="text-cyan-600" /> Tải lên File Specs
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-gray-500 font-semibold">Phân loại:</span>
+                    <select
+                      value={uploadCategory}
+                      onChange={(e) => setUploadCategory(e.target.value as any)}
+                      className="text-[11px] py-1 px-2 bg-white border border-gray-200 rounded text-gray-600 focus:outline-none focus:ring-1 focus:ring-cyan-500 font-medium"
+                    >
+                      <option value="product_image">Ảnh sản phẩm</option>
+                      <option value="manufacturer_spec">Spec hãng</option>
+                      <option value="other">Khác</option>
+                    </select>
+                  </div>
+                </div>
                 {/* Upload input */}
                 <label className="border-2 border-dashed border-gray-200 rounded-xl p-5 text-center block cursor-pointer hover:border-cyan-400 hover:bg-cyan-50/10 transition-all mb-2">
                   <input

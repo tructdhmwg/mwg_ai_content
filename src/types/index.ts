@@ -66,18 +66,19 @@ export interface Job {
   last_run_at?: string
   /** Ghi chú vận hành từ pipeline (vd: "Auto-reset article: kẹt > 20 phút") */
   ops_note?: string
+  
+  // Custom Prompts
+  prompt_category?: string
+  custom_prompt_text?: Record<string, string>
 }
 
 export interface PromptConfig {
   id: string
   site_id: SiteId
-  nganh_hang: string
+  prompt_category: string
   wf_step:
     | 'wf_name'           // S1 – Tên sản phẩm
-    | 'wf_thumb'          // S2 – Ảnh đại diện
-    | 'wf_video'          // S3 – Video review
     | 'wf_gallery'        // S4 – Gallery ảnh chi tiết
-    | 'wf_slides'         // S5 – Slide minh họa
     | 'wf1_specs'         // S6 – Thông số kỹ thuật
     | 'wf_highlights'     // S7 – Đặc điểm nổi bật
     | 'wf2_outline'       // S8 – Dàn bài
@@ -89,6 +90,30 @@ export interface PromptConfig {
   model: string
   updated_at: string
   updated_by: string
+}
+
+export interface PromptOption {
+  id: string
+  name: string
+  template_content: string
+  is_active: boolean
+  model: string
+  updated_at: string
+  updated_by: string
+}
+
+export interface PromptSubCategory {
+  id: string
+  workflow_type: string
+  name: string
+  options: PromptOption[]
+}
+
+export interface PromptCategoryLevel1 {
+  id: string
+  name: string
+  site_id: SiteId
+  sub_categories: PromptSubCategory[]
 }
 
 export interface WebhookConfig {
@@ -153,11 +178,24 @@ export type ProductPimStatus = 'draft' | 'gen_completed' | 'pending_qc' | 'qc_pa
 export interface ReferenceFile {
   id: string
   name: string
+  url: string
   size: number
   uploaded_at: string
+  file_type?: 'product_image' | 'manufacturer_spec' | 'other'
+}
+
+
+export interface ProductApprovalStatus {
+  outline_approved?: boolean
+  article_approved?: boolean
+  slider_approved?: boolean
+  final_approved?: boolean
+  highlights_approved?: boolean
+  seo_meta_approved?: boolean
 }
 
 export interface Product {
+  approval_status?: ProductApprovalStatus
   id: string // Mã sản phẩm PIM (vd: PIM-9901)
   model_code: string // Mã model (vd: IPHONE16PM)
   variantcode: string // Mã biến thể (vd: IPHONE16PM_256)
@@ -190,6 +228,10 @@ export interface Product {
   // Cấu hình prompt tùy chỉnh cho sản phẩm này
   active_prompt_category?: string // Có thể chọn ngành hàng khác để nạp prompt
   custom_prompt_text?: Record<string, string> // Ví dụ: { wf2_outline: '...', wf3_writing: '...' }
+  selected_sub_categories?: Record<string, string>
+  selected_prompt_options?: Record<string, string> // Lưu option_id cho từng workflow (vd: { wf2_outline: 'opt_1' })
+  bonus_prompts?: Record<string, string> // Lưu yêu cầu bổ sung
+  feedback_prompts?: Record<string, string> // Lưu feedback cho AI (regen)
 
   // Các file Specs làm tài liệu tham khảo để Gen AI
   specs_files?: ReferenceFile[]
