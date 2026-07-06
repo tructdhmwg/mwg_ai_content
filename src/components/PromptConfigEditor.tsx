@@ -11,6 +11,7 @@ interface PromptConfigEditorProps {
   onCategoryChange: (categoryId: string) => void
   onSubCategoryChange: (subCatId: string) => void // New prop
   onOptionChange: (optionId: string) => void
+  onPromptChoiceChange?: (subCategoryId: string, optionId: string) => void
   onBonusPromptChange: (val: string) => void
   onFeedbackPromptChange: (val: string) => void
 }
@@ -22,9 +23,9 @@ export function PromptConfigEditor({
   selectedOptionId,
   bonusPrompt,
   feedbackPrompt,
-  onCategoryChange,
   onSubCategoryChange,
   onOptionChange,
+  onPromptChoiceChange,
   onBonusPromptChange,
   onFeedbackPromptChange,
 }: PromptConfigEditorProps) {
@@ -54,53 +55,49 @@ export function PromptConfigEditor({
     return options.find(o => o.id === selectedOptionId) || options[0]
   }, [options, selectedOptionId])
 
+  // 6. Flatten every sub-category's options into a single selectable list
+  const promptChoices = useMemo(() => {
+    return availableSubCategories.flatMap(sub =>
+      sub.options.map(opt => ({
+        subCategoryId: sub.id,
+        optionId: opt.id,
+        label: `${sub.name} - ${opt.name}`,
+      }))
+    )
+  }, [availableSubCategories])
+
+  const selectedChoiceValue = currentSubCategory && selectedOption
+    ? `${currentSubCategory.id}::${selectedOption.id}`
+    : ''
+
   return (
     <div className="bg-gray-50 border border-gray-100 rounded-lg p-3 text-xs mb-3">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-        <div>
-          <label className="text-[10px] text-gray-500 font-semibold mb-1 block">1. Ngành hàng (Category)</label>
-          <select 
-            value={categoryLevel1?.id || ''}
-            onChange={(e) => {
-              onCategoryChange(e.target.value)
-            }}
-            className="w-full border border-gray-200 rounded px-2 py-1.5 focus:ring-1 focus:ring-cyan-500 bg-white"
-          >
-            {store.categories.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="text-[10px] text-gray-500 font-semibold mb-1 block">2. Phân loại Prompt</label>
-          <select 
-            value={currentSubCategory?.id || ''}
-            onChange={(e) => onSubCategoryChange(e.target.value)}
-            disabled={availableSubCategories.length === 0}
-            className="w-full border border-gray-200 rounded px-2 py-1.5 bg-white focus:ring-1 focus:ring-cyan-500"
-          >
-            {availableSubCategories.length > 0 ? (
-              availableSubCategories.map(sub => (
-                <option key={sub.id} value={sub.id}>{sub.name}</option>
-              ))
-            ) : (
-              <option value="">Không có phân loại</option>
-            )}
-          </select>
-        </div>
-        <div>
-          <label className="text-[10px] text-gray-500 font-semibold mb-1 block">3. Option Template</label>
-          <select 
-            value={selectedOption?.id || ''}
-            onChange={(e) => onOptionChange(e.target.value)}
-            className="w-full border border-gray-200 rounded px-2 py-1.5 focus:ring-1 focus:ring-cyan-500 bg-white"
-            disabled={options.length === 0}
-          >
-            {options.map(opt => (
-              <option key={opt.id} value={opt.id}>{opt.name}</option>
-            ))}
-          </select>
-        </div>
+      <div className="mb-3">
+        <label className="text-[10px] text-gray-500 font-semibold mb-1 block">Danh sách prompt</label>
+        <select
+          value={selectedChoiceValue}
+          onChange={(e) => {
+            const [subCategoryId, optionId] = e.target.value.split('::')
+            if (onPromptChoiceChange) {
+              onPromptChoiceChange(subCategoryId, optionId)
+            } else {
+              onSubCategoryChange(subCategoryId)
+              onOptionChange(optionId)
+            }
+          }}
+          disabled={promptChoices.length === 0}
+          className="w-full border border-gray-200 rounded px-2 py-1.5 focus:ring-1 focus:ring-cyan-500 bg-white"
+        >
+          {promptChoices.length > 0 ? (
+            promptChoices.map(choice => (
+              <option key={`${choice.subCategoryId}::${choice.optionId}`} value={`${choice.subCategoryId}::${choice.optionId}`}>
+                {choice.label}
+              </option>
+            ))
+          ) : (
+            <option value="">Không có prompt</option>
+          )}
+        </select>
       </div>
 
       <div className="mb-3">

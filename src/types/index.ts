@@ -14,6 +14,8 @@ export interface ImageEntry {
   id: string
   url: string
   label: string
+  file_name?: string
+  ai_feedback?: string
   /** Tiêu đề H3 trong bài viết mà ảnh này được gắn vào */
   section_h3?: string
   /** Tên file ảnh gốc (từ hãng) dùng để tạo ảnh AI này */
@@ -114,6 +116,7 @@ export interface PromptCategoryLevel1 {
   name: string
   site_id: SiteId
   sub_categories: PromptSubCategory[]
+  children?: PromptCategoryLevel1[]
 }
 
 export interface WebhookConfig {
@@ -246,5 +249,4 @@ export interface Product {
   created_at: string
   updated_at: string
 }
-
 

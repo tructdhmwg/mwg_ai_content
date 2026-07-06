@@ -117,29 +117,121 @@ Hãy sinh thẻ Meta Title (dưới 65 ký tự) và Meta Description (dưới 1
             updated_by: 'Admin'
           }
         ]
-      }
-    ]
-  },
-  {
-    id: 'TU_LANH',
-    name: 'Tủ lạnh',
-    site_id: 'dmx',
-    sub_categories: [
+      },
       {
-        id: 'wf2_outline_tl',
-        workflow_type: 'wf2_outline',
-        name: 'Dàn bài Tủ lạnh',
+        id: 'wf4_highlights_dt',
+        workflow_type: 'wf4_highlights',
+        name: 'Đặc điểm nổi bật (Điện thoại)',
         options: [
           {
-            id: 'tl_outline_1',
-            name: 'Cơ bản (Inverter)',
-            template_content: `Tạo dàn bài cho tủ lạnh {{ten_san_pham}} thuộc hệ thống Điện Máy Xanh.\nCấu trúc:\n1. Thiết kế bên ngoài và dung tích\n2. Công nghệ tiết kiệm điện Inverter\n3. Công nghệ làm lạnh & khử mùi\n4. Các tiện ích khác\nThông số: {{spec_final_json}}`,
+            id: 'highlights_dt_1',
+            name: 'Danh sách nổi bật ngắn gọn',
+            template_content: `Sinh 4-5 đặc điểm nổi bật cho điện thoại {{ten_san_pham}} dưới dạng HTML.\n\nYêu cầu:\n- Trả về danh sách <ul><li>...</li></ul>.\n- Mỗi ý ngắn gọn, dễ hiểu, bám theo thông số kỹ thuật: {{spec_final_json}}.\n- Ưu tiên các điểm khác biệt về màn hình, hiệu năng, camera, pin và thiết kế.`,
             is_active: true,
             model: 'gpt-4o',
             updated_at: new Date().toISOString(),
             updated_by: 'Admin'
           }
         ]
+      }
+    ]
+  },
+  {
+    id: 'DIEN_TU_DIEN_MAY',
+    name: 'Điện tử, Điện máy',
+    site_id: 'dmx',
+    sub_categories: [],
+    children: [
+      {
+        id: 'MAY_GIAT_MAY_SAY',
+        name: 'Máy giặt - Máy sấy áo quần',
+        site_id: 'dmx',
+        sub_categories: [],
+        children: [
+          {
+            id: 'MAY_GIAT_CUA_TREN',
+            name: 'Máy giặt cửa trên',
+            site_id: 'dmx',
+            sub_categories: []
+          },
+          {
+            id: 'MAY_GIAT_CUA_NGANG',
+            name: 'Máy giặt cửa ngang',
+            site_id: 'dmx',
+            sub_categories: []
+          },
+          {
+            id: 'MAY_SAY_QUAN_AO',
+            name: 'Máy sấy quần áo',
+            site_id: 'dmx',
+            sub_categories: []
+          }
+        ]
+      },
+      {
+        id: 'MAY_LANH',
+        name: 'Máy lạnh',
+        site_id: 'dmx',
+        sub_categories: []
+      },
+      {
+        id: 'TIVI',
+        name: 'Tivi',
+        site_id: 'dmx',
+        sub_categories: []
+      },
+      {
+        id: 'TU_LANH',
+        name: 'Tủ lạnh',
+        site_id: 'dmx',
+        sub_categories: [
+          {
+            id: 'wf2_outline_tl',
+            workflow_type: 'wf2_outline',
+            name: 'Dàn bài Tủ lạnh',
+            options: [
+              {
+                id: 'tl_outline_1',
+                name: 'Cơ bản (Inverter)',
+                template_content: `Tạo dàn bài cho tủ lạnh {{ten_san_pham}} thuộc hệ thống Điện Máy Xanh.\nCấu trúc:\n1. Thiết kế bên ngoài và dung tích\n2. Công nghệ tiết kiệm điện Inverter\n3. Công nghệ làm lạnh & khử mùi\n4. Các tiện ích khác\nThông số: {{spec_final_json}}`,
+                is_active: true,
+                model: 'gpt-4o',
+                updated_at: new Date().toISOString(),
+                updated_by: 'Admin'
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: 'MAY_RUA_CHEN',
+        name: 'Máy rửa chén',
+        site_id: 'dmx',
+        sub_categories: []
+      },
+      {
+        id: 'TU_DONG_TU_MAT',
+        name: 'Tủ đông, tủ mát',
+        site_id: 'dmx',
+        sub_categories: []
+      },
+      {
+        id: 'MAY_NUOC_NONG',
+        name: 'Máy nước nóng',
+        site_id: 'dmx',
+        sub_categories: []
+      },
+      {
+        id: 'TIVI_TEST_URL',
+        name: 'Tivi test url',
+        site_id: 'dmx',
+        sub_categories: []
+      },
+      {
+        id: 'BON_NUOC',
+        name: 'Bồn nước',
+        site_id: 'dmx',
+        sub_categories: []
       }
     ]
   }

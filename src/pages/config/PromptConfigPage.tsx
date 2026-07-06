@@ -6,24 +6,25 @@ import { useToast } from '../../components/ui/Toast'
 import { useAuthStore } from '../../store/authStore'
 import { SITE_META, type SiteId, type PromptCategoryLevel1, type PromptSubCategory, type PromptOption } from '../../types'
 import { formatDateTime } from '../../lib/utils'
-import { 
-  Search, 
-  Trash2, 
-  Copy, 
-  X, 
-  Plus, 
-  Sparkles, 
+import {
+  Search,
+  Trash2,
+  Copy,
+  X,
+  Plus,
+  Sparkles,
   Edit,
   ChevronRight,
-  Database
+  Database,
+  Minus
 } from 'lucide-react'
 
 // Only the active workflows
 const ACTIVE_WORKFLOWS: Record<string, string> = {
-  wf1_specs:        'S1 – Thông Số Kỹ Thuật',
-  wf2_outline:      'S2 – Dàn Bài',
-  wf3_writing:      'S3 – Bài Viết Chi Tiết',
-  wf5_seo:          'S4 – Tối Ưu SEO',
+  wf1_specs: 'S1 – Thông Số Kỹ Thuật',
+  wf2_outline: 'S2 – Dàn Bài',
+  wf3_writing: 'S3 – Bài Viết Chi Tiết',
+  wf5_seo: 'S4 – Tối Ưu SEO',
   wf4_article_images: 'S5 – Gen Ảnh Bài Viết',
 }
 
@@ -43,7 +44,7 @@ export function PromptConfigPage() {
 
   // Tabs site
   const [activeSite, setActiveSite] = useState<SiteId>('tgdd')
-  
+
   // Selection states
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null)
   const [activeWorkflow, setActiveWorkflow] = useState<string>('wf2_outline')
@@ -51,7 +52,7 @@ export function PromptConfigPage() {
   // Slide-over panel states
   const [isPanelOpen, setIsPanelOpen] = useState(false)
   const [panelMode, setPanelMode] = useState<'create_cat' | 'edit_cat' | 'create_sub' | 'edit_sub' | 'create_opt' | 'edit_opt' | null>(null)
-  
+
   // Panel targets
   const [targetCatId, setTargetCatId] = useState<string | null>(null)
   const [targetSubId, setTargetSubId] = useState<string | null>(null)
@@ -65,13 +66,36 @@ export function PromptConfigPage() {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
+  // Tree expand/collapse state — top-level categories start expanded, nested ones collapsed
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set(store.categories.map(c => c.id)))
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const findCategoryById = (cats: PromptCategoryLevel1[], id: string): PromptCategoryLevel1 | undefined => {
+    for (const c of cats) {
+      if (c.id === id) return c
+      if (c.children) {
+        const found = findCategoryById(c.children, id)
+        if (found) return found
+      }
+    }
+    return undefined
+  }
+
   const siteCategories = useMemo(() => {
     return store.categories.filter(c => c.site_id === activeSite)
   }, [store.categories, activeSite])
 
   const activeCategory = useMemo(() => {
     if (!activeCategoryId && siteCategories.length > 0) return siteCategories[0]
-    return siteCategories.find(c => c.id === activeCategoryId) || siteCategories[0]
+    return (activeCategoryId && findCategoryById(siteCategories, activeCategoryId)) || siteCategories[0]
   }, [siteCategories, activeCategoryId])
 
   const activeSubCategories = useMemo(() => {
@@ -108,7 +132,7 @@ export function PromptConfigPage() {
         setFormTemplate(opt.template_content)
       }
     }
-    
+
     setIsPanelOpen(true)
   }
 
@@ -157,9 +181,54 @@ export function PromptConfigPage() {
     toast('Đã xóa thành công', 'warning')
   }
 
+  // Recursively render a node in the "Ngành hàng" tree. Only top-level nodes expose
+  // edit/delete controls — nested children are sample data for the tree, not wired to CRUD.
+  const renderCategoryNode = (cat: PromptCategoryLevel1, isTopLevel: boolean) => {
+    const hasChildren = !!cat.children && cat.children.length > 0
+    const isExpanded = expandedIds.has(cat.id)
+    const isActive = activeCategory?.id === cat.id
+
+    return (
+      <div key={cat.id}>
+        <div
+          onClick={() => (hasChildren ? toggleExpand(cat.id) : setActiveCategoryId(cat.id))}
+          className="group relative flex items-center gap-1.5 pl-4 py-1 cursor-pointer"
+        >
+          <span className="absolute left-0 top-1/2 w-4 h-px bg-gray-200" />
+          {hasChildren && (
+            <span className="relative z-10 flex items-center justify-center w-3.5 h-3.5 border border-gray-300 rounded-[2px] text-gray-400 bg-white shrink-0">
+              {isExpanded ? <Minus size={9} /> : <Plus size={9} />}
+            </span>
+          )}
+          <span
+            className={`truncate pr-1 ${isActive ? 'text-blue-700 font-semibold' : 'text-gray-600 group-hover:text-gray-900'
+              }`}
+          >
+            {cat.name}
+          </span>
+          {isTopLevel && (
+            <div className="flex items-center gap-1 ml-auto opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+              <button onClick={(e) => { e.stopPropagation(); openPanel('edit_cat', cat.id) }} className="p-1 text-gray-400 hover:text-blue-600">
+                <Edit size={12} />
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); handleDelete('cat', cat.id) }} className="p-1 text-gray-400 hover:text-red-600">
+                <Trash2 size={12} />
+              </button>
+            </div>
+          )}
+        </div>
+        {hasChildren && isExpanded && (
+          <div className="ml-[7px] border-l border-gray-200">
+            {cat.children!.map(child => renderCategoryNode(child, false))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
     <AppShell breadcrumb={['AICPS', 'Cấu hình', 'Hệ quản trị Prompt']}>
-      
+
       {/* Title Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
@@ -175,7 +244,7 @@ export function PromptConfigPage() {
 
       {/* Main Workspace Area */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col min-h-[calc(100vh-200px)]">
-        
+
         {/* Site Tab Bar */}
         <div className="border-b border-gray-100 bg-gray-50/50 p-4 flex flex-wrap gap-1.5">
           {(Object.entries(SITE_META) as [SiteId, typeof SITE_META[SiteId]][]).map(([k, v]) => {
@@ -187,9 +256,8 @@ export function PromptConfigPage() {
                   setActiveSite(k)
                   setActiveCategoryId(null)
                 }}
-                className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl transition-all border ${
-                  isActive ? 'bg-white text-gray-900 border-gray-200 shadow-sm scale-102 font-bold' : 'bg-transparent text-gray-400 border-transparent hover:text-gray-600 hover:bg-gray-100'
-                }`}
+                className={`flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl transition-all border ${isActive ? 'bg-white text-gray-900 border-gray-200 shadow-sm scale-102 font-bold' : 'bg-transparent text-gray-400 border-transparent hover:text-gray-600 hover:bg-gray-100'
+                  }`}
               >
                 <span className={`w-2.5 h-2.5 rounded-full ${k === 'tgdd' ? 'bg-yellow-500' : k === 'dmx' ? 'bg-blue-500' : 'bg-green-500'}`} />
                 {v.label}
@@ -200,33 +268,33 @@ export function PromptConfigPage() {
 
         <div className="flex flex-1 overflow-hidden">
           {/* Level 1: Sidebar Categories */}
-          <div className="w-64 border-r border-gray-100 bg-gray-50/30 overflow-y-auto p-4 flex flex-col gap-2">
+          <div className="w-64 border-r border-gray-100 bg-gray-50/30 overflow-y-auto p-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Ngành hàng (Cấp 1)</h3>
               <button onClick={() => openPanel('create_cat')} className="p-1 hover:bg-gray-200 rounded text-gray-500">
                 <Plus size={14} />
               </button>
             </div>
+
             {siteCategories.length === 0 && <p className="text-xs text-gray-400">Chưa có ngành hàng nào</p>}
-            {siteCategories.map(cat => (
-              <div 
-                key={cat.id} 
-                onClick={() => setActiveCategoryId(cat.id)}
-                className={`group flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border ${
-                  activeCategory?.id === cat.id ? 'bg-blue-50 border-blue-100 text-blue-700' : 'bg-white border-gray-100 hover:border-gray-200 text-gray-700'
-                }`}
-              >
-                <span className="text-sm font-semibold truncate pr-2">{cat.name}</span>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={(e) => { e.stopPropagation(); openPanel('edit_cat', cat.id) }} className="p-1 text-gray-400 hover:text-blue-600">
-                    <Edit size={12} />
-                  </button>
-                  <button onClick={(e) => { e.stopPropagation(); handleDelete('cat', cat.id) }} className="p-1 text-gray-400 hover:text-red-600">
-                    <Trash2 size={12} />
-                  </button>
+
+            {siteCategories.length > 0 && (
+              <div className="text-sm">
+                {/* Root node: current site */}
+                <div className="flex items-center gap-1.5 text-gray-700 font-semibold py-1">
+                  <span className="flex items-center justify-center w-3.5 h-3.5 border border-gray-300 rounded-[2px] text-gray-400 shrink-0">
+                    <Minus size={9} />
+                  </span>
+                  <Database size={13} className="text-gray-400 shrink-0" />
+                  <span className="truncate">{SITE_META[activeSite].label}</span>
+                </div>
+
+                {/* Ngành hàng tree (may include nested sample sub-groups) */}
+                <div className="ml-[7px] border-l border-gray-200">
+                  {siteCategories.map(cat => renderCategoryNode(cat, true))}
                 </div>
               </div>
-            ))}
+            )}
           </div>
 
           {/* Levels 2 & 3: Main Content */}
@@ -241,9 +309,8 @@ export function PromptConfigPage() {
                     <button
                       key={wf}
                       onClick={() => setActiveWorkflow(wf)}
-                      className={`pb-3 text-xs font-bold border-b-2 transition-colors ${
-                        activeWorkflow === wf ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-400 hover:text-gray-600'
-                      }`}
+                      className={`pb-3 text-xs font-bold border-b-2 transition-colors ${activeWorkflow === wf ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-400 hover:text-gray-600'
+                        }`}
                     >
                       {label}
                     </button>
@@ -288,7 +355,7 @@ export function PromptConfigPage() {
                           </div>
 
                           {sub.options.length === 0 && <p className="text-xs text-gray-400">Chưa có option nào.</p>}
-                          
+
                           <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                             {sub.options.map(opt => (
                               <div key={opt.id} className="bg-white border border-gray-200 rounded-lg p-3 hover:border-blue-300 transition-colors">
@@ -298,8 +365,8 @@ export function PromptConfigPage() {
                                     <span className="font-semibold text-gray-800 text-xs">{opt.name}</span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <button onClick={() => openPanel('edit_opt', activeCategory.id, sub.id, opt.id)} className="text-gray-400 hover:text-blue-600"><Edit size={12}/></button>
-                                    <button onClick={() => handleDelete('opt', activeCategory.id, sub.id, opt.id)} className="text-gray-400 hover:text-red-600"><Trash2 size={12}/></button>
+                                    <button onClick={() => openPanel('edit_opt', activeCategory.id, sub.id, opt.id)} className="text-gray-400 hover:text-blue-600"><Edit size={12} /></button>
+                                    <button onClick={() => handleDelete('opt', activeCategory.id, sub.id, opt.id)} className="text-gray-400 hover:text-red-600"><Trash2 size={12} /></button>
                                   </div>
                                 </div>
                                 <pre className="text-[10px] text-gray-600 font-mono bg-gray-50 p-2 rounded whitespace-pre-wrap line-clamp-3">
@@ -329,7 +396,7 @@ export function PromptConfigPage() {
           </h2>
           <button onClick={() => setIsPanelOpen(false)} className="p-1.5 text-gray-400 hover:bg-gray-100 rounded-lg"><X size={18} /></button>
         </div>
-        
+
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1.5">Tên hiển thị</label>
