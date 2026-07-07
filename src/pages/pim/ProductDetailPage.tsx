@@ -1,13 +1,14 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { PRODUCT_CONTENT_STATUS_META, getProductContentStatus } from '../../lib/productContentStatus'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Upload, Trash2, Plus, Sparkles, Save, FileText,
   Settings, AlertTriangle, Globe, File, Check, Info, Loader2, X, FileSpreadsheet,
-  Link, History, CheckCircle2, Play, ExternalLink, Image, Video, LayoutList
+  Link, History, CheckCircle2, Play, ExternalLink, Image, Video, LayoutList,
+  ChevronLeft, ChevronRight, SlidersHorizontal
 } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
-import { PromptConfigEditor } from '../../components/PromptConfigEditor'
+import { ProductPromptConfigTab } from '../../components/pim/ProductPromptConfigTab'
 import { SiteBadge, Badge, StatusBadge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Dialog } from '../../components/ui/Dialog'
@@ -17,6 +18,23 @@ import { useJobStore } from '../../store/jobStore'
 import { useToast } from '../../components/ui/Toast'
 import { type ProductPimStatus, type Job } from '../../types'
 import { formatDateTime, formatTimeAgo } from '../../lib/utils'
+
+const SHOW_SPECS_SECTION = false
+const SHOW_SEO_SECTION = false
+
+const TOC_SECTIONS = [
+  { id: 'section-name', label: 'Tên sản phẩm', icon: Info },
+  { id: 'section-thumbnail', label: 'Ảnh đại diện', icon: Image },
+  { id: 'section-video', label: 'Video Review', icon: Play },
+  { id: 'section-gallery', label: 'Gallery ảnh', icon: Image },
+  { id: 'section-slides', label: 'Slide minh họa', icon: Video },
+  ...(SHOW_SPECS_SECTION ? [{ id: 'section-specs', label: 'Thông số kỹ thuật', icon: FileSpreadsheet }] : []),
+  { id: 'section-highlights', label: 'Đặc điểm nổi bật', icon: Check },
+  { id: 'section-outline', label: 'Dàn bài (Outline)', icon: FileText },
+  { id: 'section-article-images', label: 'Ảnh bài viết', icon: Image },
+  { id: 'section-article-content', label: 'Bài viết chi tiết', icon: FileText },
+  ...(SHOW_SEO_SECTION ? [{ id: 'section-seo', label: 'SEO Meta', icon: Globe }] : []),
+]
 
 const getVariantStatusDotClass = (statusClassName: string) => {
   const percent = parseInt(statusClassName.match(/w-\[(\d+)%\]/)?.[1] || '0')
@@ -143,8 +161,47 @@ export function ProductDetailPage() {
     return matches.map(m => m[1].replace(/<[^>]+>/g, '').trim()).filter(Boolean)
   }, [product?.content_html])
 
-  // Right side panel tab: specs | prompts | jobs
-  const [mainTab, setMainTab] = useState<'content' | 'specs' | 'jobs'>('content')
+  // Right side panel tab: prompts | content | specs | jobs
+  const [mainTab, setMainTab] = useState<'prompts' | 'content' | 'specs' | 'jobs'>('content')
+  // Dirty-check khi rời tab Cấu hình prompt chưa lưu
+  const [promptTabDirty, setPromptTabDirty] = useState(false)
+  const handleTabChange = (tab: 'prompts' | 'content' | 'specs' | 'jobs') => {
+    if (mainTab === 'prompts' && tab !== 'prompts' && promptTabDirty) {
+      if (!confirm('Cấu hình prompt chưa lưu. Rời tab?')) return
+    }
+    setMainTab(tab)
+  }
+  const goToPromptSection = (anchor: 's1' | 's2' | 's3') => {
+    setMainTab('prompts')
+    window.setTimeout(() => {
+      document.getElementById(`prompt-section-${anchor}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
+  }
+  // Pin the tab bar to the top of the viewport once scrolled past the Outline section
+  const outlineSentinelRef = useRef<HTMLDivElement>(null)
+  const [isTabsPinned, setIsTabsPinned] = useState(false)
+  const pinnedTabsBarRef = useRef<HTMLDivElement>(null)
+  const [pinnedTabsBarHeight, setPinnedTabsBarHeight] = useState(0)
+  // Section quick-nav (Table of Contents) panel
+  const [tocCollapsed, setTocCollapsed] = useState(false)
+  const [activeTocId, setActiveTocId] = useState(TOC_SECTIONS[0]?.id)
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id)
+    if (!el) return
+    const offset = (isTabsPinned ? pinnedTabsBarHeight : 0) + 20
+    const top = el.getBoundingClientRect().top + window.scrollY - offset
+    window.scrollTo({ top, behavior: 'smooth' })
+  }
+
+  // Measure the pinned tab bar so the TOC panel can sit right below it, never under it
+  useEffect(() => {
+    if (!isTabsPinned) return
+    const el = pinnedTabsBarRef.current
+    if (!el) return
+    const observer = new ResizeObserver(([entry]) => setPinnedTabsBarHeight(entry.contentRect.height))
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [isTabsPinned])
   // HTML Content view tab
   const [contentTab, setContentTab] = useState<'edit' | 'preview'>('preview')
   
@@ -230,6 +287,41 @@ export function ProductDetailPage() {
       }
     }
   }, [product?.id])
+
+  // Pin the tab bar once the user scrolls past the Outline section
+  useEffect(() => {
+    const el = outlineSentinelRef.current
+    if (!el || mainTab !== 'content') {
+      setIsTabsPinned(false)
+      return
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsTabsPinned(entry.boundingClientRect.top < 0),
+      { threshold: 0 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [mainTab])
+
+  // Track which section is currently in view to highlight the active TOC item
+  useEffect(() => {
+    if (mainTab !== 'content') return
+    const elements = TOC_SECTIONS
+      .map(section => document.getElementById(section.id))
+      .filter((el): el is HTMLElement => !!el)
+    if (elements.length === 0) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter(e => e.isIntersecting)
+        if (visible.length > 0) {
+          setActiveTocId(visible[0].target.id)
+        }
+      },
+      { rootMargin: '-100px 0px -70% 0px' }
+    )
+    elements.forEach(el => observer.observe(el))
+    return () => observer.disconnect()
+  }, [mainTab])
 
   // Custom prompt update handler
   const handleUpdateCustomPrompt = (stepKey: string, val: string) => {
@@ -361,19 +453,22 @@ export function ProductDetailPage() {
         thong_so_ky_thuat: 'wf1_specs',
         dac_diem_noi_bat: 'wf4_highlights',
         outline: 'wf2_outline',
-        content_html: 'wf3_writing',
+        // Workflow gộp Outline & Bài viết: prompt viết bài nằm trong template_content của option wf2_outline
+        content_html: 'wf2_outline',
         meta_seo: 'wf5_finalize'
       }
       const stepKey = fieldStepMap[field] || 'wf2_outline'
-      
+
       const category = prompts.find((c: any) => c.site_id === product.site_id && c.id === activePromptCategory)
       const subCategory = category?.sub_categories.find((s: any) => s.workflow_type === stepKey)
       const subCatId = product.selected_sub_categories?.[stepKey]
       const actualSubCategory = category?.sub_categories.find((s: any) => s.id === subCatId) || subCategory
       const optionId = product.selected_prompt_options?.[stepKey]
       const matchedOption = actualSubCategory?.options.find((o: any) => o.id === optionId) || actualSubCategory?.options[0]
-      
-      let promptText = matchedOption ? matchedOption.template_content : ''
+
+      let promptText = matchedOption
+        ? (field === 'outline' ? matchedOption.outline_prompt_content ?? matchedOption.template_content : matchedOption.template_content)
+        : ''
       if (!promptText && product.custom_prompt_text?.[stepKey]) {
         promptText = product.custom_prompt_text[stepKey]
       } else {
@@ -900,35 +995,113 @@ export function ProductDetailPage() {
       </div>
 
     {/* Page-level Tabs Navigation */}
-    <div className="flex bg-gray-100 p-1.5 rounded-xl border border-gray-200 mb-5 max-w-3xl mx-auto shadow-sm">
+    {isTabsPinned && (
+      <div ref={pinnedTabsBarRef} className="fixed top-0 left-0 right-0 md:left-[var(--sidebar-width)] z-40 bg-[#f0f2f5]/95 backdrop-blur-sm border-b border-gray-200 shadow-md py-2 px-6 animate-fade-in">
+        <div className="mx-auto flex w-fit max-w-full items-center gap-1 overflow-x-auto rounded-xl bg-gray-100/80 p-1.5 shadow-sm">
+          <button
+            onClick={() => handleTabChange('prompts')}
+            className={`flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-all ${mainTab === 'prompts' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/70 ring-1 ring-gray-200/70' : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'}`}
+          >
+            <SlidersHorizontal size={16} className={mainTab === 'prompts' ? 'text-blue-500' : 'text-gray-400'} /> Cấu hình prompt
+          </button>
+          <button
+            onClick={() => handleTabChange('content')}
+            className={`flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-all ${mainTab === 'content' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/70 ring-1 ring-gray-200/70' : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'}`}
+          >
+            <LayoutList size={16} className={mainTab === 'content' ? 'text-blue-500' : 'text-gray-400'} /> Thông tin sản phẩm
+          </button>
+          <button
+            onClick={() => handleTabChange('specs')}
+            className={`flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-all ${mainTab === 'specs' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/70 ring-1 ring-gray-200/70' : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'}`}
+          >
+            <FileText size={16} className={mainTab === 'specs' ? 'text-blue-500' : 'text-gray-400'} /> Tài liệu & Links Tham Khảo
+          </button>
+          <button
+            onClick={() => handleTabChange('jobs')}
+            className={`flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-all ${mainTab === 'jobs' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/70 ring-1 ring-gray-200/70' : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'}`}
+          >
+            <History size={16} className={mainTab === 'jobs' ? 'text-blue-500' : 'text-gray-400'} /> Lịch sử Jobs
+          </button>
+        </div>
+      </div>
+    )}
+    <div className="mx-auto mb-5 flex w-fit max-w-full items-center gap-1 overflow-x-auto rounded-xl bg-gray-100/80 p-1.5 shadow-sm">
       <button
-        onClick={() => setMainTab('content')}
-        className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${mainTab === 'content' ? 'bg-white text-cyan-700 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}
+        onClick={() => handleTabChange('prompts')}
+        className={`flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-all ${mainTab === 'prompts' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/70 ring-1 ring-gray-200/70' : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'}`}
       >
-        <LayoutList size={16} /> Thông tin & Thông số kỹ thuật
+        <SlidersHorizontal size={16} className={mainTab === 'prompts' ? 'text-blue-500' : 'text-gray-400'} /> Cấu hình prompt
       </button>
       <button
-        onClick={() => setMainTab('specs')}
-        className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${mainTab === 'specs' ? 'bg-white text-cyan-700 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}
+        onClick={() => handleTabChange('content')}
+        className={`flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-all ${mainTab === 'content' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/70 ring-1 ring-gray-200/70' : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'}`}
       >
-        <FileText size={16} /> Tài liệu & Links Tham Khảo
+        <LayoutList size={16} className={mainTab === 'content' ? 'text-blue-500' : 'text-gray-400'} /> Thông tin sản phẩm
       </button>
       <button
-        onClick={() => setMainTab('jobs')}
-        className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${mainTab === 'jobs' ? 'bg-white text-cyan-700 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}
+        onClick={() => handleTabChange('specs')}
+        className={`flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-all ${mainTab === 'specs' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/70 ring-1 ring-gray-200/70' : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'}`}
       >
-        <History size={16} /> Lịch sử Jobs
+        <FileText size={16} className={mainTab === 'specs' ? 'text-blue-500' : 'text-gray-400'} /> Tài liệu & Links Tham Khảo
+      </button>
+      <button
+        onClick={() => handleTabChange('jobs')}
+        className={`flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-all ${mainTab === 'jobs' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/70 ring-1 ring-gray-200/70' : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'}`}
+      >
+        <History size={16} className={mainTab === 'jobs' ? 'text-blue-500' : 'text-gray-400'} /> Lịch sử Jobs
       </button>
     </div>
 
     {/* Main Content Area */}
     <div className="w-full">
-      
+
+      {/* Tab: Cấu hình prompt */}
+      {mainTab === 'prompts' && (
+        <div className="max-w-5xl mx-auto w-full">
+          <ProductPromptConfigTab product={product} onDirtyChange={setPromptTabDirty} />
+        </div>
+      )}
+
       {/* Left Column: Interactive Field Editors (Now Full Width) */}
-      <div className={mainTab === 'content' ? "flex flex-col gap-5" : "hidden"}>
+      <div className={mainTab === 'content' ? "flex items-start gap-5" : "hidden"}>
+
+        {/* Section quick-nav (Table of Contents) */}
+        <div
+          className="sticky shrink-0 z-30 hidden lg:block"
+          style={{ top: (isTabsPinned ? pinnedTabsBarHeight : 0) + 16 }}
+        >
+          <div className={`bg-white rounded-xl border border-gray-200 shadow-sm transition-all overflow-hidden ${tocCollapsed ? 'w-11' : 'w-56'}`}>
+            <div className={`flex items-center border-b border-gray-100 px-2 py-2 ${tocCollapsed ? 'justify-center' : 'justify-between'}`}>
+              {!tocCollapsed && <span className="text-xs font-bold text-gray-700 pl-1.5">Mục lục</span>}
+              <button
+                onClick={() => setTocCollapsed(prev => !prev)}
+                className="p-1 rounded-md text-gray-400 hover:text-cyan-600 hover:bg-gray-50"
+                title={tocCollapsed ? 'Mở rộng mục lục' : 'Thu gọn mục lục'}
+              >
+                {tocCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+              </button>
+            </div>
+            {!tocCollapsed && (
+              <nav className="flex flex-col p-1.5 max-h-[70vh] overflow-y-auto">
+                {TOC_SECTIONS.map(section => (
+                  <button
+                    key={section.id}
+                    onClick={() => scrollToSection(section.id)}
+                    className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-left transition-colors ${activeTocId === section.id ? 'bg-cyan-50 text-cyan-700' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'}`}
+                  >
+                    <section.icon size={13} className="shrink-0" />
+                    <span className="truncate">{section.label}</span>
+                  </button>
+                ))}
+              </nav>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-5 flex-1 min-w-0">
 
         {/* Section 1: Tên sản phẩm */}
-        <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
+        <div id="section-name" className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
           <div className="flex items-center justify-between border-b border-gray-50 pb-3 mb-4 flex-wrap gap-2">
             <h3 className="font-bold text-gray-800 text-sm flex items-center gap-1.5">
               <Info size={16} className="text-cyan-600" /> Tên sản phẩm
@@ -1002,7 +1175,7 @@ export function ProductDetailPage() {
 
 
           {/* Section 2: Ảnh đại diện (Thumbnail) */}
-          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
+          <div id="section-thumbnail" className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
             <div className="flex items-center justify-between border-b border-gray-50 pb-3 mb-4 flex-wrap gap-2">
               <div className="flex items-center gap-1.5">
                 <Image size={16} className="text-cyan-600" />
@@ -1103,7 +1276,7 @@ export function ProductDetailPage() {
           </div>
 
           {/* Section 3: Video Review */}
-          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
+          <div id="section-video" className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
             <div className="flex items-center justify-between border-b border-gray-50 pb-3 mb-4 flex-wrap gap-2">
               <div className="flex items-center gap-1.5">
                 <Video size={16} className="text-cyan-600" />
@@ -1220,7 +1393,7 @@ export function ProductDetailPage() {
           </div>
 
           {/* Section 4: Gallery (Ảnh chi tiết) */}
-          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
+          <div id="section-gallery" className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
             <div className="flex items-center justify-between border-b border-gray-50 pb-3 mb-4 flex-wrap gap-2">
               <div className="flex items-center gap-1.5">
                 <Image size={16} className="text-cyan-600" />
@@ -1330,7 +1503,7 @@ export function ProductDetailPage() {
           </div>
 
           {/* Section 5: Slide minh họa */}
-          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
+          <div id="section-slides" className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
             <div className="flex items-center justify-between border-b border-gray-50 pb-3 mb-4 flex-wrap gap-2">
               <div className="flex items-center gap-1.5">
                 <Sparkles size={16} className="text-amber-500 animate-pulse" />
@@ -1431,21 +1604,22 @@ export function ProductDetailPage() {
           </div>
 
           {/* Section 6: Thông số kỹ thuật */}
-          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
+          {SHOW_SPECS_SECTION && (
+          <div id="section-specs" className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
             <div className="flex items-center justify-between border-b border-gray-50 pb-3 mb-4 flex-wrap gap-2">
               <div className="flex items-center gap-1.5">
                 <FileSpreadsheet size={16} className="text-cyan-600" />
                 <h3 className="font-bold text-gray-800 text-sm">Thông số kỹ thuật</h3>
               </div>
               <div className="flex items-center gap-2">
-                <Button 
+                <Button
                   size="sm"
-                  variant="ghost" 
+                  variant="ghost"
                   className="text-gray-500 hover:text-cyan-600 text-xs py-1"
-                  onClick={() => setShowPrompts(prev => ({ ...prev, wf1_specs: !prev.wf1_specs }))}
+                  onClick={() => goToPromptSection('s1')}
                 >
                   <Settings size={12} className="mr-1" />
-                  {showPrompts['wf1_specs'] ? 'Đóng prompt' : 'Cấu hình Prompt'}
+                  Cấu hình Prompt
                 </Button>
                 <Button 
                   size="sm" 
@@ -1463,37 +1637,6 @@ export function ProductDetailPage() {
                 </Button>
               </div>
             </div>
-
-            {/* Prompt Config */}
-            {showPrompts['wf1_specs'] && (
-              <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 animate-fade-in">
-                <div className="flex justify-between items-center mb-1 text-[10px]">
-                   <div className="flex items-center gap-1.5">
-                   <span className="text-gray-400 font-semibold">Prompt AI cho Trích xuất Specs</span>
-                   <code className="px-1.5 py-0.5 bg-violet-100 text-violet-600 rounded font-mono text-[9px] font-bold tracking-wide">wf1_specs</code>
-                   </div>
-                  {product.custom_prompt_text?.['wf1_specs'] && (
-                    <button
-                      onClick={() => {
-                        const nextPrompt = { ...product.custom_prompt_text }
-                        delete nextPrompt['wf1_specs']
-                        updateProductField(product.id, 'custom_prompt_text', nextPrompt)
-                        toast('Đã khôi phục prompt mặc định', 'info')
-                      }}
-                      className="text-red-500 hover:underline font-semibold"
-                    >
-                      Khôi phục mặc định
-                    </button>
-                  )}
-                </div>
-                <textarea
-                  value={getPromptText('wf1_specs')}
-                  onChange={(e) => handleUpdateCustomPrompt('wf1_specs', e.target.value)}
-                  rows={3}
-                  className="w-full border border-gray-200 rounded-lg p-2 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500 font-mono text-gray-700 bg-white"
-                />
-              </div>
-            )}
 
             {/* Filter Tabs for Specs Status */}
             <div className="flex flex-wrap items-center gap-1.5 mb-4 pb-3 border-b border-gray-100">
@@ -1724,9 +1867,10 @@ export function ProductDetailPage() {
               })()}
             </div>
           </div>
+          )}
 
           {/* Section 7: Đặc điểm nổi bật (Highlights) */}
-          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
+          <div id="section-highlights" className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
             <div className="flex items-center justify-between border-b border-gray-50 pb-3 mb-4 flex-wrap gap-2">
               <div className="flex items-center gap-1.5">
                 <Check size={16} className="text-cyan-600" />
@@ -1849,21 +1993,21 @@ export function ProductDetailPage() {
           </div>
 
           {/* Section 8: Dàn bài (Outline) */}
-          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
+          <div id="section-outline" className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
             <div className="flex items-center justify-between border-b border-gray-50 pb-3 mb-4 flex-wrap gap-2">
               <div className="flex items-center gap-1.5">
                 <FileText size={16} className="text-cyan-600" />
                 <h3 className="font-bold text-gray-800 text-sm">Dàn bài viết (Outline)</h3>
               </div>
               <div className="flex items-center gap-2">
-                <Button 
+                <Button
                   size="sm"
-                  variant="ghost" 
+                  variant="ghost"
                   className="text-gray-500 hover:text-cyan-600 text-xs py-1"
-                  onClick={() => setShowPrompts(prev => ({ ...prev, wf2_outline: !prev.wf2_outline }))}
+                  onClick={() => goToPromptSection('s2')}
                 >
                   <Settings size={12} className="mr-1" />
-                  {showPrompts['wf2_outline'] ? 'Đóng prompt' : 'Cấu hình Prompt'}
+                  Cấu hình Prompt
                 </Button>
                 <Button 
                   size="sm" 
@@ -1882,37 +2026,6 @@ export function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Prompt Config */}
-            {showPrompts['wf2_outline'] && (
-              <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 animate-fade-in">
-                <div className="flex justify-between items-center mb-1 text-[10px]">
-                   <div className="flex items-center gap-1.5">
-                   <span className="text-gray-400 font-semibold">Prompt AI cho Lập Dàn Bài</span>
-                   <code className="px-1.5 py-0.5 bg-violet-100 text-violet-600 rounded font-mono text-[9px] font-bold tracking-wide">wf2_outline</code>
-                   </div>
-                  {product.custom_prompt_text?.['wf2_outline'] && (
-                    <button
-                      onClick={() => {
-                        const nextPrompt = { ...product.custom_prompt_text }
-                        delete nextPrompt['wf2_outline']
-                        updateProductField(product.id, 'custom_prompt_text', nextPrompt)
-                        toast('Đã khôi phục prompt mặc định', 'info')
-                      }}
-                      className="text-red-500 hover:underline font-semibold"
-                    >
-                      Khôi phục mặc định
-                    </button>
-                  )}
-                </div>
-                <textarea
-                  value={getPromptText('wf2_outline')}
-                  onChange={(e) => handleUpdateCustomPrompt('wf2_outline', e.target.value)}
-                  rows={3}
-                  className="w-full border border-gray-200 rounded-lg p-2 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500 font-mono text-gray-700 bg-white"
-                />
-              </div>
-            )}
-
             <textarea
               value={product.outline || ''}
               onChange={(e) => updateProductField(product.id, 'outline', e.target.value)}
@@ -1921,9 +2034,10 @@ export function ProductDetailPage() {
               className="w-full border border-gray-200 rounded-lg p-3 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500 font-mono text-gray-700 bg-gray-50/50"
             />
           </div>
+          <div ref={outlineSentinelRef} />
 
           {/* Section 9: Hình ảnh gắn vào bài viết */}
-          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
+          <div id="section-article-images" className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
             <div className="flex items-center justify-between border-b border-gray-50 pb-3 mb-4 flex-wrap gap-2">
               <div className="flex items-center gap-1.5">
                 <Image size={16} className="text-cyan-600" />
@@ -1933,14 +2047,14 @@ export function ProductDetailPage() {
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <Button 
+                <Button
                   size="sm"
-                  variant="ghost" 
+                  variant="ghost"
                   className="text-gray-500 hover:text-cyan-600 text-xs py-1"
-                  onClick={() => setShowPrompts(prev => ({ ...prev, wf4_article_images: !prev.wf4_article_images }))}
+                  onClick={() => goToPromptSection('s3')}
                 >
                   <Settings size={12} className="mr-1" />
-                  {showPrompts['wf4_article_images'] ? 'Đóng prompt' : 'Cấu hình Prompt'}
+                  Cấu hình Prompt
                 </Button>
                 <Button 
                   size="sm" 
@@ -1957,43 +2071,6 @@ export function ProductDetailPage() {
                 </Button>
               </div>
             </div>
-
-            {showPrompts['wf4_article_images'] && (
-              <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 animate-fade-in">
-                <div className="flex justify-between items-center mb-1 text-[10px]">
-                   <div className="flex items-center gap-1.5">
-                   <span className="text-gray-400 font-semibold">Prompt AI cho Ảnh gắn bài viết</span>
-                   <code className="px-1.5 py-0.5 bg-violet-100 text-violet-600 rounded font-mono text-[9px] font-bold tracking-wide">wf_article_images</code>
-                   </div>
-                  {product.custom_prompt_text?.['wf4_article_images'] && (
-                    <button
-                      onClick={() => {
-                        const nextPrompt = { ...product.custom_prompt_text }
-                        delete nextPrompt['wf4_article_images']
-                        updateProductField(product.id, 'custom_prompt_text', nextPrompt)
-                        toast('Đã khôi phục prompt mặc định', 'info')
-                      }}
-                      className="text-red-500 hover:underline font-semibold"
-                    >
-                      Khôi phục mặc định
-                    </button>
-                  )}
-                </div>
-                <PromptConfigEditor
-                  workflowType="wf4_article_images"
-                  activeCategory={product.active_prompt_category || product.nganh_hang}
-                  selectedSubCategoryId={product.selected_sub_categories?.['wf4_article_images'] || ''}
-                  selectedOptionId={product.selected_prompt_options?.['wf4_article_images'] || ''}
-                  bonusPrompt={product.bonus_prompts?.['wf4_article_images'] || ''}
-                  feedbackPrompt={product.feedback_prompts?.['wf4_article_images'] || ''}
-                  onCategoryChange={(cat) => updateProductField(product.id, 'active_prompt_category', cat)}
-                  onSubCategoryChange={(sub) => updateProductField(product.id, 'selected_sub_categories', { ...(product.selected_sub_categories || {}), wf4_article_images: sub })}
-                  onOptionChange={(opt) => updateProductField(product.id, 'selected_prompt_options', { ...(product.selected_prompt_options || {}), wf4_article_images: opt })}
-                  onBonusPromptChange={(val) => updateProductField(product.id, 'bonus_prompts', { ...(product.bonus_prompts || {}), wf4_article_images: val })}
-                  onFeedbackPromptChange={(val) => updateProductField(product.id, 'feedback_prompts', { ...(product.feedback_prompts || {}), wf4_article_images: val })}
-                />
-              </div>
-            )}
 
             {/* Grid of article images */}
             {(() => {
@@ -2053,7 +2130,7 @@ export function ProductDetailPage() {
           </div>
 
           {/* Section 10: Bài viết chi tiết (HTML Content) */}
-          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
+          <div id="section-article-content" className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
             <div className="flex flex-wrap items-center justify-between border-b border-gray-50 pb-3 mb-4 gap-2">
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1.5">
@@ -2077,14 +2154,14 @@ export function ProductDetailPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Button 
+                <Button
                   size="sm"
-                  variant="ghost" 
+                  variant="ghost"
                   className="text-gray-500 hover:text-cyan-600 text-xs py-1"
-                  onClick={() => setShowPrompts(prev => ({ ...prev, wf3_writing: !prev.wf3_writing }))}
+                  onClick={() => goToPromptSection('s2')}
                 >
                   <Settings size={12} className="mr-1" />
-                  {showPrompts['wf3_writing'] ? 'Đóng prompt' : 'Cấu hình Prompt'}
+                  Cấu hình Prompt
                 </Button>
                 <Button 
                   size="sm" 
@@ -2102,37 +2179,6 @@ export function ProductDetailPage() {
                 </Button>
               </div>
             </div>
-
-            {/* Prompt Config */}
-            {showPrompts['wf3_writing'] && (
-              <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200 animate-fade-in">
-                <div className="flex justify-between items-center mb-1 text-[10px]">
-                   <div className="flex items-center gap-1.5">
-                   <span className="text-gray-400 font-semibold">Prompt AI cho Viết Bài chi tiết</span>
-                   <code className="px-1.5 py-0.5 bg-violet-100 text-violet-600 rounded font-mono text-[9px] font-bold tracking-wide">wf3_writing</code>
-                   </div>
-                  {product.custom_prompt_text?.['wf3_writing'] && (
-                    <button
-                      onClick={() => {
-                        const nextPrompt = { ...product.custom_prompt_text }
-                        delete nextPrompt['wf3_writing']
-                        updateProductField(product.id, 'custom_prompt_text', nextPrompt)
-                        toast('Đã khôi phục prompt mặc định', 'info')
-                      }}
-                      className="text-red-500 hover:underline font-semibold"
-                    >
-                      Khôi phục mặc định
-                    </button>
-                  )}
-                </div>
-                <textarea
-                  value={getPromptText('wf3_writing')}
-                  onChange={(e) => handleUpdateCustomPrompt('wf3_writing', e.target.value)}
-                  rows={3}
-                  className="w-full border border-gray-200 rounded-lg p-2 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500 font-mono text-gray-700 bg-white"
-                />
-              </div>
-            )}
 
             {contentTab === 'edit' ? (
               <textarea
@@ -2178,7 +2224,8 @@ export function ProductDetailPage() {
           </div>
 
           {/* Section 10: SEO Meta */}
-          <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
+          {SHOW_SEO_SECTION && (
+          <div id="section-seo" className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
             <div className="flex items-center justify-between border-b border-gray-50 pb-3 mb-4">
               <h3 className="font-bold text-gray-800 text-sm flex items-center gap-1.5">
                 <Globe size={16} className="text-cyan-600" /> Cấu hình SEO Meta
@@ -2278,6 +2325,8 @@ export function ProductDetailPage() {
               </div>
             </div>
           </div>
+          )}
+        </div>
         </div>
 
         {/* Tab 2: Specs Reference Files */}

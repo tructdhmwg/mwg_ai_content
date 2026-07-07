@@ -1,7 +1,7 @@
 import { ErrorBoundary } from '../../components/ErrorBoundary'
 // @ts-nocheck
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { PRODUCT_CONTENT_STATUS_META, getProductContentStatus } from '../../lib/productContentStatus'
 import { useParams, useNavigate } from 'react-router-dom'
 import { EditorContent, useEditor } from '@tiptap/react'
@@ -18,12 +18,14 @@ import Placeholder from '@tiptap/extension-placeholder'
 import {
   ArrowLeft, Upload, Trash2, Plus, Sparkles, Save, FileText,
   Settings, AlertTriangle, Globe, File, Info, Loader2, X, FileSpreadsheet,
-  Link, History, CheckCircle2, ExternalLink, Image, LayoutList, Zap, ArrowUp, ChevronDown
+  Link, History, CheckCircle2, ExternalLink, Image, LayoutList, Zap, ArrowUp, ChevronDown,
+  ChevronLeft, ChevronRight, SlidersHorizontal
 } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { SiteBadge, StatusBadge } from '../../components/ui/Badge'
 import { SectionHeaderCard } from '../../components/pim/SectionHeaderCard'
 import { PromptConfigDialog } from '../../components/pim/PromptConfigDialog'
+import { ProductPromptConfigTab } from '../../components/pim/ProductPromptConfigTab'
 import { Button } from '../../components/ui/Button'
 import { Dialog } from '../../components/ui/Dialog'
 import { useProductStore } from '../../store/productStore'
@@ -32,6 +34,18 @@ import { useJobStore } from '../../store/jobStore'
 import { useToast } from '../../components/ui/Toast'
 import { type Job, type ImageEntry } from '../../types'
 import { formatDateTime, formatTimeAgo } from '../../lib/utils'
+
+const SHOW_SPECS_SECTION = false
+const SHOW_SEO_SECTION = false
+
+const TOC_SECTIONS = [
+  ...(SHOW_SPECS_SECTION ? [{ id: 'section-specs', label: 'Thông số kỹ thuật', icon: FileSpreadsheet }] : []),
+  { id: 'section-outline', label: 'Dàn bài (Outline)', icon: FileText },
+  { id: 'section-article-content', label: 'Bài viết chi tiết', icon: Globe },
+  { id: 'section-highlights', label: 'Đặc điểm nổi bật', icon: Sparkles },
+  { id: 'section-article-images', label: 'Ảnh bài viết', icon: Image },
+  ...(SHOW_SEO_SECTION ? [{ id: 'section-seo', label: 'SEO Meta', icon: Globe }] : []),
+]
 
 interface RichTextEditorProps {
   value: string
@@ -523,9 +537,82 @@ function SpecsDemoPageContent() {
     return matches.map(m => m[1].replace(/<[^>]+>/g, '').trim()).filter(Boolean)
   }, [product?.content_html])
 
-  // Right side panel tab: specs | prompts | jobs
-  const [mainTab, setMainTab] = useState<'content' | 'specs' | 'jobs'>('content')
-  
+  // Right side panel tab: prompts | content | specs | jobs
+  const [mainTab, setMainTab] = useState<'prompts' | 'content' | 'specs' | 'jobs'>('content')
+  // Dirty-check khi rời tab Cấu hình prompt chưa lưu
+  const [promptTabDirty, setPromptTabDirty] = useState(false)
+  const handleTabChange = (tab: 'prompts' | 'content' | 'specs' | 'jobs') => {
+    if (mainTab === 'prompts' && tab !== 'prompts' && promptTabDirty) {
+      if (!confirm('Cấu hình prompt chưa lưu. Rời tab?')) return
+    }
+    setMainTab(tab)
+  }
+  const goToPromptSection = (anchor: 's1' | 's2' | 's3') => {
+    setMainTab('prompts')
+    window.setTimeout(() => {
+      document.getElementById(`prompt-section-${anchor}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 50)
+  }
+  // Pin the tab bar to the top of the viewport once scrolled past the Outline section
+  const outlineSentinelRef = useRef<HTMLDivElement>(null)
+  const [isTabsPinned, setIsTabsPinned] = useState(false)
+  const pinnedTabsBarRef = useRef<HTMLDivElement>(null)
+  const [pinnedTabsBarHeight, setPinnedTabsBarHeight] = useState(0)
+
+  useEffect(() => {
+    const el = outlineSentinelRef.current
+    if (!el || mainTab !== 'content') {
+      setIsTabsPinned(false)
+      return
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsTabsPinned(entry.boundingClientRect.top < 0),
+      { threshold: 0 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [mainTab])
+
+  // Measure the pinned tab bar so the TOC panel can sit right below it, never under it
+  useEffect(() => {
+    if (!isTabsPinned) return
+    const el = pinnedTabsBarRef.current
+    if (!el) return
+    const observer = new ResizeObserver(([entry]) => setPinnedTabsBarHeight(entry.contentRect.height))
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [isTabsPinned])
+
+  // Section quick-nav (Table of Contents) panel
+  const [tocCollapsed, setTocCollapsed] = useState(false)
+  const [activeTocId, setActiveTocId] = useState(TOC_SECTIONS[0]?.id)
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id)
+    if (!el) return
+    const offset = (isTabsPinned ? pinnedTabsBarHeight : 0) + 20
+    const top = el.getBoundingClientRect().top + window.scrollY - offset
+    window.scrollTo({ top, behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    if (mainTab !== 'content') return
+    const elements = TOC_SECTIONS
+      .map(section => document.getElementById(section.id))
+      .filter((el): el is HTMLElement => !!el)
+    if (elements.length === 0) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries.filter(e => e.isIntersecting)
+        if (visible.length > 0) {
+          setActiveTocId(visible[0].target.id)
+        }
+      },
+      { rootMargin: '-100px 0px -70% 0px' }
+    )
+    elements.forEach(el => observer.observe(el))
+    return () => observer.disconnect()
+  }, [mainTab])
+
   // Selected job details popup states
   const [selectedJob, setSelectedJob] = useState<Job | null>(null)
   const [popupTab, setPopupTab] = useState<'preview' | 'outline_specs' | 'seo' | 'logs'>('preview')
@@ -565,12 +652,6 @@ function SpecsDemoPageContent() {
   const [articleFeedbackDrafts, setArticleFeedbackDrafts] = useState<Record<string, string>>({})
   const [regeneratingArticleImageIds, setRegeneratingArticleImageIds] = useState<Record<string, boolean>>({})
   const [articleImageErrors, setArticleImageErrors] = useState<Record<string, string>>({})
-  const [outlinePromptDraft, setOutlinePromptDraft] = useState({
-    subCategoryId: '',
-    optionId: '',
-    bonusPrompt: '',
-    feedbackPrompt: '',
-  })
 
   // Highlights HTML editor state
   const [highlightsHtml, setHighlightsHtml] = useState('')
@@ -598,67 +679,6 @@ function SpecsDemoPageContent() {
     updateProductField(product.id, 'dac_diem_noi_bat', [htmlVal])
   }
 
-  const openOutlinePromptDialog = () => {
-    if (!product) return
-    setOutlinePromptDraft({
-      subCategoryId: product.selected_sub_categories?.['wf2_outline'] || '',
-      optionId: product.selected_prompt_options?.['wf2_outline'] || '',
-      bonusPrompt: product.bonus_prompts?.['wf2_outline'] || '',
-      feedbackPrompt: product.feedback_prompts?.['wf2_outline'] || '',
-    })
-    setShowPrompts(prev => ({ ...prev, wf2_outline: true }))
-  }
-
-  const handleSaveOutlinePrompt = () => {
-    if (!product) return false
-    const currentSubCategoryId = product.selected_sub_categories?.['wf2_outline'] || ''
-    const currentOptionId = product.selected_prompt_options?.['wf2_outline'] || ''
-    const isPromptChanged =
-      outlinePromptDraft.subCategoryId !== currentSubCategoryId ||
-      outlinePromptDraft.optionId !== currentOptionId
-
-    if (isPromptChanged) {
-      updateProductField(product.id, 'outline', '')
-    }
-
-    updateProductField(product.id, 'selected_sub_categories', {
-      ...(product.selected_sub_categories || {}),
-      wf2_outline: outlinePromptDraft.subCategoryId,
-    })
-    updateProductField(product.id, 'selected_prompt_options', {
-      ...(product.selected_prompt_options || {}),
-      wf2_outline: outlinePromptDraft.optionId,
-    })
-    updateProductField(product.id, 'bonus_prompts', {
-      ...(product.bonus_prompts || {}),
-      wf2_outline: outlinePromptDraft.bonusPrompt,
-    })
-    updateProductField(product.id, 'feedback_prompts', {
-      ...(product.feedback_prompts || {}),
-      wf2_outline: outlinePromptDraft.feedbackPrompt,
-    })
-    return true
-  }
-
-  const handleOutlinePromptChoiceChange = (subCategoryId: string, optionId: string) => {
-    if (!product) return
-    const isPromptChanged =
-      subCategoryId !== outlinePromptDraft.subCategoryId ||
-      optionId !== outlinePromptDraft.optionId
-
-    if (isPromptChanged && product.outline?.trim()) {
-      const confirmed = window.confirm('Khi chọn prompt mới, nội dung outline cũ sẽ bị xoá đi')
-      if (!confirmed) return
-      updateProductField(product.id, 'outline', '')
-    }
-
-    setOutlinePromptDraft(prev => ({
-      ...prev,
-      subCategoryId,
-      optionId,
-    }))
-  }
-
   if (!product) {
     return (
       <AppShell breadcrumb={['AICPS', 'Sản phẩm', 'Lỗi']}>
@@ -683,7 +703,8 @@ function SpecsDemoPageContent() {
         thong_so_ky_thuat: 'wf1_specs',
         dac_diem_noi_bat: 'wf4_highlights',
         outline: 'wf2_outline',
-        content_html: 'wf3_writing',
+        // Workflow gộp Outline & Bài viết: prompt viết bài nằm trong template_content của option wf2_outline
+        content_html: 'wf2_outline',
         meta_seo: 'wf5_finalize'
       }
       const stepKey = fieldStepMap[field] || 'wf2_outline'
@@ -700,7 +721,9 @@ function SpecsDemoPageContent() {
 
       let promptText = ''
       if (matchedOption) {
-        promptText = matchedOption.template_content
+        promptText = field === 'outline'
+          ? matchedOption.outline_prompt_content ?? matchedOption.template_content
+          : matchedOption.template_content
       } else if (product.custom_prompt_text?.[stepKey]) {
         promptText = product.custom_prompt_text[stepKey]
       } else {
@@ -1140,33 +1163,113 @@ function SpecsDemoPageContent() {
       </div>
 
     {/* Page-level Tabs Navigation */}
-    <div className="flex bg-gray-100 p-1.5 rounded-xl border border-gray-200 mb-5 max-w-3xl mx-auto shadow-sm">
+    {isTabsPinned && (
+      <div ref={pinnedTabsBarRef} className="fixed top-0 left-0 right-0 md:left-[var(--sidebar-width)] z-40 bg-[#f0f2f5]/95 backdrop-blur-sm border-b border-gray-200 shadow-md py-2 px-6 animate-fade-in">
+        <div className="mx-auto flex w-fit max-w-full items-center gap-1 overflow-x-auto rounded-xl bg-gray-100/80 p-1.5 shadow-sm">
+          <button
+            onClick={() => handleTabChange('prompts')}
+            className={`flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-all ${mainTab === 'prompts' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/70 ring-1 ring-gray-200/70' : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'}`}
+          >
+            <SlidersHorizontal size={16} className={mainTab === 'prompts' ? 'text-blue-500' : 'text-gray-400'} /> Cấu hình prompt
+          </button>
+          <button
+            onClick={() => handleTabChange('content')}
+            className={`flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-all ${mainTab === 'content' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/70 ring-1 ring-gray-200/70' : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'}`}
+          >
+            <LayoutList size={16} className={mainTab === 'content' ? 'text-blue-500' : 'text-gray-400'} /> Thông tin sản phẩm
+          </button>
+          <button
+            onClick={() => handleTabChange('specs')}
+            className={`flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-all ${mainTab === 'specs' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/70 ring-1 ring-gray-200/70' : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'}`}
+          >
+            <FileText size={16} className={mainTab === 'specs' ? 'text-blue-500' : 'text-gray-400'} /> Tài liệu & Links Tham Khảo
+          </button>
+          <button
+            onClick={() => handleTabChange('jobs')}
+            className={`flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-all ${mainTab === 'jobs' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/70 ring-1 ring-gray-200/70' : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'}`}
+          >
+            <History size={16} className={mainTab === 'jobs' ? 'text-blue-500' : 'text-gray-400'} /> Lịch sử Jobs
+          </button>
+        </div>
+      </div>
+    )}
+    <div className="mx-auto mb-5 flex w-fit max-w-full items-center gap-1 overflow-x-auto rounded-xl bg-gray-100/80 p-1.5 shadow-sm">
       <button
-        onClick={() => setMainTab('content')}
-        className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${mainTab === 'content' ? 'bg-white text-cyan-700 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}
+        onClick={() => handleTabChange('prompts')}
+        className={`flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-all ${mainTab === 'prompts' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/70 ring-1 ring-gray-200/70' : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'}`}
       >
-        <LayoutList size={16} /> Thông tin & Thông số kỹ thuật
+        <SlidersHorizontal size={16} className={mainTab === 'prompts' ? 'text-blue-500' : 'text-gray-400'} /> Cấu hình prompt
       </button>
       <button
-        onClick={() => setMainTab('specs')}
-        className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${mainTab === 'specs' ? 'bg-white text-cyan-700 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}
+        onClick={() => handleTabChange('content')}
+        className={`flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-all ${mainTab === 'content' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/70 ring-1 ring-gray-200/70' : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'}`}
       >
-        <FileText size={16} /> Tài liệu & Links Tham Khảo
+        <LayoutList size={16} className={mainTab === 'content' ? 'text-blue-500' : 'text-gray-400'} /> Thông tin sản phẩm
       </button>
       <button
-        onClick={() => setMainTab('jobs')}
-        className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${mainTab === 'jobs' ? 'bg-white text-cyan-700 shadow-sm' : 'text-gray-500 hover:text-gray-800'}`}
+        onClick={() => handleTabChange('specs')}
+        className={`flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-all ${mainTab === 'specs' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/70 ring-1 ring-gray-200/70' : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'}`}
       >
-        <History size={16} /> Lịch sử Jobs
+        <FileText size={16} className={mainTab === 'specs' ? 'text-blue-500' : 'text-gray-400'} /> Tài liệu & Links Tham Khảo
+      </button>
+      <button
+        onClick={() => handleTabChange('jobs')}
+        className={`flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-all ${mainTab === 'jobs' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/70 ring-1 ring-gray-200/70' : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'}`}
+      >
+        <History size={16} className={mainTab === 'jobs' ? 'text-blue-500' : 'text-gray-400'} /> Lịch sử Jobs
       </button>
     </div>
 
     {/* Main Content Area */}
     <div className="w-full">
-      
+
+      {/* Tab: Cấu hình prompt */}
+      {mainTab === 'prompts' && (
+        <div className="max-w-5xl mx-auto w-full">
+          <ProductPromptConfigTab product={product} onDirtyChange={setPromptTabDirty} />
+        </div>
+      )}
+
       {/* Left Column: Interactive Field Editors (Now Full Width) */}
-      <div className={mainTab === 'content' ? "flex flex-col" : "hidden"}>
+      <div className={mainTab === 'content' ? "flex items-start gap-5" : "hidden"}>
+
+        {/* Section quick-nav (Table of Contents) */}
+        <div
+          className="sticky shrink-0 z-30 hidden lg:block"
+          style={{ top: (isTabsPinned ? pinnedTabsBarHeight : 0) + 16 }}
+        >
+          <div className={`bg-white rounded-xl border border-gray-200 shadow-sm transition-all overflow-hidden ${tocCollapsed ? 'w-11' : 'w-56'}`}>
+            <div className={`flex items-center border-b border-gray-100 px-2 py-2 ${tocCollapsed ? 'justify-center' : 'justify-between'}`}>
+              {!tocCollapsed && <span className="text-xs font-bold text-gray-700 pl-1.5">Mục lục</span>}
+              <button
+                onClick={() => setTocCollapsed(prev => !prev)}
+                className="p-1 rounded-md text-gray-400 hover:text-cyan-600 hover:bg-gray-50"
+                title={tocCollapsed ? 'Mở rộng mục lục' : 'Thu gọn mục lục'}
+              >
+                {tocCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+              </button>
+            </div>
+            {!tocCollapsed && (
+              <nav className="flex flex-col p-1.5 max-h-[70vh] overflow-y-auto">
+                {TOC_SECTIONS.map(section => (
+                  <button
+                    key={section.id}
+                    onClick={() => scrollToSection(section.id)}
+                    className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-left transition-colors ${activeTocId === section.id ? 'bg-cyan-50 text-cyan-700' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-800'}`}
+                  >
+                    <section.icon size={13} className="shrink-0" />
+                    <span className="truncate">{section.label}</span>
+                  </button>
+                ))}
+              </nav>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-col flex-1 min-w-0">
           {/* Section 6: Thông số kỹ thuật */}
+          {SHOW_SPECS_SECTION && (
+          <div id="section-specs">
           <SectionHeaderCard
             className="!rounded-b-none"
             title="Thông số kỹ thuật"
@@ -1188,7 +1291,7 @@ function SpecsDemoPageContent() {
             primaryAction={publishToPimAction}
             toolbarLeft={[
               { label: 'Trích xuất specs AI', icon: Zap, tag: 'WF1', onClick: handleExtractSpecs, disabled: extractingSpecs },
-              { label: 'Cấu hình prompt', icon: Settings, onClick: () => setShowPrompts(prev => ({ ...prev, wf1_specs: true })) },
+              { label: 'Cấu hình prompt', icon: Settings, onClick: () => goToPromptSection('s1') },
             ]}
             toolbarRight={[
               { label: 'Xuất file excel', icon: FileSpreadsheet, onClick: handleExportExcel },
@@ -1224,22 +1327,6 @@ function SpecsDemoPageContent() {
                 </button>
               ))}
             </div>
-
-            <PromptConfigDialog
-              open={!!showPrompts['wf1_specs']}
-              onClose={() => setShowPrompts(prev => ({ ...prev, wf1_specs: false }))}
-              workflowType="wf1_specs"
-              activeCategory={product.active_prompt_category || product.nganh_hang}
-              selectedSubCategoryId={product.selected_sub_categories?.['wf1_specs'] || ''}
-              selectedOptionId={product.selected_prompt_options?.['wf1_specs'] || ''}
-              bonusPrompt={product.bonus_prompts?.['wf1_specs'] || ''}
-              feedbackPrompt={product.feedback_prompts?.['wf1_specs'] || ''}
-              onCategoryChange={(cat) => updateProductField(product.id, 'active_prompt_category', cat)}
-              onSubCategoryChange={(sub) => updateProductField(product.id, 'selected_sub_categories', { ...(product.selected_sub_categories || {}), wf1_specs: sub })}
-              onOptionChange={(opt) => updateProductField(product.id, 'selected_prompt_options', { ...(product.selected_prompt_options || {}), wf1_specs: opt })}
-              onBonusPromptChange={(val) => updateProductField(product.id, 'bonus_prompts', { ...(product.bonus_prompts || {}), wf1_specs: val })}
-              onFeedbackPromptChange={(val) => updateProductField(product.id, 'feedback_prompts', { ...(product.feedback_prompts || {}), wf1_specs: val })}
-            />
 
             {!hasMappingFiles && (
               <div className="mb-4 bg-cyan-50/50 border border-cyan-100 rounded-xl p-4 flex items-start gap-3">
@@ -1458,9 +1545,11 @@ function SpecsDemoPageContent() {
               )}
             </div>
           </div>
-
+          </div>
+          )}
 
           {/* Section 7: Dàn bài (Outline) */}
+          <div id="section-outline">
           <SectionHeaderCard
             className="!rounded-b-none"
             icon={FileText}
@@ -1482,29 +1571,11 @@ function SpecsDemoPageContent() {
             secondaryAction={saveSectionAction}
             toolbarLeft={[
               { label: 'Tạo outline (AI)', icon: Sparkles, onClick: () => handleGenField('outline'), disabled: generatingFields['outline'] || product.approval_status?.outline_approved },
-              { label: 'Cấu hình prompt', icon: Settings, onClick: openOutlinePromptDialog },
+              { label: 'Cấu hình prompt', icon: Settings, onClick: () => goToPromptSection('s2') },
             ]}
           />
 
           <div className="mb-5 bg-white rounded-xl !rounded-t-none border !border-t-0 border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
-
-            <PromptConfigDialog
-              open={!!showPrompts['wf2_outline']}
-              onClose={() => setShowPrompts(prev => ({ ...prev, wf2_outline: false }))}
-              onSave={handleSaveOutlinePrompt}
-              workflowType="wf2_outline"
-              activeCategory={product.active_prompt_category || product.nganh_hang}
-              selectedSubCategoryId={outlinePromptDraft.subCategoryId}
-              selectedOptionId={outlinePromptDraft.optionId}
-              bonusPrompt={outlinePromptDraft.bonusPrompt}
-              feedbackPrompt={outlinePromptDraft.feedbackPrompt}
-              onCategoryChange={(cat) => updateProductField(product.id, 'active_prompt_category', cat)}
-              onPromptChoiceChange={handleOutlinePromptChoiceChange}
-              onSubCategoryChange={(sub) => setOutlinePromptDraft(prev => ({ ...prev, subCategoryId: sub }))}
-              onOptionChange={(opt) => setOutlinePromptDraft(prev => ({ ...prev, optionId: opt }))}
-              onBonusPromptChange={(val) => setOutlinePromptDraft(prev => ({ ...prev, bonusPrompt: val }))}
-              onFeedbackPromptChange={(val) => setOutlinePromptDraft(prev => ({ ...prev, feedbackPrompt: val }))}
-            />
 
             <textarea
               value={product.outline || ''}
@@ -1514,8 +1585,49 @@ function SpecsDemoPageContent() {
               className="w-full border border-gray-200 rounded-lg p-3 text-xs focus:outline-none focus:ring-2 focus:ring-cyan-500 font-mono text-gray-700 bg-gray-50/50"
             />
           </div>
+          </div>
+          <div ref={outlineSentinelRef} />
+
+          {/* Section 8: Bài viết chi tiết (HTML Content) */}
+          <div id="section-article-content">
+          <SectionHeaderCard
+            className="!rounded-b-none"
+            icon={Globe}
+            title="Bài viết chi tiết"
+            approval={{
+              state: product.approval_status?.article_approved ? 'approved' : 'pending',
+              onToggle: () => {
+                const nextStatus = { ...product.approval_status };
+                nextStatus.article_approved = !nextStatus.article_approved;
+                updateProductField(product.id, 'approval_status', nextStatus);
+                if (nextStatus.article_approved) toast('Duyệt Bài Viết thành công!', 'success');
+              },
+            }}
+            ai={{
+              label: specsAiStatusMeta?.label || 'AI gen xong',
+              agentId: 'writing_agent#124',
+              isGenerating: generatingFields['content_html'],
+            }}
+            secondaryAction={saveSectionAction}
+            primaryAction={publishToPimAction}
+            toolbarLeft={[
+              { label: 'Viết bài (AI)', icon: Sparkles, onClick: () => handleGenField('content_html'), disabled: generatingFields['content_html'] || !product.approval_status?.outline_approved || product.approval_status?.article_approved },
+              { label: 'Cấu hình prompt', icon: Settings, onClick: () => goToPromptSection('s2') },
+            ]}
+          />
+
+          <div className="mb-5 bg-white rounded-xl !rounded-t-none border !border-t-0 border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
+
+            <RichTextEditor
+              value={product.content_html || ''}
+              onChange={(value) => updateProductField(product.id, 'content_html', value)}
+              placeholder="Nhập nội dung bài viết hoặc bấm Viết bài AI..."
+            />
+          </div>
+          </div>
 
           {/* Section 8: Đặc điểm nổi bật */}
+          <div id="section-highlights">
           <SectionHeaderCard
             className="!rounded-b-none"
             icon={Sparkles}
@@ -1538,7 +1650,6 @@ function SpecsDemoPageContent() {
             primaryAction={publishToPimAction}
             toolbarLeft={[
               { label: 'Gen đặc điểm nổi bật', icon: Sparkles, onClick: () => handleGenField('dac_diem_noi_bat'), disabled: generatingFields['dac_diem_noi_bat'] || product.approval_status?.highlights_approved },
-              { label: 'Cấu hình prompt', icon: Settings, onClick: () => setShowPrompts(prev => ({ ...prev, wf4_highlights: true })) },
             ]}
           />
 
@@ -1565,60 +1676,10 @@ function SpecsDemoPageContent() {
               placeholder="Nhập các đặc điểm nổi bật hoặc bấm Gen đặc điểm nổi bật..."
             />
           </div>
-
-          {/* Section 8: Bài viết chi tiết (HTML Content) */}
-          <SectionHeaderCard
-            className="!rounded-b-none"
-            icon={Globe}
-            title="Bài viết chi tiết"
-            approval={{
-              state: product.approval_status?.article_approved ? 'approved' : 'pending',
-              onToggle: () => {
-                const nextStatus = { ...product.approval_status };
-                nextStatus.article_approved = !nextStatus.article_approved;
-                updateProductField(product.id, 'approval_status', nextStatus);
-                if (nextStatus.article_approved) toast('Duyệt Bài Viết thành công!', 'success');
-              },
-            }}
-            ai={{
-              label: specsAiStatusMeta?.label || 'AI gen xong',
-              agentId: 'writing_agent#124',
-              isGenerating: generatingFields['content_html'],
-            }}
-            secondaryAction={saveSectionAction}
-            primaryAction={publishToPimAction}
-            toolbarLeft={[
-              { label: 'Viết bài (AI)', icon: Sparkles, onClick: () => handleGenField('content_html'), disabled: generatingFields['content_html'] || !product.approval_status?.outline_approved || product.approval_status?.article_approved },
-              { label: 'Cấu hình prompt', icon: Settings, onClick: () => setShowPrompts(prev => ({ ...prev, wf3_writing: true })) },
-            ]}
-          />
-
-          <div className="mb-5 bg-white rounded-xl !rounded-t-none border !border-t-0 border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
-
-            <PromptConfigDialog
-              open={!!showPrompts['wf3_writing']}
-              onClose={() => setShowPrompts(prev => ({ ...prev, wf3_writing: false }))}
-              workflowType="wf3_writing"
-              activeCategory={product.active_prompt_category || product.nganh_hang}
-              selectedSubCategoryId={product.selected_sub_categories?.['wf3_writing'] || ''}
-              selectedOptionId={product.selected_prompt_options?.['wf3_writing'] || ''}
-              bonusPrompt={product.bonus_prompts?.['wf3_writing'] || ''}
-              feedbackPrompt={product.feedback_prompts?.['wf3_writing'] || ''}
-              onCategoryChange={(cat) => updateProductField(product.id, 'active_prompt_category', cat)}
-              onSubCategoryChange={(sub) => updateProductField(product.id, 'selected_sub_categories', { ...(product.selected_sub_categories || {}), wf3_writing: sub })}
-              onOptionChange={(opt) => updateProductField(product.id, 'selected_prompt_options', { ...(product.selected_prompt_options || {}), wf3_writing: opt })}
-              onBonusPromptChange={(val) => updateProductField(product.id, 'bonus_prompts', { ...(product.bonus_prompts || {}), wf3_writing: val })}
-              onFeedbackPromptChange={(val) => updateProductField(product.id, 'feedback_prompts', { ...(product.feedback_prompts || {}), wf3_writing: val })}
-            />
-
-            <RichTextEditor
-              value={product.content_html || ''}
-              onChange={(value) => updateProductField(product.id, 'content_html', value)}
-              placeholder="Nhập nội dung bài viết hoặc bấm Viết bài AI..."
-            />
           </div>
 
           {/* Section 9: Hình ảnh gắn vào bài viết */}
+          <div id="section-article-images">
           <SectionHeaderCard
             className="!rounded-b-none"
             icon={Image}
@@ -1641,27 +1702,11 @@ function SpecsDemoPageContent() {
             primaryAction={publishToPimAction}
             toolbarLeft={[
               { label: 'Gen ảnh bài viết', icon: Sparkles, onClick: handleGenArticleImages, disabled: generatingArticleImages || !product.approval_status?.slider_approved || product.approval_status?.final_approved },
-              { label: 'Cấu hình prompt', icon: Settings, onClick: () => setShowPrompts(prev => ({ ...prev, wf4_article_images: true })) },
+              { label: 'Cấu hình prompt', icon: Settings, onClick: () => goToPromptSection('s3') },
             ]}
           />
 
           <div className="mb-5 bg-white rounded-xl !rounded-t-none border !border-t-0 border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
-
-            <PromptConfigDialog
-              open={!!showPrompts['wf4_article_images']}
-              onClose={() => setShowPrompts(prev => ({ ...prev, wf4_article_images: false }))}
-              workflowType="wf4_article_images"
-              activeCategory={product.active_prompt_category || product.nganh_hang}
-              selectedSubCategoryId={product.selected_sub_categories?.['wf4_article_images'] || ''}
-              selectedOptionId={product.selected_prompt_options?.['wf4_article_images'] || ''}
-              bonusPrompt={product.bonus_prompts?.['wf4_article_images'] || ''}
-              feedbackPrompt={product.feedback_prompts?.['wf4_article_images'] || ''}
-              onCategoryChange={(cat) => updateProductField(product.id, 'active_prompt_category', cat)}
-              onSubCategoryChange={(sub) => updateProductField(product.id, 'selected_sub_categories', { ...(product.selected_sub_categories || {}), wf4_article_images: sub })}
-              onOptionChange={(opt) => updateProductField(product.id, 'selected_prompt_options', { ...(product.selected_prompt_options || {}), wf4_article_images: opt })}
-              onBonusPromptChange={(val) => updateProductField(product.id, 'bonus_prompts', { ...(product.bonus_prompts || {}), wf4_article_images: val })}
-              onFeedbackPromptChange={(val) => updateProductField(product.id, 'feedback_prompts', { ...(product.feedback_prompts || {}), wf4_article_images: val })}
-            />
 
             {/* Grid of article images */}
             {(() => {
@@ -1818,8 +1863,11 @@ function SpecsDemoPageContent() {
               )
             })()}
           </div>
+          </div>
 
           {/* Section 11: SEO Meta */}
+          {SHOW_SEO_SECTION && (
+          <div id="section-seo">
           <SectionHeaderCard
             className="!rounded-b-none"
             icon={Globe}
@@ -1942,6 +1990,9 @@ function SpecsDemoPageContent() {
               </div>
             </div>
           </div>
+          </div>
+          )}
+        </div>
         </div>
 
         {/* Tab 2: Specs Reference Files */}

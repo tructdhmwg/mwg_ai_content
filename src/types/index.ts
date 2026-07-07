@@ -99,6 +99,9 @@ export interface PromptOption {
   name: string
   prompt_label?: string
   image_analysis_prompt?: string
+  /** Prompt outline, dùng cho workflow gộp Outline & Bài viết */
+  outline_prompt_content?: string
+  /** Với workflow gộp Outline & Bài viết, đây là Prompt viết bài */
   template_content: string
   is_active: boolean
   model: string
