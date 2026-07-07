@@ -169,13 +169,29 @@ Hãy sinh thẻ Meta Title (dưới 65 ký tự) và Meta Description (dưới 1
           {
             id: 'wf2_outline_mg',
             workflow_type: 'wf2_outline',
-            name: 'Outline & Bài viết Máy giặt',
+            name: 'Outline Máy giặt',
             options: [
               {
-                id: 'mg_article_cao_cap',
+                id: 'mg_outline_cao_cap',
                 name: 'Máy giặt - Cao cấp',
                 prompt_label: 'Cao cấp',
-                outline_prompt_content: `Sinh dàn bài bài viết đánh giá chi tiết cho máy giặt {{ten_san_pham}}.\n\nYêu cầu cấu trúc:\n1. Thiết kế hiện đại, khối lượng giặt phù hợp gia đình đông người\n2. Công nghệ AI DD chăm sóc sợi vải và tối ưu chuyển động giặt\n3. Động cơ Inverter vận hành êm, tiết kiệm điện nước\n4. Chương trình giặt và tiện ích thông minh\n5. Tổng kết lý do nên mua\n\nMỗi phần cần có 2-3 ý chính dựa trên thông số kỹ thuật: {{spec_final_json}}.`,
+                template_content: `Sinh dàn bài bài viết đánh giá chi tiết cho máy giặt {{ten_san_pham}}.\n\nYêu cầu cấu trúc:\n1. Thiết kế hiện đại, khối lượng giặt phù hợp gia đình đông người\n2. Công nghệ AI DD chăm sóc sợi vải và tối ưu chuyển động giặt\n3. Động cơ Inverter vận hành êm, tiết kiệm điện nước\n4. Chương trình giặt và tiện ích thông minh\n5. Tổng kết lý do nên mua\n\nMỗi phần cần có 2-3 ý chính dựa trên thông số kỹ thuật: {{spec_final_json}}.`,
+                is_active: true,
+                model: 'gpt-4o',
+                updated_at: new Date().toISOString(),
+                updated_by: 'Admin'
+              }
+            ]
+          },
+          {
+            id: 'wf3_writing_mg',
+            workflow_type: 'wf3_writing',
+            name: 'Bài viết Máy giặt',
+            options: [
+              {
+                id: 'mg_writing_cao_cap',
+                name: 'Máy giặt - Cao cấp',
+                prompt_label: 'Cao cấp',
                 template_content: `Viết bài đánh giá chuyên sâu khoảng 1000 chữ cho máy giặt {{ten_san_pham}} dựa trên dàn bài: {{outline}}.\n\nThông số kỹ thuật: {{spec_final_json}}.\n\nVăn phong rõ ràng, dễ hiểu, nhấn mạnh lợi ích thực tế cho gia đình: giặt sạch, bảo vệ quần áo, vận hành êm, tiết kiệm điện và tiện ích điều khiển thông minh. Chèn thẻ [IMAGE] cuối mỗi đoạn H2 để hệ thống chèn ảnh minh họa.`,
                 is_active: true,
                 model: 'gpt-4o',

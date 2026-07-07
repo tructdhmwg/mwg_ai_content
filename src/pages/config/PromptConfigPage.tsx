@@ -24,12 +24,12 @@ import {
 
 const WORKFLOWS = [
   { key: 'wf1_specs', label: 'S1 – Thông số kỹ thuật', shortLabel: 'S1' },
-  { key: 'wf2_outline', label: 'S2 – Outline & Bài viết', shortLabel: 'S2' },
-  { key: 'wf4_article_images', label: 'S3 – Tạo ảnh slider', shortLabel: 'S3' },
+  { key: 'wf2_outline', label: 'S2 – Outline bài viết', shortLabel: 'S2' },
+  { key: 'wf3_writing', label: 'S3 – Tạo bài viết sản phẩm', shortLabel: 'S3' },
+  { key: 'wf4_article_images', label: 'S4 – Tạo ảnh slider', shortLabel: 'S4' },
 ] as const
 
 const LEGACY_WORKFLOW_FALLBACK: Record<string, string> = {
-  wf3_writing: 'wf2_outline',
   wf5_seo: 'wf4_article_images',
 }
 
@@ -99,8 +99,6 @@ export function PromptConfigPage() {
   const [editingRecord, setEditingRecord] = useState<PromptRecord | null>(null)
   const [promptLabel, setPromptLabel] = useState('')
   const [promptText, setPromptText] = useState('')
-  const [outlinePromptText, setOutlinePromptText] = useState('')
-  const [imageAnalysisPrompt, setImageAnalysisPrompt] = useState('')
   const [promptIsActive, setPromptIsActive] = useState(true)
   const [hasTypedInModal, setHasTypedInModal] = useState(false)
 
@@ -193,8 +191,20 @@ export function PromptConfigPage() {
   }, [siteCategories, activeCategoryId])
 
   const activeWorkflowMeta = WORKFLOWS.find(workflow => workflow.key === activeWorkflow) || WORKFLOWS[0]
-  const isImageWorkflow = activeWorkflow === 'wf4_article_images'
-  const isOutlineWritingWorkflow = activeWorkflow === 'wf2_outline'
+  const promptTextLabel = activeWorkflow === 'wf2_outline'
+    ? 'Prompt outline'
+    : activeWorkflow === 'wf3_writing'
+      ? 'Prompt viết bài'
+      : activeWorkflow === 'wf4_article_images'
+        ? 'Prompt tạo ảnh'
+        : 'Text prompt'
+  const promptTextPlaceholder = activeWorkflow === 'wf2_outline'
+    ? 'Nhập prompt dùng để tạo dàn bài (outline)...'
+    : activeWorkflow === 'wf3_writing'
+      ? 'Nhập prompt dùng để viết bài sản phẩm...'
+      : activeWorkflow === 'wf4_article_images'
+        ? 'Nhập prompt dùng để tạo ảnh slider...'
+        : 'Nhập nội dung prompt...'
   const currentSearch = searchByWorkflow[activeWorkflow] || ''
   const debouncedSearch = (debouncedSearchByWorkflow[activeWorkflow] || '').trim().toLowerCase()
   const currentPage = pageByWorkflow[activeWorkflow] || 1
@@ -284,8 +294,6 @@ export function PromptConfigPage() {
     setEditingRecord(null)
     setPromptLabel('')
     setPromptText('')
-    setOutlinePromptText('')
-    setImageAnalysisPrompt('')
     setPromptIsActive(true)
     setHasTypedInModal(false)
     setModalOpen(true)
@@ -296,9 +304,7 @@ export function PromptConfigPage() {
     setModalMode('edit')
     setEditingRecord(record)
     setPromptLabel(record.option.prompt_label || '')
-    setPromptText(record.option.template_content || '')
-    setOutlinePromptText(record.option.outline_prompt_content || '')
-    setImageAnalysisPrompt(record.option.image_analysis_prompt || '')
+    setPromptText(activeWorkflow === 'wf2_outline' ? (record.option.outline_prompt_content || record.option.template_content || '') : (record.option.template_content || ''))
     setPromptIsActive(record.option.is_active)
     setHasTypedInModal(false)
     setModalOpen(true)
@@ -312,16 +318,6 @@ export function PromptConfigPage() {
   const handlePromptTextChange = (value: string) => {
     setHasTypedInModal(true)
     setPromptText(value)
-  }
-
-  const handleOutlinePromptTextChange = (value: string) => {
-    setHasTypedInModal(true)
-    setOutlinePromptText(value)
-  }
-
-  const handleImageAnalysisPromptChange = (value: string) => {
-    setHasTypedInModal(true)
-    setImageAnalysisPrompt(value)
   }
 
   const handleWorkflowChange = (workflow: WorkflowKey) => {
@@ -355,8 +351,8 @@ export function PromptConfigPage() {
         id: newOptionId,
         name: nextName,
         prompt_label: trimmedPromptLabel,
-        image_analysis_prompt: isImageWorkflow ? imageAnalysisPrompt : undefined,
-        outline_prompt_content: isOutlineWritingWorkflow ? outlinePromptText : undefined,
+        image_analysis_prompt: undefined,
+        outline_prompt_content: undefined,
         template_content: promptText,
         is_active: promptIsActive,
         model: 'gpt-4o',
@@ -367,8 +363,8 @@ export function PromptConfigPage() {
       store.updateOption(activeCategory.id, editingRecord.subCategoryId, editingRecord.option.id, {
         name: nextName,
         prompt_label: trimmedPromptLabel,
-        image_analysis_prompt: isImageWorkflow ? imageAnalysisPrompt : undefined,
-        outline_prompt_content: isOutlineWritingWorkflow ? outlinePromptText : undefined,
+        image_analysis_prompt: undefined,
+        outline_prompt_content: undefined,
         template_content: promptText,
         is_active: promptIsActive,
       }, currentUserName)
@@ -794,76 +790,18 @@ export function PromptConfigPage() {
                 )}
               </div>
 
-              {isImageWorkflow ? (
-                <div className="space-y-5">
-                  <div>
-                    <label htmlFor="image-analysis-prompt" className="mb-2 block text-sm font-bold text-gray-700">
-                      Prompt phân tích ảnh
-                    </label>
-                    <textarea
-                      id="image-analysis-prompt"
-                      value={imageAnalysisPrompt}
-                      onChange={(event) => handleImageAnalysisPromptChange(event.target.value)}
-                      placeholder="Nhập prompt dùng để phân tích ảnh đầu vào..."
-                      className="min-h-32 w-full resize-y rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="image-generation-prompt" className="mb-2 block text-sm font-bold text-gray-700">
-                      Prompt tạo ảnh
-                    </label>
-                    <textarea
-                      id="image-generation-prompt"
-                      value={promptText}
-                      onChange={(event) => handlePromptTextChange(event.target.value)}
-                      placeholder="Nhập prompt dùng để tạo ảnh slider..."
-                      className="min-h-36 w-full resize-y rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
-                    />
-                  </div>
-                </div>
-              ) : isOutlineWritingWorkflow ? (
-                <div className="space-y-5">
-                  <div>
-                    <label htmlFor="outline-prompt" className="mb-2 block text-sm font-bold text-gray-700">
-                      Prompt outline
-                    </label>
-                    <textarea
-                      id="outline-prompt"
-                      value={outlinePromptText}
-                      onChange={(event) => handleOutlinePromptTextChange(event.target.value)}
-                      placeholder="Nhập prompt dùng để tạo dàn bài (outline)..."
-                      className="min-h-32 w-full resize-y rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
-                    />
-                  </div>
-
-                  <div>
-                    <label htmlFor="writing-prompt" className="mb-2 block text-sm font-bold text-gray-700">
-                      Prompt viết bài
-                    </label>
-                    <textarea
-                      id="writing-prompt"
-                      value={promptText}
-                      onChange={(event) => handlePromptTextChange(event.target.value)}
-                      placeholder="Nhập prompt dùng để viết bài sản phẩm..."
-                      className="min-h-36 w-full resize-y rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <label htmlFor="prompt-text" className="mb-2 block text-sm font-bold text-gray-700">
-                    Text prompt
-                  </label>
-                  <textarea
-                    id="prompt-text"
-                    value={promptText}
-                    onChange={(event) => handlePromptTextChange(event.target.value)}
-                    placeholder="Nhập nội dung prompt..."
-                    className="min-h-44 w-full resize-y rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
-                  />
-                </div>
-              )}
+              <div>
+                <label htmlFor="prompt-text" className="mb-2 block text-sm font-bold text-gray-700">
+                  {promptTextLabel}
+                </label>
+                <textarea
+                  id="prompt-text"
+                  value={promptText}
+                  onChange={(event) => handlePromptTextChange(event.target.value)}
+                  placeholder={promptTextPlaceholder}
+                  className="min-h-44 w-full resize-y rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
+                />
+              </div>
 
               <div className="flex items-center justify-between rounded-xl border border-gray-200 px-4 py-4">
                 <div>

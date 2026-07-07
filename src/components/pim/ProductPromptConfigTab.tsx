@@ -31,44 +31,42 @@ export function resolvePromptCategory(
 }
 
 type PromptEntry = { subCategoryId: string; option: PromptOption }
-type WorkflowDraft = { subCategoryId: string; optionId: string; bonus: string; feedback: string }
+type WorkflowDraft = { subCategoryId: string; optionId: string; bonus: string; feedback: string; research: boolean }
 
 const SECTION_DEFS = [
   {
     code: 'S1',
-    anchor: 's1',
-    workflowKey: 'wf1_specs',
+    anchor: 's2',
+    workflowKey: 'wf2_outline',
     legacyWorkflowKeys: [] as string[],
-    title: 'Thông số kỹ thuật',
-    description: 'Prompt trích xuất specs từ tài liệu hãng',
-    chipClass: 'bg-cyan-50 text-cyan-700',
+    title: 'Outline bài viết',
+    description: 'Prompt dàn bài cho bài viết sản phẩm',
+    chipClass: 'bg-indigo-50 text-indigo-700',
     templateFields: (option?: PromptOption) => [
-      { label: 'Text prompt', value: option?.template_content || '' },
+      { label: 'Prompt outline', value: option?.outline_prompt_content || option?.template_content || '' },
     ],
   },
   {
     code: 'S2',
-    anchor: 's2',
-    workflowKey: 'wf2_outline',
-    legacyWorkflowKeys: ['wf3_writing'],
-    title: 'Outline & Bài viết',
-    description: 'Prompt dàn bài và prompt viết bài chi tiết',
-    chipClass: 'bg-indigo-50 text-indigo-700',
+    anchor: 's3',
+    workflowKey: 'wf3_writing',
+    legacyWorkflowKeys: [] as string[],
+    title: 'Tạo bài viết sản phẩm',
+    description: 'Prompt viết bài chi tiết theo outline',
+    chipClass: 'bg-blue-50 text-blue-700',
     templateFields: (option?: PromptOption) => [
-      { label: 'Prompt outline', value: option?.outline_prompt_content || '' },
       { label: 'Prompt viết bài', value: option?.template_content || '' },
     ],
   },
   {
     code: 'S3',
-    anchor: 's3',
+    anchor: 's4',
     workflowKey: 'wf4_article_images',
     legacyWorkflowKeys: [] as string[],
     title: 'Tạo ảnh slider',
-    description: 'Prompt phân tích ảnh đầu vào và prompt tạo ảnh',
+    description: 'Prompt tạo ảnh slider',
     chipClass: 'bg-emerald-50 text-emerald-700',
     templateFields: (option?: PromptOption) => [
-      { label: 'Prompt phân tích ảnh', value: option?.image_analysis_prompt || '' },
       { label: 'Prompt tạo ảnh', value: option?.template_content || '' },
     ],
   },
@@ -98,7 +96,26 @@ function buildDraft(product: Product, section: SectionDef, entries: PromptEntry[
     optionId: matched?.option.id || '',
     bonus: product.bonus_prompts?.[wf] || '',
     feedback: product.feedback_prompts?.[wf] || '',
+    research: product.external_research_by_workflow?.[wf] ?? false,
   }
+}
+
+const emptyDraft: WorkflowDraft = { subCategoryId: '', optionId: '', bonus: '', feedback: '', research: false }
+
+function ResearchSwitch({ checked, onChange }: { checked: boolean; onChange: (checked: boolean) => void }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className={`inline-flex h-6 w-10 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/30 focus:ring-offset-2 ${
+        checked ? 'bg-cyan-600' : 'bg-gray-300'
+      }`}
+    >
+      <span className={`h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${checked ? 'translate-x-4' : 'translate-x-0.5'}`} />
+    </button>
+  )
 }
 
 interface PromptSectionProps {
@@ -126,6 +143,10 @@ function PromptSection({ section, entries, draft, onDraftChange }: PromptSection
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          <div className="mr-1 hidden items-center gap-2 rounded-full border border-gray-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-gray-600 sm:flex">
+            <ResearchSwitch checked={draft.research} onChange={(research) => onDraftChange({ research })} />
+            Research bằng AI
+          </div>
           {selectedEntry && (
             <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -154,6 +175,11 @@ function PromptSection({ section, entries, draft, onDraftChange }: PromptSection
           </div>
         ) : (
           <div className="flex flex-col gap-4 p-5">
+            <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50/70 px-3.5 py-3 sm:hidden">
+              <span className="text-xs font-semibold text-gray-700">Research bằng AI</span>
+              <ResearchSwitch checked={draft.research} onChange={(research) => onDraftChange({ research })} />
+            </div>
+
             <div>
               <label className="mb-1.5 block text-xs font-bold text-gray-700">Tên prompt</label>
               <select
@@ -259,42 +285,45 @@ export function ProductPromptConfigTab({ product, onDirtyChange }: ProductPrompt
   }
 
   const handleSave = () => {
-    const s1 = drafts['wf1_specs']
-    const s2 = drafts['wf2_outline']
-    const s3 = drafts['wf4_article_images']
-    // Mirror lựa chọn S2 sang key wf3_writing để các luồng cũ còn đọc key này không bị lệch
+    const outline = drafts['wf2_outline'] || emptyDraft
+    const writing = drafts['wf3_writing'] || emptyDraft
+    const image = drafts['wf4_article_images'] || emptyDraft
     updateProductField(product.id, 'selected_sub_categories', {
       ...(product.selected_sub_categories || {}),
-      wf1_specs: s1.subCategoryId,
-      wf2_outline: s2.subCategoryId,
-      wf3_writing: s2.subCategoryId,
-      wf4_article_images: s3.subCategoryId,
+      wf2_outline: outline.subCategoryId,
+      wf3_writing: writing.subCategoryId,
+      wf4_article_images: image.subCategoryId,
     })
     updateProductField(product.id, 'selected_prompt_options', {
       ...(product.selected_prompt_options || {}),
-      wf1_specs: s1.optionId,
-      wf2_outline: s2.optionId,
-      wf3_writing: s2.optionId,
-      wf4_article_images: s3.optionId,
+      wf2_outline: outline.optionId,
+      wf3_writing: writing.optionId,
+      wf4_article_images: image.optionId,
     })
     updateProductField(product.id, 'bonus_prompts', {
       ...(product.bonus_prompts || {}),
-      wf1_specs: s1.bonus,
-      wf2_outline: s2.bonus,
-      wf4_article_images: s3.bonus,
+      wf2_outline: outline.bonus,
+      wf3_writing: writing.bonus,
+      wf4_article_images: image.bonus,
     })
     updateProductField(product.id, 'feedback_prompts', {
       ...(product.feedback_prompts || {}),
-      wf1_specs: s1.feedback,
-      wf2_outline: s2.feedback,
-      wf4_article_images: s3.feedback,
+      wf2_outline: outline.feedback,
+      wf3_writing: writing.feedback,
+      wf4_article_images: image.feedback,
+    })
+    updateProductField(product.id, 'external_research_by_workflow', {
+      ...(product.external_research_by_workflow || {}),
+      wf2_outline: outline.research,
+      wf3_writing: writing.research,
+      wf4_article_images: image.research,
     })
     toast('Đã lưu cấu hình prompt', 'success')
   }
 
   return (
     <div>
-      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+      <div className="sticky top-16 z-20 mb-5 flex flex-wrap items-start justify-between gap-3 border-b border-gray-200/70 bg-[#f0f2f5]/95 px-0 py-3 backdrop-blur supports-[backdrop-filter]:bg-[#f0f2f5]/80">
         <div>
           <h2 className="text-[15px] font-semibold text-gray-900">Cấu hình prompt cho sản phẩm</h2>
           <p className="mt-0.5 text-xs text-gray-500">
@@ -326,7 +355,7 @@ export function ProductPromptConfigTab({ product, onDirtyChange }: ProductPrompt
             key={section.code}
             section={section}
             entries={entries}
-            draft={drafts[section.workflowKey] || { subCategoryId: '', optionId: '', bonus: '', feedback: '' }}
+            draft={drafts[section.workflowKey] || emptyDraft}
             onDraftChange={(partial) => handleDraftChange(section.workflowKey, partial)}
           />
         ))

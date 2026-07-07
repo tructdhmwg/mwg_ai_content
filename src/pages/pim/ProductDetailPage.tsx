@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { ProductPromptConfigTab } from '../../components/pim/ProductPromptConfigTab'
+import { ProductPromptWorkflowDialog } from '../../components/pim/ProductPromptWorkflowDialog'
 import { SiteBadge, Badge, StatusBadge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Dialog } from '../../components/ui/Dialog'
@@ -177,6 +178,7 @@ export function ProductDetailPage() {
       document.getElementById(`prompt-section-${anchor}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }, 50)
   }
+  const [promptWorkflowDialog, setPromptWorkflowDialog] = useState<'wf2_outline' | 'wf3_writing' | 'wf4_article_images' | null>(null)
   // Pin the tab bar to the top of the viewport once scrolled past the Outline section
   const outlineSentinelRef = useRef<HTMLDivElement>(null)
   const [isTabsPinned, setIsTabsPinned] = useState(false)
@@ -1051,6 +1053,16 @@ export function ProductDetailPage() {
         <History size={16} className={mainTab === 'jobs' ? 'text-blue-500' : 'text-gray-400'} /> Lịch sử Jobs
       </button>
     </div>
+
+    {promptWorkflowDialog && (
+      <ProductPromptWorkflowDialog
+        open={!!promptWorkflowDialog}
+        onClose={() => setPromptWorkflowDialog(null)}
+        product={product}
+        workflowKey={promptWorkflowDialog}
+        onUpdateProductField={(field, value) => updateProductField(product.id, field, value)}
+      />
+    )}
 
     {/* Main Content Area */}
     <div className="w-full">
@@ -2004,7 +2016,7 @@ export function ProductDetailPage() {
                   size="sm"
                   variant="ghost"
                   className="text-gray-500 hover:text-cyan-600 text-xs py-1"
-                  onClick={() => goToPromptSection('s2')}
+                  onClick={() => setPromptWorkflowDialog('wf2_outline')}
                 >
                   <Settings size={12} className="mr-1" />
                   Cấu hình Prompt
@@ -2051,7 +2063,7 @@ export function ProductDetailPage() {
                   size="sm"
                   variant="ghost"
                   className="text-gray-500 hover:text-cyan-600 text-xs py-1"
-                  onClick={() => goToPromptSection('s3')}
+                  onClick={() => setPromptWorkflowDialog('wf4_article_images')}
                 >
                   <Settings size={12} className="mr-1" />
                   Cấu hình Prompt
@@ -2158,7 +2170,7 @@ export function ProductDetailPage() {
                   size="sm"
                   variant="ghost"
                   className="text-gray-500 hover:text-cyan-600 text-xs py-1"
-                  onClick={() => goToPromptSection('s2')}
+                  onClick={() => setPromptWorkflowDialog('wf3_writing')}
                 >
                   <Settings size={12} className="mr-1" />
                   Cấu hình Prompt

@@ -241,6 +241,7 @@ export interface Product {
   selected_prompt_options?: Record<string, string> // Lưu option_id cho từng workflow (vd: { wf2_outline: 'opt_1' })
   bonus_prompts?: Record<string, string> // Lưu yêu cầu bổ sung
   feedback_prompts?: Record<string, string> // Lưu feedback cho AI (regen)
+  external_research_by_workflow?: Record<string, boolean> // Bật/tắt research AI theo từng workflow
 
   // Các file Specs làm tài liệu tham khảo để Gen AI
   specs_files?: ReferenceFile[]

@@ -18,7 +18,7 @@ import Placeholder from '@tiptap/extension-placeholder'
 import {
   ArrowLeft, Upload, Trash2, Plus, Sparkles, Save, FileText,
   Settings, AlertTriangle, Globe, File, Info, Loader2, X, FileSpreadsheet,
-  Link, History, CheckCircle2, ExternalLink, Image, LayoutList, Zap, ArrowUp, ChevronDown,
+  Link, History, CheckCircle2, ExternalLink, Image, LayoutList, Zap, ChevronDown,
   ChevronLeft, ChevronRight, SlidersHorizontal
 } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
@@ -26,6 +26,7 @@ import { SiteBadge, StatusBadge } from '../../components/ui/Badge'
 import { SectionHeaderCard } from '../../components/pim/SectionHeaderCard'
 import { PromptConfigDialog } from '../../components/pim/PromptConfigDialog'
 import { ProductPromptConfigTab } from '../../components/pim/ProductPromptConfigTab'
+import { ProductPromptWorkflowDialog } from '../../components/pim/ProductPromptWorkflowDialog'
 import { Button } from '../../components/ui/Button'
 import { Dialog } from '../../components/ui/Dialog'
 import { useProductStore } from '../../store/productStore'
@@ -553,6 +554,7 @@ function SpecsDemoPageContent() {
       document.getElementById(`prompt-section-${anchor}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }, 50)
   }
+  const [promptWorkflowDialog, setPromptWorkflowDialog] = useState<'wf2_outline' | 'wf3_writing' | 'wf4_article_images' | null>(null)
   // Pin the tab bar to the top of the viewport once scrolled past the Outline section
   const outlineSentinelRef = useRef<HTMLDivElement>(null)
   const [isTabsPinned, setIsTabsPinned] = useState(false)
@@ -649,8 +651,8 @@ function SpecsDemoPageContent() {
   const [selectedArticleImageId, setSelectedArticleImageId] = useState<string | null>(null)
   const [editingArticleFileId, setEditingArticleFileId] = useState<string | null>(null)
   const [articleFileDrafts, setArticleFileDrafts] = useState<Record<string, string>>({})
+  const [articleAltDrafts, setArticleAltDrafts] = useState<Record<string, string>>({})
   const [articleFeedbackDrafts, setArticleFeedbackDrafts] = useState<Record<string, string>>({})
-  const [regeneratingArticleImageIds, setRegeneratingArticleImageIds] = useState<Record<string, boolean>>({})
   const [articleImageErrors, setArticleImageErrors] = useState<Record<string, string>>({})
 
   // Highlights HTML editor state
@@ -897,6 +899,38 @@ function SpecsDemoPageContent() {
     )))
   }
 
+  const getCurrentArticleImages = () => {
+    if (!product) return []
+    return product.article_images && product.article_images.length > 0
+      ? product.article_images
+      : Array.from({ length: 4 }, (_, i) => ({
+          id: `demo-art-${i}`,
+          url: `https://picsum.photos/seed/${product.id}-art${i}/800/600`,
+          label: articleH3s[i] || `Ảnh minh họa bài viết ${i + 1}`,
+          section_h3: articleH3s[i],
+          file_name: `${slugifyFileName(articleH3s[i] || `article-image-${i + 1}`)}.jpg`
+        }))
+  }
+
+  const saveArticleImageAlt = (img: ImageEntry, index: number) => {
+    const nextAlt = (articleAltDrafts[img.id] ?? img.label ?? articleH3s[index] ?? '').trim()
+    if (!nextAlt) return
+    updateArticleImage(img.id, { label: nextAlt })
+  }
+
+  const hasArticleFeedbackChanges = Object.values(articleFeedbackDrafts).some(value => value.trim().length > 0)
+
+  const handleSaveAllArticleImageFeedback = () => {
+    if (!product || !hasArticleFeedbackChanges) return
+    const currentImages = getCurrentArticleImages()
+    updateProductField(product.id, 'article_images', currentImages.map((img) => {
+      const feedback = (articleFeedbackDrafts[img.id] || '').trim()
+      return feedback ? { ...img, ai_feedback: feedback } : img
+    }))
+    setArticleFeedbackDrafts({})
+    toast('Đã lưu feedback cho ảnh bài viết', 'success')
+  }
+
   const beginRenameArticleImage = (img: ImageEntry, index: number) => {
     const fileName = getArticleImageFileName(img, index)
     setEditingArticleFileId(img.id)
@@ -929,35 +963,6 @@ function SpecsDemoPageContent() {
     updateArticleImage(img.id, { file_name: nextFileName, source_image: nextFileName })
     cancelRenameArticleImage(img.id)
     setArticleImageErrors((prev) => ({ ...prev, [img.id]: '' }))
-  }
-
-  const handleRegenArticleImageFeedback = async (img: ImageEntry, index: number) => {
-    if (!product) return
-    const feedback = (articleFeedbackDrafts[img.id] || '').trim()
-    if (!feedback) return
-
-    setRegeneratingArticleImageIds((prev) => ({ ...prev, [img.id]: true }))
-    setArticleImageErrors((prev) => ({ ...prev, [img.id]: '' }))
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 900))
-      const nextUrl = `https://picsum.photos/seed/${encodeURIComponent(`${img.id}-${feedback}-${Date.now()}`)}/800/600`
-      updateArticleImage(img.id, {
-        url: nextUrl,
-        label: img.label,
-        section_h3: img.section_h3 || articleH3s[index],
-        ai_feedback: feedback
-      })
-      if (product.content_html) {
-        const escapedUrl = img.url.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
-        updateProductField(product.id, 'content_html', product.content_html.replace(new RegExp(escapedUrl, 'g'), nextUrl))
-      }
-      setArticleFeedbackDrafts((prev) => ({ ...prev, [img.id]: '' }))
-      toast(`Đã gen lại ảnh H3 #${index + 1}`, 'success')
-    } catch {
-      setArticleImageErrors((prev) => ({ ...prev, [img.id]: 'Gen lại ảnh thất bại. Vui lòng thử lại.' }))
-    } finally {
-      setRegeneratingArticleImageIds((prev) => ({ ...prev, [img.id]: false }))
-    }
   }
 
   // SEO Keywords Handlers
@@ -1219,6 +1224,16 @@ function SpecsDemoPageContent() {
         <History size={16} className={mainTab === 'jobs' ? 'text-blue-500' : 'text-gray-400'} /> Lịch sử Jobs
       </button>
     </div>
+
+    {promptWorkflowDialog && (
+      <ProductPromptWorkflowDialog
+        open={!!promptWorkflowDialog}
+        onClose={() => setPromptWorkflowDialog(null)}
+        product={product}
+        workflowKey={promptWorkflowDialog}
+        onUpdateProductField={(field, value) => updateProductField(product.id, field, value)}
+      />
+    )}
 
     {/* Main Content Area */}
     <div className="w-full">
@@ -1571,7 +1586,7 @@ function SpecsDemoPageContent() {
             secondaryAction={saveSectionAction}
             toolbarLeft={[
               { label: 'Tạo outline (AI)', icon: Sparkles, onClick: () => handleGenField('outline'), disabled: generatingFields['outline'] || product.approval_status?.outline_approved },
-              { label: 'Cấu hình prompt', icon: Settings, onClick: () => goToPromptSection('s2') },
+              { label: 'Cấu hình prompt', icon: Settings, onClick: () => setPromptWorkflowDialog('wf2_outline') },
             ]}
           />
 
@@ -1612,7 +1627,7 @@ function SpecsDemoPageContent() {
             primaryAction={publishToPimAction}
             toolbarLeft={[
               { label: 'Viết bài (AI)', icon: Sparkles, onClick: () => handleGenField('content_html'), disabled: generatingFields['content_html'] || !product.approval_status?.outline_approved || product.approval_status?.article_approved },
-              { label: 'Cấu hình prompt', icon: Settings, onClick: () => goToPromptSection('s2') },
+              { label: 'Cấu hình prompt', icon: Settings, onClick: () => setPromptWorkflowDialog('wf3_writing') },
             ]}
           />
 
@@ -1702,7 +1717,7 @@ function SpecsDemoPageContent() {
             primaryAction={publishToPimAction}
             toolbarLeft={[
               { label: 'Gen ảnh bài viết', icon: Sparkles, onClick: handleGenArticleImages, disabled: generatingArticleImages || !product.approval_status?.slider_approved || product.approval_status?.final_approved },
-              { label: 'Cấu hình prompt', icon: Settings, onClick: () => goToPromptSection('s3') },
+              { label: 'Cấu hình prompt', icon: Settings, onClick: () => setPromptWorkflowDialog('wf4_article_images') },
             ]}
           />
 
@@ -1727,7 +1742,6 @@ function SpecsDemoPageContent() {
                       const fileName = getArticleImageFileName(img, index)
                       const isSelected = selectedArticleImageId === img.id
                       const isEditingName = editingArticleFileId === img.id
-                      const isRegenerating = !!regeneratingArticleImageIds[img.id]
                       const feedbackValue = articleFeedbackDrafts[img.id] || ''
                       const hasFeedback = feedbackValue.trim().length > 0
                       const errorMessage = articleImageErrors[img.id]
@@ -1751,19 +1765,12 @@ function SpecsDemoPageContent() {
                               Vị trí · H3 #{index + 1}
                             </span>
 
-                            {isRegenerating && (
-                              <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-900/35 backdrop-blur-[1px]">
-                                <Loader2 size={24} className="animate-spin text-white" />
-                              </div>
-                            )}
-
                             <button
                               onClick={(e) => {
                                 e.stopPropagation()
                                 handleRemoveArticleImage(img.id)
                               }}
-                              disabled={isRegenerating}
-                              className="absolute right-3 top-3 z-20 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white/90 text-[#DC4C4C] opacity-100 shadow-sm transition-all hover:bg-white disabled:cursor-not-allowed disabled:opacity-50 md:opacity-0 md:group-hover:opacity-100"
+                              className="absolute right-3 top-3 z-20 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white/90 text-[#DC4C4C] opacity-100 shadow-sm transition-all hover:bg-white md:opacity-0 md:group-hover:opacity-100"
                               title="Xóa ảnh này"
                             >
                               <Trash2 size={16} />
@@ -1771,13 +1778,6 @@ function SpecsDemoPageContent() {
                           </div>
 
                           <div className="flex flex-1 flex-col gap-2.5 px-3.5 pb-3.5 pt-3">
-                            <p
-                              className="h-[38px] overflow-hidden text-[13px] font-medium leading-[1.45] text-gray-900 [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:2]"
-                              title={computedLabel}
-                            >
-                              {computedLabel}
-                            </p>
-
                             <div className="space-y-1.5">
                               <label className="block text-[11px] font-semibold uppercase tracking-[0.05em] text-gray-500">
                                 Tên file
@@ -1818,13 +1818,25 @@ function SpecsDemoPageContent() {
                               )}
                             </div>
 
-                            <form
-                              className="space-y-1.5"
-                              onSubmit={(e) => {
-                                e.preventDefault()
-                                handleRegenArticleImageFeedback(img, index)
-                              }}
-                            >
+                            <div className="space-y-1.5">
+                              <label className="block text-[11px] font-semibold uppercase tracking-[0.05em] text-gray-500">
+                                File ALT
+                              </label>
+                              <input
+                                value={articleAltDrafts[img.id] ?? img.label ?? computedLabel}
+                                onClick={(e) => e.stopPropagation()}
+                                onChange={(e) => setArticleAltDrafts((prev) => ({ ...prev, [img.id]: e.target.value }))}
+                                onBlur={() => saveArticleImageAlt(img, index)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') saveArticleImageAlt(img, index)
+                                }}
+                                placeholder="Nhập nội dung alt ảnh..."
+                                className="h-8 w-full rounded-lg border border-gray-200 bg-gray-50 px-2 text-[12px] text-gray-700 outline-none transition-colors focus:border-cyan-300 focus:bg-white focus:ring-2 focus:ring-cyan-200"
+                                aria-label={`ALT ảnh H3 ${index + 1}`}
+                              />
+                            </div>
+
+                            <div className="space-y-1.5">
                               <label className="block text-[11px] font-semibold uppercase tracking-[0.05em] text-[#C2660A]">
                                 Feedback cho AI
                               </label>
@@ -1833,31 +1845,32 @@ function SpecsDemoPageContent() {
                               }`}>
                                 <input
                                   value={feedbackValue}
-                                  disabled={isRegenerating}
                                   onClick={(e) => e.stopPropagation()}
                                   onChange={(e) => setArticleFeedbackDrafts((prev) => ({ ...prev, [img.id]: e.target.value }))}
                                   placeholder="Nhập feedback để gen lại ảnh..."
-                                  className="min-w-0 flex-1 bg-transparent text-[13px] text-[#8A5A16] placeholder:text-[#B9853A] outline-none disabled:cursor-not-allowed"
+                                  className="min-w-0 flex-1 bg-transparent text-[13px] text-[#8A5A16] placeholder:text-[#B9853A] outline-none"
                                   aria-label={`Feedback cho ảnh H3 ${index + 1}`}
                                 />
-                                <button
-                                  type="submit"
-                                  disabled={!hasFeedback || isRegenerating}
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="ml-2 inline-flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-md bg-gray-900 text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-300"
-                                  title="Gửi feedback gen lại ảnh"
-                                >
-                                  {isRegenerating ? <Loader2 size={13} className="animate-spin" /> : <ArrowUp size={14} />}
-                                </button>
                               </div>
                               {errorMessage && (
                                 <p className="text-[11px] font-medium text-red-500">{errorMessage}</p>
                               )}
-                            </form>
+                            </div>
                           </div>
                         </div>
                       )
                     })}
+                  </div>
+                  <div className="flex justify-end border-t border-gray-100 pt-4">
+                    <Button
+                      size="sm"
+                      onClick={handleSaveAllArticleImageFeedback}
+                      disabled={!hasArticleFeedbackChanges}
+                      className="bg-gray-900 text-white hover:bg-gray-800 disabled:bg-gray-300"
+                    >
+                      <Save size={14} className="mr-1.5" />
+                      Lưu feedback
+                    </Button>
                   </div>
                 </div>
               )
