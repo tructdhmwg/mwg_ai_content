@@ -236,11 +236,12 @@ export const useProductStore = create<ProductStore>((set) => ({
         }
         
         const specs_files = avtUrl ? [
-          { 
-            id: `spec-${variantCode}`, 
-            name: `PIM_${variantCode}_Specs_Official.pdf`, 
-            size: 1024 * 1024 + Math.floor(Math.random() * 500000), 
-            uploaded_at: new Date().toISOString() 
+          {
+            id: `spec-${variantCode}`,
+            name: `PIM_${variantCode}_Specs_Official.pdf`,
+            url: avtUrl,
+            size: 1024 * 1024 + Math.floor(Math.random() * 500000),
+            uploaded_at: new Date().toISOString()
           }
         ] : []
         

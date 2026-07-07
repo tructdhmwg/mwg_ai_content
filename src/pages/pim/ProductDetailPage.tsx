@@ -7,6 +7,7 @@ import {
   Link, History, CheckCircle2, Play, ExternalLink, Image, Video, LayoutList
 } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
+import { PromptConfigEditor } from '../../components/PromptConfigEditor'
 import { SiteBadge, Badge, StatusBadge } from '../../components/ui/Badge'
 import { Button } from '../../components/ui/Button'
 import { Dialog } from '../../components/ui/Dialog'
@@ -16,6 +17,14 @@ import { useJobStore } from '../../store/jobStore'
 import { useToast } from '../../components/ui/Toast'
 import { type ProductPimStatus, type Job } from '../../types'
 import { formatDateTime, formatTimeAgo } from '../../lib/utils'
+
+const getVariantStatusDotClass = (statusClassName: string) => {
+  const percent = parseInt(statusClassName.match(/w-\[(\d+)%\]/)?.[1] || '0')
+  if (percent === 100) return 'bg-emerald-500'
+  if (percent > 50) return 'bg-amber-400'
+  if (percent > 0) return 'bg-orange-400'
+  return 'bg-gray-300'
+}
 
 const PIM_STATUS_META: Record<ProductPimStatus, { label: string; bgClass: string }> = {
   draft: { label: 'Nháp PIM', bgClass: 'bg-gray-100 text-gray-700 border-gray-200' },
@@ -158,6 +167,7 @@ export function ProductDetailPage() {
   const [extractingSpecs, setExtractingSpecs] = useState(false)
   const [, setHasExtractedSpecs] = useState(false)
   const [pendingSpecFiles, setPendingSpecFiles] = useState<File[]>([])
+  const [uploadCategory, setUploadCategory] = useState<'product_image' | 'manufacturer_spec' | 'other'>('other')
   const [showMissingInputAlert, setShowMissingInputAlert] = useState(false)
 
   // Prompts visibility toggle
@@ -321,15 +331,7 @@ export function ProductDetailPage() {
   }
 
   if (!product) {
-    const getVariantStatusDotClass = (statusClassName: string) => {
-    const percent = parseInt(statusClassName.match(/w-\[(\d+)%\]/)?.[1] || '0')
-    if (percent === 100) return 'bg-emerald-500'
-    if (percent > 50) return 'bg-amber-400'
-    if (percent > 0) return 'bg-orange-400'
-    return 'bg-gray-300'
-  }
-
-  return (
+    return (
       <AppShell breadcrumb={['AICPS', 'Sản phẩm', 'Lỗi']}>
         <div className="bg-white rounded-xl border border-gray-100 p-8 text-center shadow-sm">
           <AlertTriangle className="text-red-500 mx-auto mb-3" size={40} />
@@ -682,7 +684,7 @@ export function ProductDetailPage() {
 
   const handleSaveSpecFile = () => {
     if (pendingSpecFiles.length === 0) return
-    pendingSpecFiles.forEach((file) => uploadSpecFile(product.id, file.name, file.size, 'other'))
+    pendingSpecFiles.forEach((file) => uploadSpecFile(product.id, file.name, file.size, uploadCategory))
     toast(`Đã tải lên ${pendingSpecFiles.length} tài liệu specs`, 'success')
     toast('Đã nhận diện specs mới. Bạn có thể bấm "Trích xuất Specs" để AI phân tích tự động.', 'info')
     setPendingSpecFiles([])
@@ -2343,7 +2345,7 @@ export function ProductDetailPage() {
                     <span className="text-[11px] text-gray-500 font-semibold">Phân loại:</span>
                     <select
                       value={uploadCategory}
-                      onChange={(e) => setUploadCategory(e.target.value as any)}
+                      onChange={(e) => setUploadCategory(e.target.value as 'product_image' | 'manufacturer_spec' | 'other')}
                       className="text-[11px] py-1 px-2 bg-white border border-gray-200 rounded text-gray-600 focus:outline-none focus:ring-1 focus:ring-cyan-500 font-medium"
                     >
                       <option value="product_image">Ảnh sản phẩm</option>

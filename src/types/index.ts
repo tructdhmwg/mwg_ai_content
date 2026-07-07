@@ -189,6 +189,7 @@ export interface ReferenceFile {
 
 
 export interface ProductApprovalStatus {
+  specs_approved?: boolean
   outline_approved?: boolean
   article_approved?: boolean
   slider_approved?: boolean

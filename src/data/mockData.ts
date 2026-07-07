@@ -1,5 +1,5 @@
 import { MOCK_PROMPT_CATEGORIES } from './mockCategories'
-import type { Job, PromptConfig, Product, User, WebhookConfig } from '../types'
+import type { Job, Product, User, WebhookConfig } from '../types'
 
 export const MOCK_JOBS: Job[] = [
   {
@@ -461,7 +461,7 @@ export const MOCK_PRODUCTS: Product[] = [
     ai_note: 'Tập trung viết so sánh nhẹ về hiệu năng xử lý tác vụ AI với chip A17 Pro',
     use_external_research: true,
     specs_files: [
-      { id: 'spec-f1', name: 'iPhone_16_Pro_Max_Specs_Official.pdf', size: 1048576, uploaded_at: '2026-06-08T09:00:00' }
+      { id: 'spec-f1', name: 'iPhone_16_Pro_Max_Specs_Official.pdf', url: 'https://picsum.photos/seed/spec-f1/800/600', size: 1048576, uploaded_at: '2026-06-08T09:00:00' }
     ],
     thong_so_ky_thuat: {
       'Màn hình': '6.9 inch, Super Retina XDR OLED, 120Hz',
@@ -544,7 +544,7 @@ export const MOCK_PRODUCTS: Product[] = [
     ai_note: 'Nhấn mạnh tỉ lệ GOS/FOS 9:1 độc quyền được chứng nhận khoa học',
     use_external_research: true,
     specs_files: [
-      { id: 'spec-f2', name: 'Aptamil_2_Nutrition_Guide.png', size: 524288, uploaded_at: '2026-06-10T07:30:00' }
+      { id: 'spec-f2', name: 'Aptamil_2_Nutrition_Guide.png', url: 'https://picsum.photos/seed/spec-f2/800/600', size: 524288, uploaded_at: '2026-06-10T07:30:00' }
     ],
     thong_so_ky_thuat: {
       'Xuất xứ': 'Đức (sản xuất tại Hà Lan)',
@@ -637,7 +637,7 @@ export const MOCK_PRODUCTS: Product[] = [
     ai_note: 'Nhấn mạnh bảo hành động cơ máy nén 20 năm chính hãng',
     use_external_research: true,
     specs_files: [
-      { id: 'spec-f3', name: 'Samsung_Bespoke_462L_Manual.pdf', size: 2097152, uploaded_at: '2026-06-09T14:20:00' }
+      { id: 'spec-f3', name: 'Samsung_Bespoke_462L_Manual.pdf', url: 'https://picsum.photos/seed/spec-f3/800/600', size: 2097152, uploaded_at: '2026-06-09T14:20:00' }
     ],
     thong_so_ky_thuat: {
       'Dung tích thực': '462 lít',

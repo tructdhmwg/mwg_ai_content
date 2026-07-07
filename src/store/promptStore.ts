@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { MOCK_PROMPT_CATEGORIES } from '../data/mockCategories'
-import type { PromptCategoryLevel1, PromptSubCategory, PromptOption, SiteId } from '../types'
+import type { PromptCategoryLevel1, PromptSubCategory, PromptOption } from '../types'
 
 interface PromptStore {
   categories: PromptCategoryLevel1[]

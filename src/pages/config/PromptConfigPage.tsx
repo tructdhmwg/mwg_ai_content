@@ -4,12 +4,9 @@ import { Button } from '../../components/ui/Button'
 import { usePromptStore } from '../../store/promptStore'
 import { useToast } from '../../components/ui/Toast'
 import { useAuthStore } from '../../store/authStore'
-import { SITE_META, type SiteId, type PromptCategoryLevel1, type PromptSubCategory, type PromptOption } from '../../types'
-import { formatDateTime } from '../../lib/utils'
+import { SITE_META, type SiteId, type PromptCategoryLevel1 } from '../../types'
 import {
-  Search,
   Trash2,
-  Copy,
   X,
   Plus,
   Sparkles,

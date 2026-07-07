@@ -17,8 +17,8 @@ import { TableCell } from '@tiptap/extension-table-cell'
 import Placeholder from '@tiptap/extension-placeholder'
 import {
   ArrowLeft, Upload, Trash2, Plus, Sparkles, Save, FileText,
-  Settings, AlertTriangle, Globe, File, Check, Info, Loader2, X, FileSpreadsheet,
-  Link, History, CheckCircle2, Play, ExternalLink, Image, Video, LayoutList, Zap, ArrowUp, ChevronDown
+  Settings, AlertTriangle, Globe, File, Info, Loader2, X, FileSpreadsheet,
+  Link, History, CheckCircle2, ExternalLink, Image, LayoutList, Zap, ArrowUp, ChevronDown
 } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { SiteBadge, StatusBadge } from '../../components/ui/Badge'
@@ -30,22 +30,8 @@ import { useProductStore } from '../../store/productStore'
 import { usePromptStore } from '../../store/promptStore'
 import { useJobStore } from '../../store/jobStore'
 import { useToast } from '../../components/ui/Toast'
-import { type ProductPimStatus, type Job, type ImageEntry } from '../../types'
+import { type Job, type ImageEntry } from '../../types'
 import { formatDateTime, formatTimeAgo } from '../../lib/utils'
-
-const PIM_STATUS_META: Record<ProductPimStatus, { label: string; bgClass: string }> = {
-  draft: { label: 'Nháp PIM', bgClass: 'bg-gray-100 text-gray-700 border-gray-200' },
-  gen_completed: { label: 'Đã gen xong', bgClass: 'bg-blue-50 text-blue-700 border-blue-200' },
-  pending_qc: { label: 'Cần QC', bgClass: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
-  qc_passed: { label: 'Đã QC', bgClass: 'bg-green-50 text-green-700 border-green-200' },
-  published: { label: 'Đã publish PIM', bgClass: 'bg-emerald-600 text-white border-emerald-600' }
-}
-
-interface SpecSchemaField {
-  name: string
-  type: 'text' | 'select' | 'multi'
-  options?: string[]
-}
 
 interface RichTextEditorProps {
   value: string
@@ -212,77 +198,6 @@ function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
   )
 }
 
-const SPEC_SCHEMAS: Record<string, SpecSchemaField[]> = {
-  'Sữa bột': [
-    { name: 'Thương hiệu', type: 'text' },
-    { name: 'Xuất xứ', type: 'select', options: ['Úc', 'Đức', 'Nhật Bản', 'Việt Nam', 'New Zealand', 'Pháp', 'Hoa Kỳ', 'Thụy Sĩ', 'Hàn Quốc'] },
-    { name: 'Độ tuổi', type: 'select', options: ['0 - 6 tháng', '6 - 12 tháng', '12 - 24 tháng', 'Trên 2 tuổi'] },
-    { name: 'Trọng lượng', type: 'text' },
-    { name: 'Hạn sử dụng', type: 'text' },
-    { name: 'Thành phần chính', type: 'text' },
-    { name: 'Dưỡng chất bổ sung', type: 'multi', options: ['DHA', 'ARA', 'Vitamin D3', 'Canxi', 'Chất xơ (FOS)', 'Omega 3', 'Omega 6'] }
-  ],
-  'Điện thoại': [
-    { name: 'Thương hiệu', type: 'text' },
-    { name: 'Hệ điều hành', type: 'select', options: ['iOS', 'Android', 'HarmonyOS', 'Khác'] },
-    { name: 'RAM', type: 'select', options: ['4 GB', '6 GB', '8 GB', '12 GB', '16 GB', '24 GB'] },
-    { name: 'Bộ nhớ trong', type: 'select', options: ['64 GB', '128 GB', '256 GB', '512 GB', '1 TB'] },
-    { name: 'Dung lượng pin', type: 'text' },
-    { name: 'Cổng kết nối', type: 'multi', options: ['Type-C', 'Lightning', 'Micro USB', 'Jack 3.5mm', 'NFC', 'Wi-Fi 6', 'Bluetooth 5.3', '5G'] },
-    { name: 'Cổng sạc', type: 'multi', options: ['Type-C', 'Lightning', 'Sạc không dây MagSafe', 'Sạc không dây Qi', 'Sạc siêu nhanh SuperVOOC'] }
-  ],
-  'iPhone': [
-    { name: 'Thương hiệu', type: 'text' },
-    { name: 'Hệ điều hành', type: 'select', options: ['iOS'] },
-    { name: 'RAM', type: 'select', options: ['6 GB', '8 GB', '12 GB'] },
-    { name: 'Bộ nhớ trong', type: 'select', options: ['128 GB', '256 GB', '512 GB', '1 TB'] },
-    { name: 'Kích thước màn hình', type: 'text' },
-    { name: 'Cổng kết nối', type: 'multi', options: ['Type-C', 'Lightning', '5G', 'Wi-Fi 6E', 'Wi-Fi 7', 'Bluetooth 5.3', 'NFC'] },
-    { name: 'Cổng sạc', type: 'multi', options: ['Type-C', 'Lightning', 'Sạc không dây MagSafe', 'Sạc không dây Qi'] }
-  ],
-  'Mac': [
-    { name: 'Thương hiệu', type: 'text' },
-    { name: 'Hệ điều hành', type: 'select', options: ['macOS'] },
-    { name: 'RAM', type: 'select', options: ['8 GB', '16 GB', '18 GB', '24 GB', '32 GB', '36 GB', '48 GB', '64 GB', '96 GB', '128 GB'] },
-    { name: 'Ổ cứng', type: 'select', options: ['256 GB SSD', '512 GB SSD', '1 TB SSD', '2 TB SSD', '4 TB SSD'] },
-    { name: 'Kích thước màn hình', type: 'text' },
-    { name: 'Cổng kết nối', type: 'multi', options: ['Thunderbolt 4', 'Type-C', 'USB-A', 'HDMI', 'SD Card Slot', 'Jack 3.5mm', 'MagSafe 3'] }
-  ],
-  'Máy tính bảng': [
-    { name: 'Thương hiệu', type: 'text' },
-    { name: 'Hệ điều hành', type: 'select', options: ['iPadOS', 'Android'] },
-    { name: 'RAM', type: 'select', options: ['4 GB', '6 GB', '8 GB', '12 GB', '16 GB'] },
-    { name: 'Bộ nhớ trong', type: 'select', options: ['64 GB', '128 GB', '256 GB', '512 GB', '1 TB'] },
-    { name: 'Dung lượng pin', type: 'text' },
-    { name: 'Cổng kết nối', type: 'multi', options: ['Type-C', 'Lightning', 'Wi-Fi 6', 'Bluetooth 5.2'] }
-  ],
-  'Tủ lạnh': [
-    { name: 'Thương hiệu', type: 'text' },
-    { name: 'Kiểu tủ', type: 'select', options: ['Ngăn đá trên', 'Ngăn đá dưới', 'Side by Side', 'Multi Door', 'Mini'] },
-    { name: 'Dung tích sử dụng', type: 'text' },
-    { name: 'Công nghệ tiết kiệm điện', type: 'text' },
-    { name: 'Nơi sản xuất', type: 'text' },
-    { name: 'Tiện ích', type: 'multi', options: ['Làm đá tự động', 'Lấy nước ngoài', 'Bảng điều khiển ngoài', 'Ngăn đông mềm', 'Chuông báo cửa mở'] }
-  ],
-  'Máy giặt': [
-    { name: 'Thương hiệu', type: 'text' },
-    { name: 'Loại máy', type: 'select', options: ['Cửa trước', 'Cửa trên', 'Lồng ngang', 'Lồng đứng'] },
-    { name: 'Khối lượng giặt', type: 'text' },
-    { name: 'Động cơ', type: 'text' },
-    { name: 'Công nghệ giặt', type: 'text' },
-    { name: 'Nơi sản xuất', type: 'text' },
-    { name: 'Tiện ích', type: 'multi', options: ['Hẹn giờ giặt', 'Khóa trẻ em', 'Giặt nước nóng', 'Tự khởi động lại', 'Vệ sinh lồng giặt', 'Wifi Control'] }
-  ]
-}
-
-const DEFAULT_SPEC_SCHEMA: SpecSchemaField[] = [
-  { name: 'Thương hiệu', type: 'text' },
-  { name: 'Xuất xứ', type: 'text' },
-  { name: 'Kích thước', type: 'text' },
-  { name: 'Chất liệu', type: 'text' },
-  { name: 'Bảo hành', type: 'text' }
-]
-
 interface MappingValue {
   code: string | number | null
   name: string
@@ -326,26 +241,7 @@ const MAPPING_LEVEL_LABEL: Record<string, string> = {
   'THUOC_TINH_MOI': 'Thuộc tính mới'
 }
 
-type SpecsApprovalStatus = 'awaiting_approval' | 'approved' | 'synced'
 type SpecsAiGenerationStatus = 'pending' | 'processing' | 'done' | 'failed'
-
-const SPECS_APPROVAL_STATUS_META: Record<SpecsApprovalStatus, { label: string; className: string; dotClassName: string }> = {
-  awaiting_approval: {
-    label: 'Chờ duyệt',
-    className: 'border-amber-200 bg-amber-50 text-amber-700',
-    dotClassName: 'bg-amber-500',
-  },
-  approved: {
-    label: 'Đã duyệt',
-    className: 'border-green-200 bg-green-50 text-green-700',
-    dotClassName: 'bg-green-500',
-  },
-  synced: {
-    label: 'Đã sync PIM',
-    className: 'border-blue-200 bg-blue-50 text-blue-700',
-    dotClassName: 'bg-blue-500',
-  },
-}
 
 const SPECS_AI_STATUS_META: Record<SpecsAiGenerationStatus, { label: string; className: string; dotClassName: string }> = {
   pending: {
@@ -416,11 +312,10 @@ function SpecsDemoPageContent() {
     uploadSpecFile,
     deleteSpecFile,
     generateFieldWithAI,
-    runFullWorkflow,
     runWf1ExtractSpecs
   } = useProductStore()
 
-  const { prompts } = usePromptStore()
+  const { categories } = usePromptStore()
   const jobs = useJobStore((s) => s.jobs)
 
   // Find current product
@@ -640,13 +535,8 @@ function SpecsDemoPageContent() {
   const [generatingFields, setGeneratingFields] = useState<Record<string, boolean>>({})
   // Track if name has changed to show dependency alert
   const [nameChangedAlert, setNameChangedAlert] = useState(false)
-  // Local edit states to prevent store update lags
-  const [editName, setEditName] = useState('')
   const [newKeywordText, setNewKeywordText] = useState('')
 
-  // Full workflow running states
-  const [runningFullWf, setRunningFullWf] = useState(false)
-  const [currentWfStep, setCurrentWfStep] = useState(0)
   const [hasExtractedSpecs, setHasExtractedSpecs] = useState(false)
   const [extractingSpecs, setExtractingSpecs] = useState(false)
   const [pendingSpecFiles, setPendingSpecFiles] = useState<{file: File, type: 'product_image' | 'manufacturer_spec' | 'other'}[]>([])
@@ -663,12 +553,6 @@ function SpecsDemoPageContent() {
   const [extraLinks, setExtraLinks] = useState<{ id: string; label: string; url: string }[]>([
     { id: 'link-1', label: '', url: '' }
   ])
-
-  // AI Confidence flags state (mocked on load)
-  const [confidenceFlags, setConfidenceFlags] = useState<Record<string, 'verified' | 'review' | 'none'>>({})
-
-  // Tech Specs status filter
-  const [specsStatusFilter, setSpecsStatusFilter] = useState<'all' | 'verified' | 'review' | 'none'>('all')
 
   // Open multi-select dropdown field name
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
@@ -691,28 +575,9 @@ function SpecsDemoPageContent() {
   // Highlights HTML editor state
   const [highlightsHtml, setHighlightsHtml] = useState('')
 
-  // Sync store name to local state on load
+  // Initialize highlights HTML
   useEffect(() => {
     if (product) {
-      setEditName(product.name)
-    }
-  }, [product?.id])
-
-  // Initialize confidence flags and highlights HTML
-  useEffect(() => {
-    if (product) {
-      const categoryFields = SPEC_SCHEMAS[product.nganh_hang] || DEFAULT_SPEC_SCHEMA
-      const initialFlags: Record<string, 'verified' | 'review' | 'none'> = {}
-      categoryFields.forEach((field, index) => {
-        const val = product.thong_so_ky_thuat?.[field.name]
-        if (!val || val.toString().trim() === '') {
-          initialFlags[field.name] = 'none'
-        } else {
-          initialFlags[field.name] = index % 2 === 0 ? 'verified' : 'review'
-        }
-      })
-      setConfidenceFlags(initialFlags)
-      
       if (product.dac_diem_noi_bat && product.dac_diem_noi_bat.length > 0) {
         const isHtml = product.dac_diem_noi_bat.some(s => s.trim().startsWith('<') && s.trim().endsWith('>'))
         if (isHtml) {
@@ -726,34 +591,6 @@ function SpecsDemoPageContent() {
     }
   }, [product?.id, product?.dac_diem_noi_bat])
 
-  // Custom prompt update handler
-  const handleUpdateCustomPrompt = (stepKey: string, val: string) => {
-    if (!product) return
-    const nextCustom = product.custom_prompt_text ? { ...product.custom_prompt_text } : {}
-    nextCustom[stepKey] = val
-    updateProductField(product.id, 'custom_prompt_text', nextCustom)
-  }
-
-  // Helper to get custom or default prompt
-  const getPromptText = (stepKey: string) => {
-    if (!product) return ''
-    if (product.custom_prompt_text?.[stepKey]) {
-      return product.custom_prompt_text[stepKey]
-    }
-    const defaults: Record<string, string> = {
-      wf4_thumb: `Tạo ảnh đại diện sản phẩm ${product.name} phong cách tối giản, nền trắng.`,
-      wf4_video: `Phân tích video review và sinh tóm tắt nội dung chính cho sản phẩm ${product.name}.`,
-      wf4_gallery: `Sinh bộ 6 ảnh chi tiết cho sản phẩm ${product.name} chất lượng cao, các góc cạnh khác nhau.`,
-      wf4_slides: `Phân tích ảnh hãng và sinh 3 ảnh slide tính năng nổi bật cho ${product.name} gắn với thẻ H3.`,
-      wf4_article_images: `Tạo bộ 4 ảnh minh họa chất lượng cao để chèn vào nội dung bài viết cho ${product.name}.`,
-      wf1_specs: `Đọc tài liệu specs đính kèm và trích xuất thông tin kỹ thuật của ${product.name} thành JSON.`,
-      wf4_highlights: `Sinh 4-5 đặc điểm nổi bật chính dạng danh sách HTML của sản phẩm ${product.name}.`,
-      wf2_outline: `Tạo dàn ý bài viết chi tiết chuẩn SEO cho sản phẩm ${product.name}.`,
-      wf3_writing: `Viết bài mô tả sản phẩm chi tiết bằng HTML dựa trên dàn ý và thông số kỹ thuật của ${product.name}.`
-    }
-    return defaults[stepKey] || ''
-  }
-
   // Update highlights HTML in store
   const handleUpdateHighlights = (htmlVal: string) => {
     if (!product) return
@@ -762,6 +599,7 @@ function SpecsDemoPageContent() {
   }
 
   const openOutlinePromptDialog = () => {
+    if (!product) return
     setOutlinePromptDraft({
       subCategoryId: product.selected_sub_categories?.['wf2_outline'] || '',
       optionId: product.selected_prompt_options?.['wf2_outline'] || '',
@@ -772,6 +610,7 @@ function SpecsDemoPageContent() {
   }
 
   const handleSaveOutlinePrompt = () => {
+    if (!product) return false
     const currentSubCategoryId = product.selected_sub_categories?.['wf2_outline'] || ''
     const currentOptionId = product.selected_prompt_options?.['wf2_outline'] || ''
     const isPromptChanged =
@@ -802,6 +641,7 @@ function SpecsDemoPageContent() {
   }
 
   const handleOutlinePromptChoiceChange = (subCategoryId: string, optionId: string) => {
+    if (!product) return
     const isPromptChanged =
       subCategoryId !== outlinePromptDraft.subCategoryId ||
       optionId !== outlinePromptDraft.optionId
@@ -817,70 +657,6 @@ function SpecsDemoPageContent() {
       subCategoryId,
       optionId,
     }))
-  }
-
-  // Helper to insert HTML tags at textarea cursor
-  const insertHtmlTag = (startTag: string, endTag: string) => {
-    const textarea = document.getElementById('highlights-textarea') as HTMLTextAreaElement
-    if (!textarea) return
-    const startPos = textarea.selectionStart
-    const endPos = textarea.selectionEnd
-    const text = textarea.value
-    const selectedText = text.substring(startPos, endPos)
-    const replacement = startTag + selectedText + endTag
-    const newText = text.substring(0, startPos) + replacement + text.substring(endPos)
-    handleUpdateHighlights(newText)
-    
-    setTimeout(() => {
-      textarea.focus()
-      textarea.selectionStart = startPos + startTag.length
-      textarea.selectionEnd = startPos + startTag.length + selectedText.length
-    }, 0)
-  }
-
-  const toggleConfidence = (fieldName: string) => {
-    if (!product) return
-    setConfidenceFlags((prev) => {
-      const current = prev[fieldName] || 'review'
-      let next: 'verified' | 'review' | 'none'
-      if (current === 'verified') next = 'review'
-      else if (current === 'review') next = 'none'
-      else next = 'verified'
-      
-      return {
-        ...prev,
-        [fieldName]: next,
-      }
-    })
-    toast(`Đã đổi trạng thái duyệt thông số "${fieldName}"`, 'info')
-  }
-
-  const handleUpdateGalleryLabel = (imgId: string, nextLabel: string) => {
-    if (!product) return
-    const updated = (product.gallery_images || []).map((g) =>
-      g.id === imgId ? { ...g, label: nextLabel } : g
-    )
-    updateProductField(product.id, 'gallery_images', updated)
-  }
-
-  const handleRegenThumb = async () => {
-    if (!product) return
-    setGenMediaLoading((p) => ({ ...p, thumb: true }))
-    await new Promise((r) => setTimeout(r, 1500))
-    const newUrl = `https://picsum.photos/seed/thumb-${Date.now()}/800/450`
-    updateProductField(product.id, 'thumb_url', newUrl)
-    setGenMediaLoading((p) => ({ ...p, thumb: false }))
-    toast('Đã gen ảnh đại diện mới bằng AI', 'success')
-  }
-
-  const handleRegenVideo = async () => {
-    if (!product) return
-    setGenMediaLoading((p) => ({ ...p, video: true }))
-    await new Promise((r) => setTimeout(r, 1500))
-    const demoVideo = 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-    updateProductField(product.id, 'video_url', demoVideo)
-    setGenMediaLoading((p) => ({ ...p, video: false }))
-    toast('Đã trích xuất & tối ưu video review bằng AI', 'success')
   }
 
   if (!product) {
@@ -899,13 +675,6 @@ function SpecsDemoPageContent() {
   // Load appropriate prompt based on override or product category
   const activePromptCategory = product.active_prompt_category || product.nganh_hang
 
-  // Handlers
-  const handleUpdateName = (val: string) => {
-    setEditName(val)
-    updateProductField(product.id, 'name', val)
-    setNameChangedAlert(true)
-  }
-
   const handleGenField = async (field: 'name' | 'thong_so_ky_thuat' | 'dac_diem_noi_bat' | 'outline' | 'content_html' | 'meta_seo') => {
     setGeneratingFields((prev) => ({ ...prev, [field]: true }))
     try {
@@ -918,14 +687,20 @@ function SpecsDemoPageContent() {
         meta_seo: 'wf5_finalize'
       }
       const stepKey = fieldStepMap[field] || 'wf2_outline'
-      
-      const matched = prompts.find(
-        (pr) => pr.site_id === product.site_id && pr.prompt_category === activePromptCategory && pr.wf_step === stepKey
-      )
-      
+
+      const categoryLevel1 = categories.find((c) => c.id === activePromptCategory)
+      const matchedSubCategory =
+        categoryLevel1?.sub_categories.find(
+          (s) => s.workflow_type === stepKey && s.id === (product.selected_sub_categories?.[stepKey] || '')
+        ) || categoryLevel1?.sub_categories.find((s) => s.workflow_type === stepKey)
+      const matchedOption =
+        matchedSubCategory?.options.find(
+          (o) => o.id === (product.selected_prompt_options?.[stepKey] || '')
+        ) || matchedSubCategory?.options[0]
+
       let promptText = ''
-      if (matched) {
-        promptText = matched.prompt_text
+      if (matchedOption) {
+        promptText = matchedOption.template_content
       } else if (product.custom_prompt_text?.[stepKey]) {
         promptText = product.custom_prompt_text[stepKey]
       } else {
@@ -977,23 +752,6 @@ function SpecsDemoPageContent() {
     }
   }
 
-  const handleRunFullWf = async () => {
-    setRunningFullWf(true)
-    setCurrentWfStep(1)
-    try {
-      await runFullWorkflow(product.id, (step) => {
-        setCurrentWfStep(step)
-      })
-      toast('Đã hoàn thành toàn bộ quy trình biên tập tự động 5 bước!', 'success')
-      setNameChangedAlert(false)
-    } catch (err) {
-      toast('Chạy workflow thất bại', 'error')
-    } finally {
-      setRunningFullWf(false)
-      setCurrentWfStep(0)
-    }
-  }
-
   const handleRegenDependentFields = async () => {
     setNameChangedAlert(false)
     setGeneratingFields((prev) => ({ ...prev, outline: true, content_html: true }))
@@ -1006,101 +764,6 @@ function SpecsDemoPageContent() {
     } finally {
       setGeneratingFields((prev) => ({ ...prev, outline: false, content_html: false }))
     }
-  }
-
-  // ──── Media Handlers ────
-  const [genMediaLoading, setGenMediaLoading] = useState<Record<string, boolean>>({})
-
-  // Demo fallback images (picsum.photos) for empty media slots
-  const DEMO_THUMB = `https://picsum.photos/seed/${product.id}-thumb/800/450`
-  const DEMO_GALLERY = Array.from({ length: 6 }, (_, i) => ({
-    id: `demo-gal-${i}`,
-    url: `https://picsum.photos/seed/${product.id}-gal${i}/600/400`,
-    label: `Ảnh demo ${i + 1}`,
-  }))
-  const DEMO_VIDEO = 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-
-  const effectiveThumb = product.thumb_url || DEMO_THUMB
-  const effectiveGallery = (product.gallery_images && product.gallery_images.length > 0)
-    ? product.gallery_images : DEMO_GALLERY
-  const effectiveVideo = product.video_url || DEMO_VIDEO
-  const isThumbDemo = !product.thumb_url
-  const isGalleryDemo = !product.gallery_images || product.gallery_images.length === 0
-  const isVideoDemo = !product.video_url
-
-  const handleRemoveThumb = () => {
-    updateProductField(product.id, 'thumb_url', '')
-    toast('Đã xóa ảnh đại diện', 'info')
-  }
-
-  const handleUploadThumb = () => {
-    // Simulate upload by assigning a new random picsum image
-    const newUrl = `https://picsum.photos/seed/${Date.now()}/800/450`
-    updateProductField(product.id, 'thumb_url', newUrl)
-    toast('Đã upload ảnh đại diện mới', 'success')
-  }
-
-  const handleRemoveGalleryImage = (imgId: string) => {
-    const updated = (product.gallery_images || []).filter((g) => g.id !== imgId)
-    updateProductField(product.id, 'gallery_images', updated)
-    toast('Đã xóa ảnh khỏi Gallery', 'info')
-  }
-
-  const handleUploadGalleryImages = () => {
-    // Simulate uploading 1-2 random images
-    const current = product.gallery_images || []
-    const newImgs = Array.from({ length: 2 }, (_, i) => ({
-      id: `upl-${Date.now()}-${i}`,
-      url: `https://picsum.photos/seed/upl${Date.now()}${i}/600/400`,
-      label: `Upload ${current.length + i + 1}`,
-    }))
-    updateProductField(product.id, 'gallery_images', [...current, ...newImgs])
-    toast(`Đã thêm ${newImgs.length} ảnh vào Gallery`, 'success')
-  }
-
-  const handleRegenGallery = async () => {
-    setGenMediaLoading((p) => ({ ...p, gallery: true }))
-    await new Promise((r) => setTimeout(r, 1500))
-    const newGallery = Array.from({ length: 6 }, (_, i) => ({
-      id: `regen-gal-${Date.now()}-${i}`,
-      url: `https://picsum.photos/seed/regen${Date.now()}${i}/600/400`,
-      label: `Gallery ảnh ${i + 1} (AI regen)`,
-    }))
-    updateProductField(product.id, 'gallery_images', newGallery)
-    setGenMediaLoading((p) => ({ ...p, gallery: false }))
-    toast('Đã gen lại toàn bộ Gallery bằng AI', 'success')
-  }
-
-  const handleRemoveSlideImage = (imgId: string) => {
-    const updated = (product.slide_images || []).filter((s) => s.id !== imgId)
-    updateProductField(product.id, 'slide_images', updated)
-    toast('Đã xóa slide AI', 'info')
-  }
-
-  const handleRegenSlides = async () => {
-    setGenMediaLoading((p) => ({ ...p, slides: true }))
-    await new Promise((r) => setTimeout(r, 2000))
-    const sections = ['Tổng quan tính năng', 'Công nghệ tiết kiệm điện', 'Thiết kế sang trọng']
-    const newSlides = sections.map((sec, i) => ({
-      id: `slide-regen-${Date.now()}-${i}`,
-      url: `https://picsum.photos/seed/slide${Date.now()}${i}/800/500`,
-      label: `Slide AI ${i + 1} – ${sec}`,
-      section_h3: sec,
-      selection_reason: `AI Vision đã chọn ảnh phù hợp nhất cho section "${sec}" dựa trên phân tích nội dung.`,
-    }))
-    updateProductField(product.id, 'slide_images', newSlides)
-    setGenMediaLoading((p) => ({ ...p, slides: false }))
-    toast('Đã gen lại Slide minh họa bằng AI Vision', 'success')
-  }
-
-  const handleUpdateVideoUrl = (url: string) => {
-    updateProductField(product.id, 'video_url', url)
-    toast('Đã cập nhật Video URL', 'success')
-  }
-
-  const handleRemoveVideo = () => {
-    updateProductField(product.id, 'video_url', '')
-    toast('Đã xóa video', 'info')
   }
 
   const handleGenArticleImages = async () => {
@@ -1274,45 +937,6 @@ function SpecsDemoPageContent() {
     }
   }
 
-  const handleUploadArticleImage = () => {
-    if (!product) return
-    const currentImages = product.article_images || []
-    const nextIndex = currentImages.length
-    const label = articleH3s[nextIndex] || `Ảnh tải lên ${nextIndex + 1}`
-    const newImgUrl = `https://picsum.photos/seed/upl-art-${Date.now()}/800/600`
-    
-    const nextImages = [
-      ...currentImages,
-      {
-        id: `upl-art-${Date.now()}`,
-        url: newImgUrl,
-        label: label
-      }
-    ]
-    updateProductField(product.id, 'article_images', nextImages)
-    
-    // Inject image under the corresponding H3 tag in content_html
-    if (product.content_html) {
-      let h3Index = 0
-      let injected = false
-      const nextHtml = product.content_html.replace(/(<h3[^>]*>.*?<\/h3>)/gi, (match) => {
-        if (h3Index === nextIndex) {
-          injected = true
-          h3Index++
-          return `${match}\n  <img src="${newImgUrl}" alt="${label}" class="mx-auto my-4 rounded-xl max-w-full shadow-sm" />`
-        }
-        h3Index++
-        return match
-      })
-      if (injected) {
-        updateProductField(product.id, 'content_html', nextHtml)
-      }
-    }
-    toast('Đã tải ảnh lên và gắn vào bài viết!', 'success')
-  }
-
-
-
   // SEO Keywords Handlers
   const handleAddKeyword = () => {
     if (!newKeywordText.trim()) return
@@ -1384,19 +1008,9 @@ function SpecsDemoPageContent() {
     toast('Đã lưu toàn bộ thay đổi thành công!', 'success')
   }
 
-  // Completeness style helper
-  const getProgressColor = (percent: number) => {
-    if (percent === 100) return 'bg-green-500'
-    if (percent >= 50) return 'bg-amber-500'
-    if (percent > 0) return 'bg-orange-400'
-    return 'bg-gray-300'
-  }
-
   const specsAiStatus = hasExtractedSpecs ? 'done' : extractingSpecs ? 'processing' : 'pending'
   const specsAiStatusMeta = SPECS_AI_STATUS_META[specsAiStatus]
 
-  const specsApprovalStatus: SpecsApprovalStatus = product.approval_status?.specs_approved ? 'approved' : 'awaiting_approval'
-  const specsApprovalStatusMeta = SPECS_APPROVAL_STATUS_META[specsApprovalStatus]
 
   const handleExportExcel = () => {
     toast('Đã xuất file Excel thông số kỹ thuật!', 'success')
@@ -1414,41 +1028,6 @@ function SpecsDemoPageContent() {
 
   return (
     <AppShell breadcrumb={['AICPS', 'Sản phẩm', `${product.model_code} / ${product.variantcode}`]}>
-      {/* Run full workflow progress overlay */}
-      {runningFullWf && (
-        <div className="fixed inset-0 z-50 bg-[#0f1535]/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-white/20 text-center animate-scale-up">
-            <Loader2 className="animate-spin text-cyan-600 mx-auto mb-4" size={40} />
-            <h3 className="text-lg font-bold text-gray-900 mb-2">Đang thực thi quy trình biên tập tự động</h3>
-            <p className="text-xs text-gray-500 mb-6">Trình sinh thông minh AI đang phân tích tài liệu và cấu trúc toàn bộ nội dung sản phẩm...</p>
-            
-            {/* Step statuses */}
-            <div className="flex flex-col gap-3 text-left max-w-xs mx-auto mb-2 text-sm text-gray-600">
-              <div className="flex items-center justify-between">
-                <span className={currentWfStep >= 1 ? 'text-cyan-600 font-bold' : 'text-gray-400'}>Bước 1: WF1 – Trích xuất Specs Hãng</span>
-                {currentWfStep > 1 ? <CheckCircle2 className="text-green-500" size={16} /> : currentWfStep === 1 ? <Loader2 className="animate-spin text-cyan-600" size={16} /> : <div className="w-4 h-4 rounded-full border border-gray-200" />}
-              </div>
-              <div className="flex items-center justify-between">
-                <span className={currentWfStep >= 2 ? 'text-cyan-600 font-bold' : 'text-gray-400'}>Bước 2: WF2 – Dàn ý & Ý tưởng Media</span>
-                {currentWfStep > 2 ? <CheckCircle2 className="text-green-500" size={16} /> : currentWfStep === 2 ? <Loader2 className="animate-spin text-cyan-600" size={16} /> : <div className="w-4 h-4 rounded-full border border-gray-200" />}
-              </div>
-              <div className="flex items-center justify-between">
-                <span className={currentWfStep >= 3 ? 'text-cyan-600 font-bold' : 'text-gray-400'}>Bước 3: WF3 – Viết Bài & Meta SEO</span>
-                {currentWfStep > 3 ? <CheckCircle2 className="text-green-500" size={16} /> : currentWfStep === 3 ? <Loader2 className="animate-spin text-cyan-600" size={16} /> : <div className="w-4 h-4 rounded-full border border-gray-200" />}
-              </div>
-              <div className="flex items-center justify-between">
-                <span className={currentWfStep >= 4 ? 'text-cyan-600 font-bold' : 'text-gray-400'}>Bước 4: WF4 – Sinh bộ ảnh & Video AI</span>
-                {currentWfStep > 4 ? <CheckCircle2 className="text-green-500" size={16} /> : currentWfStep === 4 ? <Loader2 className="animate-spin text-cyan-600" size={16} /> : <div className="w-4 h-4 rounded-full border border-gray-200" />}
-              </div>
-              <div className="flex items-center justify-between">
-                <span className={currentWfStep >= 5 ? 'text-cyan-600 font-bold' : 'text-gray-400'}>Bước 5: WF5 – n8n Merge & Đồng bộ PIM</span>
-                {currentWfStep > 5 ? <CheckCircle2 className="text-green-500" size={16} /> : currentWfStep === 5 ? <Loader2 className="animate-spin text-cyan-600" size={16} /> : <div className="w-4 h-4 rounded-full border border-gray-200" />}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Top Banner and Navigation */}
       <div className="flex items-center justify-between mb-4">
         <button
