@@ -11,18 +11,18 @@ interface PromptStore {
   deleteCategory: (id: string) => void
   
   // Level 2: Sub-category
-  addSubCategory: (categoryId: string, subCategory: Omit<PromptSubCategory, 'id' | 'options'>) => void
+  addSubCategory: (categoryId: string, subCategory: Omit<PromptSubCategory, 'id' | 'options'> & { id?: string }) => void
   updateSubCategory: (categoryId: string, subCategoryId: string, partial: Partial<Omit<PromptSubCategory, 'id' | 'options'>>) => void
   deleteSubCategory: (categoryId: string, subCategoryId: string) => void
   
   // Level 3: Option
-  addOption: (categoryId: string, subCategoryId: string, option: Omit<PromptOption, 'id' | 'updated_at' | 'updated_by'>, userName?: string) => void
+  addOption: (categoryId: string, subCategoryId: string, option: Omit<PromptOption, 'id' | 'updated_at' | 'updated_by'> & { id?: string }, userName?: string) => void
   updateOption: (categoryId: string, subCategoryId: string, optionId: string, partial: Partial<PromptOption>, userName?: string) => void
   deleteOption: (categoryId: string, subCategoryId: string, optionId: string) => void
 }
 
 export const usePromptStore = create<PromptStore>((set) => ({
-  categories: MOCK_PROMPT_CATEGORIES as any,
+  categories: MOCK_PROMPT_CATEGORIES,
   
   // LEVEL 1
   addCategory: (category) => set((state) => ({
@@ -43,7 +43,7 @@ export const usePromptStore = create<PromptStore>((set) => ({
       if (c.id === categoryId) {
         return {
           ...c,
-          sub_categories: [...c.sub_categories, { ...subCategory, id: `sub-${Date.now()}`, options: [] }]
+          sub_categories: [...c.sub_categories, { ...subCategory, id: subCategory.id || `sub-${Date.now()}`, options: [] }]
         }
       }
       return c
@@ -86,7 +86,7 @@ export const usePromptStore = create<PromptStore>((set) => ({
                 ...s,
                 options: [...s.options, {
                   ...option,
-                  id: `opt-${Date.now()}`,
+                  id: option.id || `opt-${Date.now()}`,
                   updated_at: new Date().toISOString(),
                   updated_by: userName || 'Admin'
                 }]

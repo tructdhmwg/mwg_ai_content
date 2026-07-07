@@ -97,6 +97,8 @@ export interface PromptConfig {
 export interface PromptOption {
   id: string
   name: string
+  prompt_label?: string
+  image_analysis_prompt?: string
   template_content: string
   is_active: boolean
   model: string
@@ -250,4 +252,3 @@ export interface Product {
   created_at: string
   updated_at: string
 }
-
