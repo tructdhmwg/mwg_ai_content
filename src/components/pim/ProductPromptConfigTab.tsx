@@ -63,8 +63,8 @@ const SECTION_DEFS = [
     anchor: 's4',
     workflowKey: 'wf4_article_images',
     legacyWorkflowKeys: [] as string[],
-    title: 'Tạo ảnh slider',
-    description: 'Prompt tạo ảnh slider',
+    title: 'Tạo ảnh (Bài viết - Slider)',
+    description: 'Prompt tạo ảnh bài viết và slider',
     chipClass: 'bg-emerald-50 text-emerald-700',
     templateFields: (option?: PromptOption) => [
       { label: 'Prompt tạo ảnh', value: option?.template_content || '' },
@@ -127,6 +127,7 @@ interface PromptSectionProps {
 
 function PromptSection({ section, entries, draft, onDraftChange }: PromptSectionProps) {
   const [collapsed, setCollapsed] = useState(false)
+  const showFeedback = section.workflowKey !== 'wf4_article_images'
   const selectedEntry = entries.find(entry => entry.subCategoryId === draft.subCategoryId && entry.option.id === draft.optionId)
   const templateFields = section.templateFields(selectedEntry?.option)
 
@@ -209,7 +210,7 @@ function PromptSection({ section, entries, draft, onDraftChange }: PromptSection
               ))}
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-2">
+            <div className={showFeedback ? 'grid gap-4 lg:grid-cols-2' : ''}>
               <div>
                 <label className="mb-1.5 block text-xs font-bold text-gray-700">
                   Yêu cầu bổ sung <span className="font-normal text-gray-400">(Bonus Prompt)</span>
@@ -222,20 +223,22 @@ function PromptSection({ section, entries, draft, onDraftChange }: PromptSection
                   className="w-full resize-y rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 text-[13px] text-gray-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10"
                 />
               </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-bold text-amber-700">
-                  Feedback cho AI <span className="font-normal text-amber-500">(Regen)</span>
-                </label>
-                <textarea
-                  value={draft.feedback}
-                  onChange={(event) => onDraftChange({ feedback: event.target.value })}
-                  placeholder="Nhập feedback để AI gen lại..."
-                  rows={3}
-                  className={`w-full resize-y rounded-lg border px-3.5 py-2.5 text-[13px] text-gray-800 outline-none transition focus:ring-2 focus:ring-amber-500/10 ${
-                    draft.feedback ? 'border-amber-400 bg-amber-50' : 'border-amber-300 bg-amber-50/50'
-                  }`}
-                />
-              </div>
+              {showFeedback && (
+                <div>
+                  <label className="mb-1.5 block text-xs font-bold text-amber-700">
+                    Feedback cho AI <span className="font-normal text-amber-500">(Regen)</span>
+                  </label>
+                  <textarea
+                    value={draft.feedback}
+                    onChange={(event) => onDraftChange({ feedback: event.target.value })}
+                    placeholder="Nhập feedback để AI gen lại..."
+                    rows={3}
+                    className={`w-full resize-y rounded-lg border px-3.5 py-2.5 text-[13px] text-gray-800 outline-none transition focus:ring-2 focus:ring-amber-500/10 ${
+                      draft.feedback ? 'border-amber-400 bg-amber-50' : 'border-amber-300 bg-amber-50/50'
+                    }`}
+                  />
+                </div>
+              )}
             </div>
           </div>
         )
@@ -310,7 +313,6 @@ export function ProductPromptConfigTab({ product, onDirtyChange }: ProductPrompt
       ...(product.feedback_prompts || {}),
       wf2_outline: outline.feedback,
       wf3_writing: writing.feedback,
-      wf4_article_images: image.feedback,
     })
     updateProductField(product.id, 'external_research_by_workflow', {
       ...(product.external_research_by_workflow || {}),

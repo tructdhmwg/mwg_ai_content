@@ -26,7 +26,7 @@ const WORKFLOWS = [
   { key: 'wf1_specs', label: 'S1 – Thông số kỹ thuật', shortLabel: 'S1' },
   { key: 'wf2_outline', label: 'S2 – Outline bài viết', shortLabel: 'S2' },
   { key: 'wf3_writing', label: 'S3 – Tạo bài viết sản phẩm', shortLabel: 'S3' },
-  { key: 'wf4_article_images', label: 'S4 – Tạo ảnh slider', shortLabel: 'S4' },
+  { key: 'wf4_article_images', label: 'S4 – Tạo ảnh (Bài viết - Slider)', shortLabel: 'S4' },
 ] as const
 
 const LEGACY_WORKFLOW_FALLBACK: Record<string, string> = {
@@ -203,7 +203,7 @@ export function PromptConfigPage() {
     : activeWorkflow === 'wf3_writing'
       ? 'Nhập prompt dùng để viết bài sản phẩm...'
       : activeWorkflow === 'wf4_article_images'
-        ? 'Nhập prompt dùng để tạo ảnh slider...'
+        ? 'Nhập prompt dùng để tạo ảnh bài viết và slider...'
         : 'Nhập nội dung prompt...'
   const currentSearch = searchByWorkflow[activeWorkflow] || ''
   const debouncedSearch = (debouncedSearchByWorkflow[activeWorkflow] || '').trim().toLowerCase()

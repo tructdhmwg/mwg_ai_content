@@ -15,7 +15,7 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  if (user) return <Navigate to="/products" replace />
+  if (user) return <Navigate to="/" replace />
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -29,7 +29,7 @@ export function LoginPage() {
     if (found) {
       login(found)
       toast(`Chào mừng, ${found.name}!`, 'success')
-      navigate('/products')
+      navigate('/')
     } else {
       setError('Email hoặc mật khẩu không đúng, hoặc tài khoản bị vô hiệu hóa')
     }

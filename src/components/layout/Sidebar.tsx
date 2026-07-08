@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LogOut, Database, FileText, PlusCircle, Settings, Webhook, Users,
-  Upload, LayoutDashboard, BarChart3, ListChecks, Megaphone, Activity, Eye
+  Upload, LayoutDashboard, BarChart3, ListChecks, Megaphone, Activity, Eye, Home
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useAuthStore } from '../../store/authStore'
@@ -39,10 +39,11 @@ const ROLE_LABEL: Record<string, string> = {
   viewer: 'Viewer',
 }
 
-function NavItem({ to, icon: Icon, label }: { to: string; icon: React.ElementType; label: string }) {
+function NavItem({ to, icon: Icon, label, end }: { to: string; icon: React.ElementType; label: string; end?: boolean }) {
   return (
     <NavLink
       to={to}
+      end={end}
       className={({ isActive }) =>
         cn(
           'flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all',
@@ -64,9 +65,12 @@ export function Sidebar() {
   const { toast } = useToast()
   const navigate = useNavigate()
 
-  const ocpsItems = effectiveOcpsRole === 'admin'
-    ? [...Object.values(OCPS_NAV).flat(), ...OCPS_ADMIN_NAV]
+  // Chức năng theo vai trò OCPS (vendor/nh/content/marketing) — admin thấy tất cả.
+  const ocpsRoleItems = effectiveOcpsRole === 'admin'
+    ? Object.values(OCPS_NAV).flat()
     : OCPS_NAV[effectiveOcpsRole ?? ''] ?? []
+  // Chức năng quản trị OCPS gộp vào nhóm "Quản trị" chung, chỉ hiện với admin.
+  const ocpsAdminItems = effectiveOcpsRole === 'admin' ? OCPS_ADMIN_NAV : []
 
   const handleLogout = () => {
     if (confirm('Đăng xuất khỏi hệ thống?')) {
@@ -84,18 +88,20 @@ export function Sidebar() {
     .toUpperCase() ?? 'U'
 
   return (
-    <aside className="fixed bottom-0 left-0 top-0 z-40 flex min-h-screen w-[var(--sidebar-width)] flex-col bg-[#0f1535] shadow-xl">
+    <aside className="fixed bottom-0 left-0 top-0 z-40 flex h-screen w-[var(--sidebar-width)] flex-col bg-[#0f1535] shadow-xl">
       {/* Logo */}
-      <div className="px-5 py-4 border-b border-white/10">
+      <div className="px-5 py-4 border-b border-white/10 shrink-0">
         <div className="text-white font-bold text-lg">
           AI<span className="text-cyan-400">CPS</span>
         </div>
         <div className="text-white/40 text-[10px] mt-0.5">AI Content Production</div>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 px-2 py-4 flex flex-col gap-1">
-        <div className="px-2 mb-1 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Sản phẩm</div>
+      {/* Nav — scroll nội bộ khi vượt chiều cao, để footer logout luôn cố định ở chân */}
+      <nav className="flex-1 min-h-0 overflow-y-auto px-2 py-4 flex flex-col gap-1">
+        <NavItem to="/" icon={Home} label="Trang chủ" end />
+
+        <div className="px-2 mb-1 mt-4 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Sản phẩm</div>
         <NavItem to="/products" icon={Database} label="Sản phẩm PIM" />
 
         <div className="px-2 mb-1 mt-4 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Jobs</div>
@@ -106,23 +112,26 @@ export function Sidebar() {
         <NavItem to="/config/prompts" icon={Settings} label="Prompt" />
         <NavItem to="/config/webhooks" icon={Webhook} label="Webhook" />
 
-        <div className="px-2 mb-1 mt-4 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Quản trị</div>
-        <NavItem to="/admin/users" icon={Users} label="Người dùng" />
-
-        {ocpsItems.length > 0 && (
+        {ocpsRoleItems.length > 0 && (
           <>
             <div className="px-2 mb-1 mt-4 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Vận hành OCPS</div>
-            {ocpsItems.map((item) => (
+            {ocpsRoleItems.map((item) => (
               <NavItem key={item.to} to={item.to} icon={item.icon} label={item.label} />
             ))}
           </>
         )}
+
+        {/* Quản trị luôn ở cuối — gồm quản lý người dùng + chức năng quản trị OCPS (chỉ admin) */}
+        <div className="px-2 mb-1 mt-4 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Quản trị</div>
+        <NavItem to="/admin/users" icon={Users} label="Người dùng" />
+        {ocpsAdminItems.map((item) => (
+          <NavItem key={item.to} to={item.to} icon={item.icon} label={item.label} />
+        ))}
       </nav>
 
-
-      {/* User info */}
+      {/* User info — sticky ở chân sidebar */}
       {user && (
-        <div className="px-3 py-4 border-t border-white/10">
+        <div className="px-3 py-4 border-t border-white/10 shrink-0">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-cyan-500/30 flex items-center justify-center text-cyan-300 text-xs font-bold flex-shrink-0">
               {initials}

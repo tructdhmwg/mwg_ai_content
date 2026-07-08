@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ToastProvider } from './components/ui/Toast'
+import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { JobListPage } from './pages/JobListPage'
 import { JobDetailPage } from './pages/JobDetailPage'
@@ -19,6 +20,7 @@ export default function App() {
       <ToastProvider>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/jobs" element={<JobListPage />} />
           <Route path="/jobs/new" element={<CreateJobPage />} />
           <Route path="/jobs/:jobId" element={<JobDetailPage />} />
@@ -32,7 +34,7 @@ export default function App() {
           <Route path="/admin/users/new" element={<UserFormPage />} />
           <Route path="/admin/users/:id" element={<UserFormPage />} />
           <Route path="/ocps/*" element={<OcpsRoutes />} />
-          <Route path="*" element={<Navigate to="/products" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </ToastProvider>
     </BrowserRouter>

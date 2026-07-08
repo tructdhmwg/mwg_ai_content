@@ -102,12 +102,14 @@ function scopeItemsForUser(items: OcpsItem[], currentUser: OcpsUser | null): Ocp
 
 // Điều kiện đủ để Content/IT được xử lý 1 Item — gom từ ContentDashboard, dùng lại ở cả Dashboard
 // (lọc danh sách) và ContentProcess (chặn truy cập chéo qua URL trực tiếp).
-function isContentEligible(item: OcpsItem | null | undefined): boolean {
+// Export thêm (ngoài việc expose qua context) để trang chủ AICPS có thể tính stat "yêu cầu chờ xử lý"
+// mà không cần đứng trong cây <OcpsDataProvider> (nằm ngoài nhánh route /ocps/*).
+export function isContentEligible(item: OcpsItem | null | undefined): boolean {
   return !!item && item.docStatus !== 'thieu' && item.flow !== null && item.flow !== 'chi_mkt' && item.seoStatus !== 'chua'
 }
 
 // Hàng đợi Content — lọc đủ điều kiện rồi ưu tiên: trễ SLA nhiều nhất trước, sau đó gửi yêu cầu sớm nhất trước
-function getContentQueue(items: OcpsItem[]): OcpsItem[] {
+export function getContentQueue(items: OcpsItem[]): OcpsItem[] {
   return items.filter(isContentEligible).slice().sort((a, b) => {
     if (a.slaConLai !== b.slaConLai) return a.slaConLai - b.slaConLai
     return (a.ngayGuiYeuCau || '').localeCompare(b.ngayGuiYeuCau || '')
