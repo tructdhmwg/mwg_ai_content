@@ -127,7 +127,7 @@ Hãy sinh thẻ Meta Title (dưới 65 ký tự) và Meta Description (dưới 1
         options: [
           {
             id: 'highlights_dt_1',
-            name: 'Danh sách nổi bật ngắn gọn',
+            name: 'Điện thoại - Cao cấp',
             template_content: `Sinh 4-5 đặc điểm nổi bật cho điện thoại {{ten_san_pham}} dưới dạng HTML.\n\nYêu cầu:\n- Trả về danh sách <ul><li>...</li></ul>.\n- Mỗi ý ngắn gọn, dễ hiểu, bám theo thông số kỹ thuật: {{spec_final_json}}.\n- Ưu tiên các điểm khác biệt về màn hình, hiệu năng, camera, pin và thiết kế.`,
             is_active: true,
             model: 'gpt-4o',
@@ -218,8 +218,27 @@ Hãy sinh thẻ Meta Title (dưới 65 ký tự) và Meta Description (dưới 1
               }
             ]
           }
+          ,
+          {
+            id: 'wf5_highlights_mg',
+            workflow_type: 'wf5_highlights',
+            name: 'Đặc điểm nổi bật (Máy giặt)',
+            options: [
+              {
+                id: 'highlights_mg_1',
+                name: 'Máy giặt - Cao cấp',
+                prompt_label: 'Nổi bật',
+                template_content: `Sinh 4-6 đặc điểm nổi bật cho máy giặt {{ten_san_pham}} dưới dạng HTML.\n\nHướng dẫn:\n- Ưu tiên các điểm nổi bật: công nghệ giặt, khối lượng giặt, động cơ, khả năng tiết kiệm điện/nước, chương trình giặt, tính năng thông minh, thiết kế.\n- Tập trung vào lợi ích người dùng (ví dụ: tiết kiệm thời gian, tiết kiệm điện/nước, bảo vệ sợi vải, vận hành êm).\n- Không lặp ý, không quảng cáo quá mức.\n- Chỉ sử dụng thông tin chính xác từ thông số sản phẩm: {{spec_final_json}}.\n\nYêu cầu trả về:\n- Một danh sách HTML: <ul><li>...</li></ul>.\n- Mỗi <li> ngắn gọn (khoảng 8-16 từ), rõ ràng, bắt đầu bằng động từ hành động hoặc tính từ mô tả.`,
+                is_active: true,
+                model: 'gpt-4o',
+                updated_at: new Date().toISOString(),
+                updated_by: 'Admin'
+              }
+            ]
+          }
         ]
       },
+          
       {
         id: 'MAY_GIAT_MAY_SAY',
         name: 'Máy giặt - Máy sấy áo quần',

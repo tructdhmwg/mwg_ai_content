@@ -132,8 +132,8 @@ export function ProductListPage() {
         </div>
       </div>
 
-      {/* Stats Board */}
-      {siteFilter && (
+      {/* Stats Board (temporarily hidden) */}
+      {false && siteFilter && (
         <div className="grid grid-cols-4 gap-4 mb-5">
           <div 
             onClick={() => { setNganhFilter('all'); setStatusFilter('all'); setSearchQuery(''); setCurrentPage(1); }}

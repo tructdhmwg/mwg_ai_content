@@ -22,11 +22,12 @@ import {
   X,
 } from 'lucide-react'
 
+// Temporarily hide WF1 (specs) from the tab bar and add WF5 (highlights)
 const WORKFLOWS = [
-  { key: 'wf1_specs', label: 'S1 – Thông số kỹ thuật', shortLabel: 'S1' },
   { key: 'wf2_outline', label: 'S2 – Outline bài viết', shortLabel: 'S2' },
   { key: 'wf3_writing', label: 'S3 – Tạo bài viết sản phẩm', shortLabel: 'S3' },
   { key: 'wf4_article_images', label: 'S4 – Tạo ảnh (Bài viết - Slider)', shortLabel: 'S4' },
+  { key: 'wf5_highlights', label: 'S5 – Đặc điểm nổi bật', shortLabel: 'S5' },
 ] as const
 
 const LEGACY_WORKFLOW_FALLBACK: Record<string, string> = {
@@ -48,7 +49,8 @@ type CategoryPanelMode = 'create_cat' | 'edit_cat' | null
 
 const getInitialWorkflow = (tab: string | null): WorkflowKey => {
   const found = WORKFLOWS.find(workflow => workflow.key === tab || workflow.shortLabel.toLowerCase() === tab?.toLowerCase())
-  return found?.key || 'wf1_specs'
+  // default to outline if not found (wf1_specs temporarily hidden)
+  return found?.key || 'wf2_outline'
 }
 
 const getPromptLabel = (option: PromptOption, categoryName: string) => {
@@ -197,14 +199,18 @@ export function PromptConfigPage() {
       ? 'Prompt viết bài'
       : activeWorkflow === 'wf4_article_images'
         ? 'Prompt tạo ảnh'
-        : 'Text prompt'
+        : activeWorkflow === 'wf5_highlights'
+          ? 'Prompt đặc điểm nổi bật'
+          : 'Text prompt'
   const promptTextPlaceholder = activeWorkflow === 'wf2_outline'
     ? 'Nhập prompt dùng để tạo dàn bài (outline)...'
     : activeWorkflow === 'wf3_writing'
       ? 'Nhập prompt dùng để viết bài sản phẩm...'
       : activeWorkflow === 'wf4_article_images'
         ? 'Nhập prompt dùng để tạo ảnh bài viết và slider...'
-        : 'Nhập nội dung prompt...'
+        : activeWorkflow === 'wf5_highlights'
+          ? 'Nhập prompt để sinh các đặc điểm nổi bật (4-6 ý ngắn)...'
+          : 'Nhập nội dung prompt...'
   const currentSearch = searchByWorkflow[activeWorkflow] || ''
   const debouncedSearch = (debouncedSearchByWorkflow[activeWorkflow] || '').trim().toLowerCase()
   const currentPage = pageByWorkflow[activeWorkflow] || 1
