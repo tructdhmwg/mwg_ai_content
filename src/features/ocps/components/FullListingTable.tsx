@@ -35,6 +35,22 @@ function BadgeCell({ status }: { status?: string }) {
   return <td className="py-2 pr-3">{status ? <OcpsBadge status={status} /> : null}</td>
 }
 
+function normalizeDocStatus(status?: string) {
+  if (!status) return null
+  if (status === 'thieu') return { status: 'thieu', label: 'Thiếu' }
+  if (status === 'du_toithieu' || status === 'du_full') return { status: 'du_full', label: 'Đủ' }
+  return { status, label: status }
+}
+
+function DocStatusCell({ status }: { status?: string }) {
+  const normalized = normalizeDocStatus(status)
+  return (
+    <td className="py-2 pr-3">
+      {normalized ? <OcpsBadge status={normalized.status} label={normalized.label} /> : null}
+    </td>
+  )
+}
+
 export function FullListingTable({ rows, emptyText }: FullListingTableProps) {
   return (
     <div className="overflow-x-auto">
@@ -65,7 +81,7 @@ export function FullListingTable({ rows, emptyText }: FullListingTableProps) {
               <TextCell strong>{row.tenSP}</TextCell>
               <TextCell>{row.nganhhang}</TextCell>
               <TextCell>{row.vendor}</TextCell>
-              <BadgeCell status={row.docStatus} />
+              <DocStatusCell status={row.docStatus} />
               <TextCell>{row.flowLabel}</TextCell>
               <BadgeCell status={row.seoStatus} />
               <BadgeCell status={row.mktStatus} />
