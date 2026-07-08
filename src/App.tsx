@@ -11,6 +11,7 @@ import { UserFormPage } from './pages/admin/UserFormPage'
 import { ProductListPage } from './pages/pim/ProductListPage'
 import { ProductDetailPage } from './pages/pim/ProductDetailPage'
 import { SpecsDemoPage } from './pages/pim/SpecsDemoPage'
+import { OcpsRoutes } from './features/ocps/routes'
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/admin/users" element={<UserListPage />} />
           <Route path="/admin/users/new" element={<UserFormPage />} />
           <Route path="/admin/users/:id" element={<UserFormPage />} />
+          <Route path="/ocps/*" element={<OcpsRoutes />} />
           <Route path="*" element={<Navigate to="/products" replace />} />
         </Routes>
       </ToastProvider>

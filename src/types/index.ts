@@ -141,6 +141,11 @@ export interface User {
   sites: SiteId[]
   is_active: boolean
   created_at: string
+  // Bridge sang khu vận hành OCPS (src/features/ocps) — xem OcpsAuthContext.
+  // Không set thì suy ra từ role qua DEFAULT_ROLE_MAP; viewer không có quyền OCPS.
+  ocpsRole?: 'vendor' | 'nh' | 'content' | 'marketing' | 'admin'
+  vendorId?: string
+  nganhhang?: string
 }
 
 export const SITE_META: Record<SiteId, { label: string; color: string; bgClass: string }> = {

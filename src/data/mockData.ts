@@ -756,6 +756,8 @@ export const MOCK_USERS: User[] = [
     email: 'huong@tgdd.vn',
     password: '123456',
     role: 'site_manager',
+    // site_manager map mặc định sang vai trò NH của OCPS — cần nganhhang để scope dữ liệu
+    nganhhang: 'Tivi',
     sites: ['tgdd', 'topzone'],
     is_active: true,
     created_at: '2026-06-01T08:00:00'
@@ -806,6 +808,8 @@ export const MOCK_USERS: User[] = [
     email: 'mai@dmx.vn',
     password: '123456',
     role: 'site_manager',
+    // site_manager map mặc định sang vai trò NH của OCPS — cần nganhhang để scope dữ liệu
+    nganhhang: 'Gia dụng',
     sites: ['dmx'],
     is_active: true,
     created_at: '2026-06-02T08:00:00'
@@ -819,6 +823,30 @@ export const MOCK_USERS: User[] = [
     sites: ['ntak'],
     is_active: false,
     created_at: '2026-06-03T08:00:00'
+  },
+  // User mẫu cho khu OCPS (ocpsRole bridge — xem src/features/ocps/context/OcpsAuthContext.tsx)
+  {
+    id: 'u-8',
+    name: 'SmartVision Electronics',
+    email: 'contact@smartvision.vn',
+    password: '123456',
+    role: 'viewer',
+    ocpsRole: 'vendor',
+    vendorId: 'v3',
+    sites: ['tgdd'],
+    is_active: true,
+    created_at: '2026-07-01T08:00:00'
+  },
+  {
+    id: 'u-9',
+    name: 'Ngô Thảo An',
+    email: 'an.mkt@mwg.vn',
+    password: '123456',
+    role: 'viewer',
+    ocpsRole: 'marketing',
+    sites: ['tgdd', 'dmx'],
+    is_active: true,
+    created_at: '2026-07-01T08:00:00'
   }
 ]
 

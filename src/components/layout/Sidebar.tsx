@@ -1,10 +1,30 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
-  LogOut, Database, FileText, PlusCircle, Settings, Webhook, Users
+  LogOut, Database, FileText, PlusCircle, Settings, Webhook, Users,
+  Upload, LayoutDashboard, BarChart3, ListChecks, Megaphone, Activity, Eye
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useAuthStore } from '../../store/authStore'
+import { useOcpsAuth } from '../../features/ocps/context/OcpsAuthContext'
 import { useToast } from '../ui/Toast'
+
+// Nav khu OCPS theo vai trò OCPS hiệu lực (bridge từ user A — xem OcpsAuthContext).
+// Admin thấy tất cả items của các role + nhóm giám sát/cấu hình riêng.
+const OCPS_NAV: Record<string, Array<{ to: string; label: string; icon: React.ElementType }>> = {
+  vendor: [{ to: '/ocps/vendor/upload', label: 'Upload tài liệu', icon: Upload }],
+  nh: [
+    { to: '/ocps/nh/dashboard', label: 'Dashboard NH', icon: LayoutDashboard },
+    { to: '/ocps/nh/report', label: 'Báo cáo NH', icon: BarChart3 },
+  ],
+  content: [{ to: '/ocps/content/dashboard', label: 'Hàng đợi Content', icon: ListChecks }],
+  marketing: [{ to: '/ocps/marketing/dashboard', label: 'Brief Marketing', icon: Megaphone }],
+}
+const OCPS_ADMIN_NAV: Array<{ to: string; label: string; icon: React.ElementType }> = [
+  { to: '/ocps/admin/control-tower', label: 'Control Tower', icon: Activity },
+  { to: '/ocps/admin/god-view', label: 'God View', icon: Eye },
+  { to: '/ocps/admin/config', label: 'Cấu hình OCPS', icon: Settings },
+  { to: '/ocps/admin/reports', label: 'Báo cáo OCPS', icon: FileText },
+]
 
 const ROLE_BADGE: Record<string, string> = {
   admin:           'bg-red-500/20 text-red-300',
@@ -40,8 +60,13 @@ function NavItem({ to, icon: Icon, label }: { to: string; icon: React.ElementTyp
 
 export function Sidebar() {
   const { user, logout } = useAuthStore()
+  const { effectiveOcpsRole } = useOcpsAuth()
   const { toast } = useToast()
   const navigate = useNavigate()
+
+  const ocpsItems = effectiveOcpsRole === 'admin'
+    ? [...Object.values(OCPS_NAV).flat(), ...OCPS_ADMIN_NAV]
+    : OCPS_NAV[effectiveOcpsRole ?? ''] ?? []
 
   const handleLogout = () => {
     if (confirm('Đăng xuất khỏi hệ thống?')) {
@@ -83,6 +108,15 @@ export function Sidebar() {
 
         <div className="px-2 mb-1 mt-4 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Quản trị</div>
         <NavItem to="/admin/users" icon={Users} label="Người dùng" />
+
+        {ocpsItems.length > 0 && (
+          <>
+            <div className="px-2 mb-1 mt-4 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Vận hành OCPS</div>
+            {ocpsItems.map((item) => (
+              <NavItem key={item.to} to={item.to} icon={item.icon} label={item.label} />
+            ))}
+          </>
+        )}
       </nav>
 
 
