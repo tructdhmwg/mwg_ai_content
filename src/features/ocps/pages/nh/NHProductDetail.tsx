@@ -7,15 +7,18 @@ import { Card } from '../../components/Card'
 import { OcpsButton } from '../../components/OcpsButton'
 import { OcpsBadge } from '../../components/OcpsBadge'
 import { DocSlotZone } from '../../components/DocSlotZone'
-import { LOAI_NHU_CAU_LABEL } from '../../data/ocpsMockData'
 import { getDocRuleForItem, formatImageRuleHint, getSpecTemplateUrl } from '../../utils/docRules'
-import type { Flow, SlotKey } from '../../types'
+import type { Flow, ItemDocSlots, SlotKey } from '../../types'
 
 const SLOT_DEFS: Array<{ key: SlotKey; label: string; icon: string }> = [
   { key: 'hinhanh', label: 'Hình ảnh', icon: '🖼️' },
   { key: 'spec', label: 'Spec', icon: '📄' },
   { key: 'khac', label: 'Tài liệu khác', icon: '📁' },
 ]
+
+function getContentNotes(slots: Partial<ItemDocSlots> | undefined) {
+  return SLOT_DEFS.map(({ key }) => slots?.[key]?.ghiChu?.trim()).filter((note): note is string => Boolean(note))
+}
 
 export function NHProductDetail() {
   const { id = '' } = useParams()
@@ -27,6 +30,7 @@ export function NHProductDetail() {
   // Admin vào được mọi /ocps/* (quyết định c) nên không chặn theo nganhhang với admin
   const item = found && (currentUser?.role === 'admin' || found.nganhhang === currentUser?.nganhhang) ? found : null
   const slots = docSlots[id] || {}
+  const contentNotes = getContentNotes(slots)
 
   // Content/IT luôn là luồng mặc định — không có lựa chọn "Chỉ Marketing" để tránh SP thiếu bước
   // lên web/Content. Marketing chỉ là tuỳ chọn thêm (checkbox); 'chi_mkt' chỉ còn tồn tại ở dữ liệu
@@ -130,6 +134,17 @@ export function NHProductDetail() {
         </div>
       </Card>
 
+      <Card className="mb-4">
+        <p className="text-sm font-medium text-[#0F172A] mb-2">Ghi chú của content</p>
+        <div className="min-h-10 rounded border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#475569]">
+          {contentNotes.length > 0 ? (
+            contentNotes.map((note, index) => <p key={`${index}-${note}`}>{note}</p>)
+          ) : (
+            <p className="text-[#94A3B8]">Chưa có ghi chú</p>
+          )}
+        </div>
+      </Card>
+
       {/* C — Chọn luồng */}
       <Card className="mb-4">
         <p className="text-sm font-medium text-[#0F172A] mb-1">Chọn luồng xử lý</p>
@@ -162,25 +177,6 @@ export function NHProductDetail() {
         {sendMarketing && (
           <div className="border-t border-[#E2E8F0] pt-4">
             <div className="space-y-3">
-              <div>
-                <p className="text-xs text-[#475569] mb-1.5">Loại nhu cầu</p>
-                <div className="flex gap-3 flex-wrap">
-                  {Object.entries(LOAI_NHU_CAU_LABEL).map(([k, v]) => (
-                    <label key={k} className="flex items-center gap-1.5 text-xs text-[#0F172A] cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={brief.loaiNhuCau.includes(k)}
-                        onChange={e => setBrief(b => ({
-                          ...b,
-                          loaiNhuCau: e.target.checked ? [...b.loaiNhuCau, k] : b.loaiNhuCau.filter(x => x !== k),
-                        }))}
-                        className="rounded"
-                      />
-                      {v}
-                    </label>
-                  ))}
-                </div>
-              </div>
               <textarea
                 placeholder="Brief ngắn gọn — thông điệp chính, tone, mục tiêu"
                 value={brief.briefText}

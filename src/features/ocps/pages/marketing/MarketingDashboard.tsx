@@ -3,10 +3,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useOcpsData } from '../../context/OcpsDataContext'
 import { Card } from '../../components/Card'
-import { OcpsBadge } from '../../components/OcpsBadge'
 import { OcpsButton } from '../../components/OcpsButton'
 import { StatCard } from '../../components/StatCard'
-import { LOAI_NHU_CAU_LABEL, MKT_STATUS_LABEL } from '../../data/ocpsMockData'
+import { FullListingTable } from '../../components/FullListingTable'
+import { FLOW_LABEL, LOAI_NHU_CAU_LABEL, MKT_STATUS_LABEL } from '../../data/ocpsMockData'
 import type { MktBrief, OcpsItem } from '../../types'
 
 type BriefWithItem = MktBrief & { _item?: OcpsItem }
@@ -46,6 +46,22 @@ export function MarketingDashboard() {
     if (filters.vendor && b._item?.vendor !== filters.vendor) return false
     return true
   })
+  const listingRows = filtered.map(brief => ({
+    key: brief.id,
+    maErp: brief._item?.id || brief.itemId,
+    modelCode: brief._item?.modelCode || '',
+    erpCreatedAt: brief._item?.erpCreatedAt || '',
+    tenSP: brief.tenSP,
+    nganhhang: brief._item?.nganhhang || '',
+    vendor: brief._item?.vendor || '',
+    docStatus: brief._item?.docStatus,
+    flowLabel: brief._item?.flow ? FLOW_LABEL[brief._item.flow] : '',
+    seoStatus: brief._item?.seoStatus,
+    mktStatus: brief.trangThai,
+    ngayGui: brief._item?.ngayGuiYeuCau || brief.ngayTao || '',
+    loaiNhuCau: brief.loaiNhuCau.map(l => LOAI_NHU_CAU_LABEL[l] || l).join(', '),
+    action: <OcpsButton size="sm" onClick={() => navigate(`/ocps/marketing/brief/${brief.id}`)}>Mở</OcpsButton>,
+  }))
 
   return (
     <div>
@@ -121,28 +137,7 @@ export function MarketingDashboard() {
             {vendors.map(v => <option key={v} value={v}>{v}</option>)}
           </select>
         </div>
-        <div className="flex flex-col gap-2">
-          {filtered.length === 0 && (
-            <p className="text-xs text-[#94A3B8] text-center py-4">Không có brief nào</p>
-          )}
-          {filtered.map(brief => (
-            <div key={brief.id} className="flex items-center justify-between border border-[#E2E8F0] rounded-lg px-3 py-3 hover:bg-[#F8FAFC] transition-colors">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-[#0F172A] truncate">{brief.tenSP}</p>
-                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                  <span className="text-xs text-[#94A3B8]">
-                    {brief.loaiNhuCau.map(l => LOAI_NHU_CAU_LABEL[l]).join(', ')}
-                  </span>
-                  {brief._item && <span className="text-xs text-[#94A3B8]">· {brief._item.nganhhang} · {brief._item.vendor}</span>}
-                </div>
-              </div>
-              <div className="flex items-center gap-2 ml-3 shrink-0">
-                <OcpsBadge status={brief.trangThai} />
-                <OcpsButton size="sm" onClick={() => navigate(`/ocps/marketing/brief/${brief.id}`)}>Mở</OcpsButton>
-              </div>
-            </div>
-          ))}
-        </div>
+        <FullListingTable rows={listingRows} emptyText="Không có brief nào" />
       </Card>
     </div>
   )

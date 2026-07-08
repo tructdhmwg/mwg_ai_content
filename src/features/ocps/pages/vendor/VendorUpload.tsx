@@ -1,14 +1,16 @@
 // Port từ _source_b_reference/src/pages/vendor/VendorUpload.jsx (route /ocps/vendor/upload)
 import { useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useOcpsAuth } from '../../context/OcpsAuthContext'
 import { useOcpsData } from '../../context/OcpsDataContext'
 import { Card } from '../../components/Card'
 import { OcpsButton } from '../../components/OcpsButton'
 import { DocSlotZone } from '../../components/DocSlotZone'
 import { OcpsBadge } from '../../components/OcpsBadge'
+import { FullListingTable } from '../../components/FullListingTable'
 import { getDocRuleForItem, formatImageRuleHint, getSpecTemplateUrl } from '../../utils/docRules'
-import { DOC_STATUS_LABEL } from '../../data/ocpsMockData'
-import type { SlotKey } from '../../types'
+import { DOC_STATUS_LABEL, FLOW_LABEL } from '../../data/ocpsMockData'
+import type { ItemDocSlots, SlotKey } from '../../types'
 
 const SLOT_DEFS: Array<{ key: SlotKey; label: string; icon: string }> = [
   { key: 'hinhanh', label: 'Hình ảnh', icon: '🖼️' },
@@ -16,12 +18,16 @@ const SLOT_DEFS: Array<{ key: SlotKey; label: string; icon: string }> = [
   { key: 'khac', label: 'Tài liệu khác', icon: '📁' },
 ]
 
+function getContentNotes(slots: Partial<ItemDocSlots> | undefined) {
+  return SLOT_DEFS.map(({ key }) => slots?.[key]?.ghiChu?.trim()).filter((note): note is string => Boolean(note))
+}
+
 export function VendorUpload() {
   const { currentUser } = useOcpsAuth()
-  const { items, docSlots, uploadFile, scopeItemsForUser } = useOcpsData()
+  const { items, scopeItemsForUser } = useOcpsData()
+  const navigate = useNavigate()
   const [search, setSearch] = useState('')
   const [filters, setFilters] = useState({ nganhhang: '', vendor: '', doc: '' })
-  const [selectedId, setSelectedId] = useState<string | null>(null)
 
   const myItems = scopeItemsForUser(items, currentUser)
   const nganhhangs = [...new Set(myItems.map(i => i.nganhhang))]
@@ -35,10 +41,28 @@ export function VendorUpload() {
     (!filters.vendor || i.vendor === filters.vendor) &&
     (!filters.doc || i.docStatus === filters.doc)
   )
-  const selected = selectedId ? myItems.find(i => i.id === selectedId) : null
+  const listingRows = filtered.map(item => ({
+    key: item.id,
+    maErp: item.id,
+    modelCode: item.modelCode,
+    erpCreatedAt: item.erpCreatedAt,
+    tenSP: item.ten,
+    nganhhang: item.nganhhang,
+    vendor: item.vendor,
+    docStatus: item.docStatus,
+    flowLabel: item.flow ? FLOW_LABEL[item.flow] : '',
+    seoStatus: item.seoStatus,
+    mktStatus: item.mktStatus,
+    ngayGui: item.ngayGuiYeuCau || '',
+    action: (
+      <OcpsButton size="sm" onClick={() => navigate(`/ocps/vendor/upload/${item.id}`)}>
+        Mở
+      </OcpsButton>
+    ),
+  }))
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="w-full">
       <div className="mb-5">
         <h1 className="text-lg font-semibold text-[#0F172A]">Cổng upload tài liệu</h1>
         <p className="text-sm text-[#94A3B8]">Kéo file vào đúng khu vực — hệ thống tự cập nhật trạng thái</p>
@@ -83,63 +107,71 @@ export function VendorUpload() {
           </select>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-[#E2E8F0] text-[#475569] text-left">
-                <th className="pb-2 pr-3 font-medium">Tên SP</th>
-                <th className="pb-2 pr-3 font-medium">Danh mục</th>
-                <th className="pb-2 pr-3 font-medium">Hãng</th>
-                <th className="pb-2 pr-3 font-medium">Trạng thái</th>
-                <th className="pb-2"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(item => (
-                <tr key={item.id} className="border-b border-[#F8FAFC] hover:bg-[#F8FAFC]">
-                  <td className="py-2 pr-3 text-[#0F172A]">{item.ten}</td>
-                  <td className="py-2 pr-3 text-[#475569]">{item.nganhhang}</td>
-                  <td className="py-2 pr-3 text-[#475569]">{item.vendor}</td>
-                  <td className="py-2 pr-3"><OcpsBadge status={item.docStatus} /></td>
-                  <td className="py-2">
-                    <OcpsButton size="sm" onClick={() => setSelectedId(item.id === selectedId ? null : item.id)}>
-                      {item.id === selectedId ? 'Đóng' : 'Mở'}
-                    </OcpsButton>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {filtered.length === 0 && (
-            <p className="text-center text-xs text-[#94A3B8] py-6">Không có sản phẩm nào</p>
-          )}
-        </div>
+        <FullListingTable rows={listingRows} emptyText="Không có sản phẩm nào" />
       </Card>
 
-      {selected && (
-        <Card>
-          <p className="text-sm font-semibold text-[#0F172A] mb-1">{selected.id} — {selected.ten}</p>
-          <p className="text-xs text-[#94A3B8] mb-4">Kéo file vào đúng khu vực bên dưới</p>
-          {selected.docStatus === 'du_toithieu' && (
-            <p className="text-xs text-[#92400E] bg-[#FEF3C7] rounded-lg px-3 py-2 mb-4">
-              ⚠ Đã đủ tài liệu tối thiểu để NH gửi xử lý — vẫn cần bổ sung thêm để đạt "Đủ full" (Content mới hoàn tất được AI).
-            </p>
-          )}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {SLOT_DEFS.map(({ key, label, icon }) => (
-              <DocSlotZone
-                key={key}
-                label={label}
-                icon={icon}
-                slot={docSlots[selected.id]?.[key]}
-                onUpload={file => uploadFile(selected.id, key, file)}
-                ruleHint={key === 'hinhanh' ? formatImageRuleHint(getDocRuleForItem(selected)) : undefined}
-                templateUrl={key === 'spec' ? getSpecTemplateUrl(selected) : undefined}
-              />
-            ))}
+    </div>
+  )
+}
+
+export function VendorUploadDetail() {
+  const { id = '' } = useParams()
+  const navigate = useNavigate()
+  const { currentUser } = useOcpsAuth()
+  const { items, docSlots, uploadFile, scopeItemsForUser } = useOcpsData()
+
+  const item = scopeItemsForUser(items, currentUser).find(i => i.id === id)
+  const slots = item ? docSlots[item.id] : undefined
+  const contentNotes = getContentNotes(slots)
+
+  if (!item) return <p className="text-sm text-[#94A3B8]">Không tìm thấy sản phẩm</p>
+
+  return (
+    <div className="max-w-3xl mx-auto">
+      <div className="flex items-center gap-2 mb-5">
+        <button onClick={() => navigate('/ocps/vendor/upload')} className="text-xs text-[#94A3B8] hover:text-[#0F172A]">← Danh sách</button>
+        <span className="text-[#E2E8F0]">/</span>
+        <span className="text-xs text-[#0F172A]">{id}</span>
+      </div>
+
+      <Card>
+        <div className="flex items-start justify-between gap-3 mb-4">
+          <div>
+            <p className="text-sm font-semibold text-[#0F172A] mb-1">{item.id} — {item.ten}</p>
+            <p className="text-xs text-[#94A3B8]">{item.nganhhang} · {item.vendor}</p>
           </div>
-        </Card>
-      )}
+          <OcpsBadge status={item.docStatus} />
+        </div>
+        <p className="text-xs text-[#94A3B8] mb-4">Kéo file vào đúng khu vực bên dưới</p>
+        {item.docStatus === 'du_toithieu' && (
+          <p className="text-xs text-[#92400E] bg-[#FEF3C7] rounded-lg px-3 py-2 mb-4">
+            ⚠ Đã đủ tài liệu tối thiểu để NH gửi xử lý — vẫn cần bổ sung thêm để đạt "Đủ full" (Content mới hoàn tất được AI).
+          </p>
+        )}
+        <div className="mb-4">
+          <p className="text-sm font-medium text-[#0F172A] mb-2">Ghi chú của content</p>
+          <div className="min-h-10 rounded border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#475569]">
+            {contentNotes.length > 0 ? (
+              contentNotes.map((note, index) => <p key={`${index}-${note}`}>{note}</p>)
+            ) : (
+              <p className="text-[#94A3B8]">Chưa có ghi chú</p>
+            )}
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {SLOT_DEFS.map(({ key, label, icon }) => (
+            <DocSlotZone
+              key={key}
+              label={label}
+              icon={icon}
+              slot={slots?.[key]}
+              onUpload={file => uploadFile(item.id, key, file)}
+              ruleHint={key === 'hinhanh' ? formatImageRuleHint(getDocRuleForItem(item)) : undefined}
+              templateUrl={key === 'spec' ? getSpecTemplateUrl(item) : undefined}
+            />
+          ))}
+        </div>
+      </Card>
     </div>
   )
 }

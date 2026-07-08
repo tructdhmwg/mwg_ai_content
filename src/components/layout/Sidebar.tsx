@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
-  LogOut, Database, FileText, PlusCircle, Settings, Webhook, Users,
-  Upload, LayoutDashboard, BarChart3, ListChecks, Megaphone, Activity, Eye, Home
+  LogOut, Database, Settings, Users,
+  Upload, LayoutDashboard, BarChart3, ListChecks, Megaphone, Home
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useAuthStore } from '../../store/authStore'
@@ -19,12 +19,6 @@ const OCPS_NAV: Record<string, Array<{ to: string; label: string; icon: React.El
   content: [{ to: '/ocps/content/dashboard', label: 'Hàng đợi Content', icon: ListChecks }],
   marketing: [{ to: '/ocps/marketing/dashboard', label: 'Brief Marketing', icon: Megaphone }],
 }
-const OCPS_ADMIN_NAV: Array<{ to: string; label: string; icon: React.ElementType }> = [
-  { to: '/ocps/admin/control-tower', label: 'Control Tower', icon: Activity },
-  { to: '/ocps/admin/god-view', label: 'God View', icon: Eye },
-  { to: '/ocps/admin/config', label: 'Cấu hình OCPS', icon: Settings },
-  { to: '/ocps/admin/reports', label: 'Báo cáo OCPS', icon: FileText },
-]
 
 const ROLE_BADGE: Record<string, string> = {
   admin:           'bg-red-500/20 text-red-300',
@@ -69,8 +63,6 @@ export function Sidebar() {
   const ocpsRoleItems = effectiveOcpsRole === 'admin'
     ? Object.values(OCPS_NAV).flat()
     : OCPS_NAV[effectiveOcpsRole ?? ''] ?? []
-  // Chức năng quản trị OCPS gộp vào nhóm "Quản trị" chung, chỉ hiện với admin.
-  const ocpsAdminItems = effectiveOcpsRole === 'admin' ? OCPS_ADMIN_NAV : []
 
   const handleLogout = () => {
     if (confirm('Đăng xuất khỏi hệ thống?')) {
@@ -104,13 +96,8 @@ export function Sidebar() {
         <div className="px-2 mb-1 mt-4 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Sản phẩm</div>
         <NavItem to="/products" icon={Database} label="Sản phẩm PIM" />
 
-        <div className="px-2 mb-1 mt-4 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Jobs</div>
-        <NavItem to="/jobs" icon={FileText} label="Danh sách Job" />
-        <NavItem to="/jobs/new" icon={PlusCircle} label="Tạo Job mới" />
-
         <div className="px-2 mb-1 mt-4 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Cấu hình</div>
         <NavItem to="/config/prompts" icon={Settings} label="Prompt" />
-        <NavItem to="/config/webhooks" icon={Webhook} label="Webhook" />
 
         {ocpsRoleItems.length > 0 && (
           <>
@@ -121,12 +108,9 @@ export function Sidebar() {
           </>
         )}
 
-        {/* Quản trị luôn ở cuối — gồm quản lý người dùng + chức năng quản trị OCPS (chỉ admin) */}
+        {/* Quản trị luôn ở cuối — chỉ giữ quản lý người dùng */}
         <div className="px-2 mb-1 mt-4 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Quản trị</div>
         <NavItem to="/admin/users" icon={Users} label="Người dùng" />
-        {ocpsAdminItems.map((item) => (
-          <NavItem key={item.to} to={item.to} icon={item.icon} label={item.label} />
-        ))}
       </nav>
 
       {/* User info — sticky ở chân sidebar */}

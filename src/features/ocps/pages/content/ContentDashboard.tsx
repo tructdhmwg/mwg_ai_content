@@ -3,9 +3,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useOcpsData } from '../../context/OcpsDataContext'
 import { Card } from '../../components/Card'
-import { OcpsBadge } from '../../components/OcpsBadge'
 import { OcpsButton } from '../../components/OcpsButton'
 import { StatCard } from '../../components/StatCard'
+import { FullListingTable } from '../../components/FullListingTable'
+import { FLOW_LABEL } from '../../data/ocpsMockData'
 
 export function ContentDashboard() {
   const { items, getContentQueue } = useOcpsData()
@@ -28,6 +29,21 @@ export function ContentDashboard() {
   const dang = eligible.filter(i => i.seoStatus === 'dang_xu_ly').length
   const done = eligible.filter(i => i.seoStatus === 'da_len_web' || i.seoStatus === 'hoan_tat').length
   const aiPending = eligible.filter(i => i.docStatus === 'du_full' && i.seoStatus === 'da_len_web').length
+  const listingRows = filtered.map(item => ({
+    key: item.id,
+    maErp: item.id,
+    modelCode: item.modelCode,
+    erpCreatedAt: item.erpCreatedAt,
+    tenSP: item.ten,
+    nganhhang: item.nganhhang,
+    vendor: item.vendor,
+    docStatus: item.docStatus,
+    flowLabel: item.flow ? FLOW_LABEL[item.flow] : '',
+    seoStatus: item.seoStatus,
+    mktStatus: item.mktStatus,
+    ngayGui: item.ngayGuiYeuCau || '',
+    action: <OcpsButton size="sm" onClick={() => navigate(`/ocps/content/process/${item.id}`)}>Mở</OcpsButton>,
+  }))
 
   return (
     <div>
@@ -73,39 +89,7 @@ export function ContentDashboard() {
           </select>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-[#E2E8F0] text-[#475569] text-left">
-                <th className="pb-2 pr-3 font-medium">Mã ERP</th>
-                <th className="pb-2 pr-3 font-medium">Tên SP</th>
-                <th className="pb-2 pr-3 font-medium">Ngành hàng</th>
-                <th className="pb-2 pr-3 font-medium">Tài liệu</th>
-                <th className="pb-2 pr-3 font-medium">Trạng thái</th>
-                <th className="pb-2 pr-3 font-medium">Ngày gửi</th>
-                <th className="pb-2"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(item => (
-                <tr key={item.id} className="border-b border-[#F8FAFC] hover:bg-[#F8FAFC]">
-                  <td className="py-2 pr-3 font-medium text-[#0F172A]">{item.id}</td>
-                  <td className="py-2 pr-3 text-[#0F172A]">{item.ten}</td>
-                  <td className="py-2 pr-3 text-[#475569]">{item.nganhhang}</td>
-                  <td className="py-2 pr-3"><OcpsBadge status={item.docStatus} /></td>
-                  <td className="py-2 pr-3"><OcpsBadge status={item.seoStatus} /></td>
-                  <td className="py-2 pr-3 text-[#94A3B8]">{item.ngayGuiYeuCau || '—'}</td>
-                  <td className="py-2">
-                    <OcpsButton size="sm" onClick={() => navigate(`/ocps/content/process/${item.id}`)}>Mở</OcpsButton>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {filtered.length === 0 && (
-            <p className="text-center text-xs text-[#94A3B8] py-6">Không có sản phẩm nào</p>
-          )}
-        </div>
+        <FullListingTable rows={listingRows} emptyText="Không có sản phẩm nào" />
       </Card>
     </div>
   )

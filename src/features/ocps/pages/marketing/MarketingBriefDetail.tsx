@@ -5,7 +5,7 @@ import { useOcpsData } from '../../context/OcpsDataContext'
 import { Card } from '../../components/Card'
 import { OcpsButton } from '../../components/OcpsButton'
 import { OcpsBadge } from '../../components/OcpsBadge'
-import { LOAI_NHU_CAU_LABEL, MKT_STATUS_LABEL, NHOM_KENH_LABEL, LOAI_BRIEF_LABEL } from '../../data/ocpsMockData'
+import { MKT_STATUS_LABEL, NHOM_KENH_LABEL, LOAI_BRIEF_LABEL } from '../../data/ocpsMockData'
 import type { MktStatus } from '../../types'
 
 const STATUS_OPTIONS: MktStatus[] = ['da_tiep_nhan', 'dang_san_xuat', 'hoan_tat']
@@ -16,8 +16,7 @@ export function MarketingBriefDetail() {
   const navigate = useNavigate()
 
   const brief = briefs.find(b => b.id === id)
-  const [linkFolder, setLinkFolder] = useState(brief?.linkFolder || '')
-  const [linkMedia, setLinkMedia] = useState(brief?.linkMedia || '')
+  const [productionLink, setProductionLink] = useState(brief?.linkFolder || brief?.linkMedia || '')
   const [status, setStatus] = useState<MktStatus>(brief?.trangThai || 'da_tiep_nhan')
 
   if (!brief) return <p className="text-sm text-[#94A3B8]">Không tìm thấy brief</p>
@@ -27,7 +26,7 @@ export function MarketingBriefDetail() {
   // Không khoá khi đã "Hoàn tất" — MKT vẫn cập nhật lại được nếu có feedback, mỗi lần lưu tự ghi
   // vào lịch sử cập nhật nội dung (updateBrief trong OcpsDataContext lo việc log).
   function handleSave() {
-    updateBrief(id, { trangThai: status, linkFolder, linkMedia })
+    updateBrief(id, { trangThai: status, linkFolder: productionLink, linkMedia: '' })
     updateItemStatus(brief!.itemId, { mktStatus: status })
   }
 
@@ -69,10 +68,6 @@ export function MarketingBriefDetail() {
               <span className="text-[#0F172A]">{LOAI_BRIEF_LABEL[brief.loaiBrief] || brief.loaiBrief}</span>
             </div>
           )}
-          <div className="flex gap-2">
-            <span className="text-[#94A3B8] w-24 shrink-0">Loại nhu cầu:</span>
-            <span className="text-[#0F172A]">{brief.loaiNhuCau.map(l => LOAI_NHU_CAU_LABEL[l]).join(', ')}</span>
-          </div>
           <div className="flex gap-2">
             <span className="text-[#94A3B8] w-24 shrink-0">Kênh:</span>
             <span className="text-[#0F172A]">{(Array.isArray(brief.kenh) ? brief.kenh : [brief.kenh]).join(', ')}</span>
@@ -122,17 +117,10 @@ export function MarketingBriefDetail() {
           </select>
           <input
             type="text"
-            placeholder="Link folder thành phẩm (Drive)"
-            value={linkFolder}
-            onChange={e => setLinkFolder(e.target.value)}
-            className="w-full text-xs border border-[#E2E8F0] rounded px-3 py-2 mb-2 text-[#0F172A] placeholder:text-[#94A3B8] outline-none focus:border-[#3B82F6]"
-          />
-          <textarea
-            placeholder="Link media (TikTok / Facebook / YouTube)"
-            value={linkMedia}
-            onChange={e => setLinkMedia(e.target.value)}
-            rows={3}
-            className="w-full text-xs border border-[#E2E8F0] rounded px-3 py-2 mb-3 text-[#0F172A] placeholder:text-[#94A3B8] outline-none focus:border-[#3B82F6] resize-none"
+            placeholder="Nhập link thành phẩm"
+            value={productionLink}
+            onChange={e => setProductionLink(e.target.value)}
+            className="w-full text-xs border border-[#E2E8F0] rounded px-3 py-2 mb-3 text-[#0F172A] placeholder:text-[#94A3B8] outline-none focus:border-[#3B82F6]"
           />
           <div className="flex justify-end">
             <OcpsButton variant="primary" size="sm" onClick={handleSave}>Lưu cập nhật</OcpsButton>

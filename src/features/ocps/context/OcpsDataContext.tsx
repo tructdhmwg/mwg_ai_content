@@ -379,7 +379,7 @@ export function OcpsDataProvider({ children }: { children: ReactNode }) {
       logAudit({ itemId: brief.itemId, by, from: brief.trangThai, to: patch.trangThai, reason: 'Cập nhật brief MKT' })
     }
     const changes: string[] = []
-    if (patch.linkFolder !== undefined && patch.linkFolder !== brief.linkFolder) changes.push(`Link Drive: ${patch.linkFolder || '(trống)'}`)
+    if (patch.linkFolder !== undefined && patch.linkFolder !== brief.linkFolder) changes.push(`Link thành phẩm: ${patch.linkFolder || '(trống)'}`)
     if (patch.linkMedia !== undefined && patch.linkMedia !== brief.linkMedia) changes.push(`Link media: ${patch.linkMedia || '(trống)'}`)
     const vong = changes.length ? brief.vongChinhSua + 1 : brief.vongChinhSua
     const lichSuChinhSua = changes.length

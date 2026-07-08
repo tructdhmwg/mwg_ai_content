@@ -6,7 +6,7 @@ import { Card } from './components/Card'
 import { OcpsDataProvider } from './context/OcpsDataContext'
 import { useOcpsAuth } from './context/OcpsAuthContext'
 import { OcpsLayout, OCPS_ROLE_DEFAULT } from './layouts/OcpsLayout'
-import { VendorUpload } from './pages/vendor/VendorUpload'
+import { VendorUpload, VendorUploadDetail } from './pages/vendor/VendorUpload'
 import { NHDashboard } from './pages/nh/NHDashboard'
 import { NHProductDetail } from './pages/nh/NHProductDetail'
 import { NHReport } from './pages/nh/NHReport'
@@ -53,6 +53,7 @@ export function OcpsRoutes() {
         <Route element={<OcpsLayout />}>
           {/* Phase 4a — Vendor */}
           <Route path="vendor/upload" element={<VendorUpload />} />
+          <Route path="vendor/upload/:id" element={<VendorUploadDetail />} />
           {/* Phase 4b — NH */}
           <Route path="nh/dashboard" element={<NHDashboard />} />
           <Route path="nh/product/:id" element={<NHProductDetail />} />

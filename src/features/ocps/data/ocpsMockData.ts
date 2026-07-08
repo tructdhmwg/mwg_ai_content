@@ -390,9 +390,9 @@ export const DOCUMENT_SLOTS: DocumentSlotsMap = {
 }
 
 export const BO_SUNG_STATUS_LABEL: Record<string, string> = {
-  dang_kiem_tra: 'Đang kiểm tra',
-  bo_sung_du: 'Bổ sung đủ',
-  con_thieu: 'Còn thiếu - Bổ sung thêm',
+  dang_kiem_tra: 'Thiếu',
+  bo_sung_du: 'Đủ',
+  con_thieu: 'Thiếu',
 }
 
 export const MKT_BRIEFS: MktBrief[] = [

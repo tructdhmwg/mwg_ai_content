@@ -18,7 +18,7 @@ const SLOT_DEFS: Array<{ key: SlotKey; label: string; icon: string }> = [
 export function ContentProcess() {
   const { id = '' } = useParams()
   const { currentUser } = useOcpsAuth()
-  const { items, docSlots, revertDocStatus, isContentEligible, confirmSlotStatus, updateContentLink, updateItemStatus } = useOcpsData()
+  const { items, docSlots, revertDocStatus, isContentEligible, confirmSlotStatus, updateContentLink } = useOcpsData()
   const navigate = useNavigate()
 
   const found = items.find(i => i.id === id)
@@ -30,10 +30,7 @@ export function ContentProcess() {
   const slots = docSlots[id] || {}
 
   const [linkWeb, setLinkWeb] = useState(item?.linkWeb || '')
-  const [aiNote, setAiNote] = useState('')
   const [missingNote, setMissingNote] = useState('')
-  const step2Done = item?.seoStatus === 'hoan_tat'
-  const hasSubmitted = !!item?.linkWeb
 
   if (!item) return <p className="text-sm text-[#94A3B8]">Không tìm thấy sản phẩm</p>
 
@@ -42,10 +39,6 @@ export function ContentProcess() {
   function handleStep1() {
     if (!linkWeb.trim()) return
     updateContentLink(id, linkWeb, currentUser?.name)
-  }
-
-  function handleStep2() {
-    updateItemStatus(id, { seoStatus: 'hoan_tat' })
   }
 
   function sendMissingNote() {
@@ -87,12 +80,23 @@ export function ContentProcess() {
         </div>
       </Card>
 
-      {/* Bước 1 */}
+      {/* Ghi chú thiếu file */}
+      <Card className="border-dashed mb-4">
+        <p className="text-xs font-medium text-[#475569] mb-2">Ghi chú thiếu file — gửi ngược về NH / Vendor</p>
+        <textarea
+          placeholder="VD: Thiếu ảnh mặt lưng, cần file thông số kỹ thuật PDF..."
+          value={missingNote}
+          onChange={e => setMissingNote(e.target.value)}
+          rows={2}
+          className="w-full text-xs border border-[#E2E8F0] rounded px-3 py-2 mb-2 text-[#0F172A] placeholder:text-[#94A3B8] outline-none focus:border-[#3B82F6] resize-none"
+        />
+        <OcpsButton size="sm" onClick={sendMissingNote} disabled={!missingNote.trim()}>Gửi ghi chú</OcpsButton>
+      </Card>
+
+      {/* Thông tin onweb */}
       <Card className="mb-4">
         <div className="flex items-center gap-2 mb-3">
-          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${hasSubmitted ? 'bg-[#16A34A] text-white' : 'bg-[#E2E8F0] text-[#475569]'}`}>1</span>
-          <p className="text-sm font-medium text-[#0F172A]">Đủ tối thiểu — Lên web</p>
-          {hasSubmitted && <span className="text-xs text-[#166534] bg-[#DCFCE7] px-2 py-0.5 rounded-full">✓ Đã lên web</span>}
+          <p className="text-sm font-medium text-[#0F172A]">Thông tin onweb</p>
         </div>
 
         {(item.contentLichSuChinhSua?.length ?? 0) > 0 && (
@@ -112,42 +116,8 @@ export function ContentProcess() {
           className="w-full text-xs border border-[#E2E8F0] rounded px-3 py-2 mb-3 text-[#0F172A] placeholder:text-[#94A3B8] outline-none focus:border-[#3B82F6]"
         />
         <OcpsButton variant="primary" size="sm" onClick={handleStep1} disabled={!linkWeb.trim()}>
-          {hasSubmitted ? 'Cập nhật lại nội dung' : 'Đánh dấu Đã lên web'}
+          Đánh dấu đã lên web
         </OcpsButton>
-      </Card>
-
-      {/* Bước 2 */}
-      <Card className={`mb-4 ${!hasSubmitted ? 'opacity-40 pointer-events-none' : ''} ${step2Done ? 'opacity-70' : ''}`}>
-        <div className="flex items-center gap-2 mb-3">
-          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${step2Done ? 'bg-[#16A34A] text-white' : 'bg-[#E2E8F0] text-[#475569]'}`}>2</span>
-          <p className="text-sm font-medium text-[#0F172A]">Đủ full — Hoàn tất Content AI</p>
-          {item.docStatus !== 'du_full' && <span className="text-xs text-[#94A3B8]">(Chờ tài liệu đủ full)</span>}
-          {step2Done && <span className="text-xs text-[#166534] bg-[#DCFCE7] px-2 py-0.5 rounded-full">Hoàn tất</span>}
-        </div>
-        <textarea
-          placeholder="Ghi chú nội dung AI đã cập nhật (tuỳ chọn)"
-          value={aiNote}
-          onChange={e => setAiNote(e.target.value)}
-          disabled={step2Done}
-          rows={2}
-          className="w-full text-xs border border-[#E2E8F0] rounded px-3 py-2 mb-3 text-[#0F172A] placeholder:text-[#94A3B8] outline-none focus:border-[#3B82F6] resize-none disabled:bg-[#F8FAFC] disabled:text-[#94A3B8]"
-        />
-        <OcpsButton size="sm" onClick={handleStep2} disabled={step2Done || item.docStatus !== 'du_full'}>
-          {step2Done ? '✓ Đã hoàn tất' : 'Hoàn tất Content AI'}
-        </OcpsButton>
-      </Card>
-
-      {/* Ghi chú thiếu file */}
-      <Card className="border-dashed">
-        <p className="text-xs font-medium text-[#475569] mb-2">Ghi chú thiếu file — gửi ngược về NH / Vendor</p>
-        <textarea
-          placeholder="VD: Thiếu ảnh mặt lưng, cần file thông số kỹ thuật PDF..."
-          value={missingNote}
-          onChange={e => setMissingNote(e.target.value)}
-          rows={2}
-          className="w-full text-xs border border-[#E2E8F0] rounded px-3 py-2 mb-2 text-[#0F172A] placeholder:text-[#94A3B8] outline-none focus:border-[#3B82F6] resize-none"
-        />
-        <OcpsButton size="sm" onClick={sendMissingNote} disabled={!missingNote.trim()}>Gửi ghi chú</OcpsButton>
       </Card>
     </div>
   )

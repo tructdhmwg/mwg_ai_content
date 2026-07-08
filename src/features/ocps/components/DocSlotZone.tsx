@@ -27,10 +27,12 @@ interface DocSlotZoneProps {
   ruleHint?: string
   onConfirm?: (status: TrangThaiBoSung) => void
   templateUrl?: string
+  showNote?: boolean
 }
 
-export function DocSlotZone({ label, icon, slot = {}, onUpload, readOnly = false, ruleHint, onConfirm, templateUrl }: DocSlotZoneProps) {
+export function DocSlotZone({ label, icon, slot = {}, onUpload, readOnly = false, ruleHint, onConfirm, templateUrl, showNote = false }: DocSlotZoneProps) {
   const { files = [], ghiChu, trangThaiBoSung } = slot
+  const displayStatus: TrangThaiBoSung = trangThaiBoSung ?? 'con_thieu'
 
   function handleDrop(e: DragEvent<HTMLDivElement>) {
     e.preventDefault()
@@ -52,18 +54,16 @@ export function DocSlotZone({ label, icon, slot = {}, onUpload, readOnly = false
       onDragOver={e => e.preventDefault()}
       onDrop={handleDrop}
     >
-      {ghiChu && (
+      {showNote && ghiChu && (
         <div className="bg-[#FEE2E2] text-[#991B1B] text-xs rounded-lg px-2.5 py-1.5 flex items-start gap-1.5">
           <span>⚠</span> {ghiChu}
         </div>
       )}
       <div className="flex items-center gap-2">
         <div className="text-2xl">{icon}</div>
-        {trangThaiBoSung && (
-          <span className={`text-xs px-2 py-0.5 rounded-full ${BO_SUNG_STYLE[trangThaiBoSung]}`}>
-            {BO_SUNG_STATUS_LABEL[trangThaiBoSung]}
-          </span>
-        )}
+        <span className={`text-xs px-2 py-0.5 rounded-full ${BO_SUNG_STYLE[displayStatus]}`}>
+          {BO_SUNG_STATUS_LABEL[displayStatus]}
+        </span>
       </div>
       <p className="text-xs font-semibold text-[#0F172A] uppercase tracking-wide">{label}</p>
       <p className="text-xs text-[#94A3B8]">{files.length ? `${files.length} file` : 'Chưa có file'}</p>
@@ -84,7 +84,7 @@ export function DocSlotZone({ label, icon, slot = {}, onUpload, readOnly = false
       {onConfirm && files.length > 0 && trangThaiBoSung !== 'bo_sung_du' && (
         <div className="flex gap-1.5">
           <OcpsButton size="sm" variant="success" onClick={() => onConfirm('bo_sung_du')}>✓ Đủ</OcpsButton>
-          <OcpsButton size="sm" variant="danger" onClick={() => onConfirm('con_thieu')}>✗ Còn thiếu</OcpsButton>
+          <OcpsButton size="sm" variant="danger" onClick={() => onConfirm('con_thieu')}>✗ Thiếu</OcpsButton>
         </div>
       )}
       {files.length > 0 && (

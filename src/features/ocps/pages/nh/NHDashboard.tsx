@@ -3,10 +3,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useOcpsAuth } from '../../context/OcpsAuthContext'
 import { useOcpsData } from '../../context/OcpsDataContext'
-import { OcpsBadge } from '../../components/OcpsBadge'
 import { StatCard } from '../../components/StatCard'
 import { Card } from '../../components/Card'
 import { OcpsButton } from '../../components/OcpsButton'
+import { FullListingTable } from '../../components/FullListingTable'
 import { DOC_STATUS_LABEL, MKT_STATUS_LABEL, FLOW_LABEL } from '../../data/ocpsMockData'
 
 export function NHDashboard() {
@@ -36,6 +36,21 @@ export function NHDashboard() {
   const ketMkt = myItems.filter(i => i.mktStatus === 'dang_san_xuat' || i.mktStatus === 'cho_nghiem_thu').length
   const hoanthat = myItems.filter(i => i.seoStatus === 'hoan_tat' || i.seoStatus === 'da_len_web').length
   const vendors = [...new Set(myItems.map(i => i.vendor))]
+  const listingRows = filtered.map(item => ({
+    key: item.id,
+    maErp: item.id,
+    modelCode: item.modelCode,
+    erpCreatedAt: item.erpCreatedAt,
+    tenSP: item.ten,
+    nganhhang: item.nganhhang,
+    vendor: item.vendor,
+    docStatus: item.docStatus,
+    flowLabel: item.flow ? FLOW_LABEL[item.flow] : '',
+    seoStatus: item.seoStatus,
+    mktStatus: item.mktStatus,
+    ngayGui: item.ngayGuiYeuCau || '',
+    action: <OcpsButton size="sm" onClick={() => navigate(`/ocps/nh/product/${item.id}`)}>Mở</OcpsButton>,
+  }))
 
   return (
     <div>
@@ -105,45 +120,7 @@ export function NHDashboard() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-[#E2E8F0] text-[#475569] text-left">
-                <th className="pb-2 pr-3 font-medium">Mã ERP</th>
-                <th className="pb-2 pr-3 font-medium">Mã model code</th>
-                <th className="pb-2 pr-3 font-medium">Ngày tạo ERP</th>
-                <th className="pb-2 pr-3 font-medium">Tên SP</th>
-                <th className="pb-2 pr-3 font-medium">Hãng</th>
-                <th className="pb-2 pr-3 font-medium">Tài liệu</th>
-                <th className="pb-2 pr-3 font-medium">Luồng xử lý</th>
-                <th className="pb-2 pr-3 font-medium">Content</th>
-                <th className="pb-2 pr-3 font-medium">MKT</th>
-                <th className="pb-2"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(item => (
-                <tr key={item.id} className="border-b border-[#F8FAFC] hover:bg-[#F8FAFC]">
-                  <td className="py-2 pr-3 font-medium text-[#0F172A]">{item.id}</td>
-                  <td className="py-2 pr-3 text-[#475569]">{item.modelCode || '—'}</td>
-                  <td className="py-2 pr-3 text-[#94A3B8]">{item.erpCreatedAt || '—'}</td>
-                  <td className="py-2 pr-3 text-[#0F172A]">{item.ten}</td>
-                  <td className="py-2 pr-3 text-[#475569]">{item.vendor}</td>
-                  <td className="py-2 pr-3"><OcpsBadge status={item.docStatus} /></td>
-                  <td className="py-2 pr-3 text-[#475569]">{(item.flow && FLOW_LABEL[item.flow]) || '—'}</td>
-                  <td className="py-2 pr-3"><OcpsBadge status={item.seoStatus} /></td>
-                  <td className="py-2 pr-3"><OcpsBadge status={item.mktStatus} /></td>
-                  <td className="py-2">
-                    <OcpsButton size="sm" onClick={() => navigate(`/ocps/nh/product/${item.id}`)}>Mở</OcpsButton>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {filtered.length === 0 && (
-            <p className="text-center text-xs text-[#94A3B8] py-6">Không có sản phẩm nào</p>
-          )}
-        </div>
+        <FullListingTable rows={listingRows} emptyText="Không có sản phẩm nào" />
       </Card>
     </div>
   )
