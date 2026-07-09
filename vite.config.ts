@@ -3,5 +3,5 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/mwg_ai_content/',
+  base: process.env.GITHUB_ACTIONS ? '/mwg_ai_content/' : '/',
 })
