@@ -14,7 +14,7 @@ type BriefWithItem = MktBrief & { _item?: OcpsItem }
 export function MarketingDashboard() {
   const { briefs, items } = useOcpsData()
   const navigate = useNavigate()
-  const [filters, setFilters] = useState({ trangThai: '', loaiNhuCau: '', nganhhang: '', vendor: '' })
+  const [filters, setFilters] = useState({ trangThai: '', nganhhang: '', vendor: '' })
   const [search, setSearch] = useState('')
 
   const active: BriefWithItem[] = briefs
@@ -41,7 +41,6 @@ export function MarketingDashboard() {
       if (!match) return false
     }
     if (filters.trangThai && b.trangThai !== filters.trangThai) return false
-    if (filters.loaiNhuCau && !b.loaiNhuCau.includes(filters.loaiNhuCau)) return false
     if (filters.nganhhang && b._item?.nganhhang !== filters.nganhhang) return false
     if (filters.vendor && b._item?.vendor !== filters.vendor) return false
     return true
@@ -59,7 +58,6 @@ export function MarketingDashboard() {
     seoStatus: brief._item?.seoStatus,
     mktStatus: brief.trangThai,
     ngayGui: brief._item?.ngayGuiYeuCau || brief.ngayTao || '',
-    loaiNhuCau: brief.loaiNhuCau.map(l => LOAI_NHU_CAU_LABEL[l] || l).join(', '),
     action: <OcpsButton size="sm" onClick={() => navigate(`/ocps/marketing/brief/${brief.id}`)}>Mở</OcpsButton>,
   }))
 
@@ -107,16 +105,6 @@ export function MarketingDashboard() {
           >
             <option value="">Trạng thái: tất cả</option>
             {Object.entries(MKT_STATUS_LABEL).filter(([k]) => k !== 'chua_yeu_cau' && k !== 'da_huy').map(([k, v]) => (
-              <option key={k} value={k}>{v}</option>
-            ))}
-          </select>
-          <select
-            value={filters.loaiNhuCau}
-            onChange={e => setFilters(f => ({ ...f, loaiNhuCau: e.target.value }))}
-            className="text-xs border border-[#E2E8F0] rounded px-2 py-1.5 bg-white text-[#0F172A]"
-          >
-            <option value="">Loại nhu cầu: tất cả</option>
-            {Object.entries(LOAI_NHU_CAU_LABEL).map(([k, v]) => (
               <option key={k} value={k}>{v}</option>
             ))}
           </select>

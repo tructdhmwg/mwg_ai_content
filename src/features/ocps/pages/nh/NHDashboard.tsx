@@ -60,11 +60,12 @@ export function NHDashboard() {
         <p className="text-sm text-[#94A3B8]">Ngành hàng: {currentUser?.nganhhang ?? 'Tất cả (admin)'}</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-3 mb-5">
+      {/* Tạm ẩn hàng thẻ thống kê */}
+      {/* <div className="grid grid-cols-3 gap-3 mb-5">
         <StatCard label="Thiếu tài liệu" value={thieu} color="text-[#92400E]" />
         <StatCard label="Đang kẹt MKT" value={ketMkt} />
         <StatCard label="Đã hoàn tất" value={hoanthat} color="text-[#166534]" />
-      </div>
+      </div> */}
 
       <Card>
         <div className="flex items-center gap-2 mb-3">

@@ -14,7 +14,6 @@ export interface FullListingRow {
   seoStatus?: string
   mktStatus?: string
   ngayGui?: string
-  loaiNhuCau?: string
   action?: ReactNode
 }
 
@@ -68,7 +67,6 @@ export function FullListingTable({ rows, emptyText }: FullListingTableProps) {
             <th className="pb-2 pr-3 font-medium">Content</th>
             <th className="pb-2 pr-3 font-medium">MKT</th>
             <th className="pb-2 pr-3 font-medium">Ngày gửi</th>
-            <th className="pb-2 pr-3 font-medium">Loại nhu cầu</th>
             <th className="pb-2"></th>
           </tr>
         </thead>
@@ -86,7 +84,6 @@ export function FullListingTable({ rows, emptyText }: FullListingTableProps) {
               <BadgeCell status={row.seoStatus} />
               <BadgeCell status={row.mktStatus} />
               <TextCell muted>{row.ngayGui}</TextCell>
-              <TextCell>{row.loaiNhuCau}</TextCell>
               <td className="py-2">{row.action}</td>
             </tr>
           ))}

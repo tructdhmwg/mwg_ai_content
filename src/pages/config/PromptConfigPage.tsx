@@ -83,7 +83,7 @@ export function PromptConfigPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const currentUserName = user?.name || 'Nguyễn Văn Admin'
 
-  const [activeSite, setActiveSite] = useState<SiteId>('tgdd')
+  const [activeSite, setActiveSite] = useState<SiteId>('dmx')
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null)
   const [activeWorkflow, setActiveWorkflow] = useState<WorkflowKey>(() => getInitialWorkflow(searchParams.get('tab')))
   const [searchByWorkflow, setSearchByWorkflow] = useState<Record<string, string>>({})

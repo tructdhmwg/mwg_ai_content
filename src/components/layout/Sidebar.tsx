@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
-  LogOut, Database, Settings, Users,
-  Upload, LayoutDashboard, BarChart3, ListChecks, Megaphone, Home
+  LogOut, Database, Settings,
+  Upload, LayoutDashboard, ListChecks, Megaphone, Home
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useAuthStore } from '../../store/authStore'
@@ -14,7 +14,8 @@ const OCPS_NAV: Record<string, Array<{ to: string; label: string; icon: React.El
   vendor: [{ to: '/ocps/vendor/upload', label: 'Upload tài liệu', icon: Upload }],
   nh: [
     { to: '/ocps/nh/dashboard', label: 'Dashboard NH', icon: LayoutDashboard },
-    { to: '/ocps/nh/report', label: 'Báo cáo NH', icon: BarChart3 },
+    // Tạm ẩn Báo cáo NH
+    // { to: '/ocps/nh/report', label: 'Báo cáo NH', icon: BarChart3 },
   ],
   content: [{ to: '/ocps/content/dashboard', label: 'Hàng đợi Content', icon: ListChecks }],
   marketing: [{ to: '/ocps/marketing/dashboard', label: 'Brief Marketing', icon: Megaphone }],
@@ -108,9 +109,9 @@ export function Sidebar() {
           </>
         )}
 
-        {/* Quản trị luôn ở cuối — chỉ giữ quản lý người dùng */}
-        <div className="px-2 mb-1 mt-4 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Quản trị</div>
-        <NavItem to="/admin/users" icon={Users} label="Người dùng" />
+        {/* Tạm ẩn nhóm Quản trị (Người dùng) */}
+        {/* <div className="px-2 mb-1 mt-4 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Quản trị</div>
+        <NavItem to="/admin/users" icon={Users} label="Người dùng" /> */}
       </nav>
 
       {/* User info — sticky ở chân sidebar */}
