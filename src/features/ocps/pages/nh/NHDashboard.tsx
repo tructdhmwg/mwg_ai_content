@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useOcpsAuth } from '../../context/OcpsAuthContext'
 import { useOcpsData } from '../../context/OcpsDataContext'
-import { StatCard } from '../../components/StatCard'
+// import { StatCard } from '../../components/StatCard' // Tạm ẩn thẻ thống kê
 import { Card } from '../../components/Card'
 import { OcpsButton } from '../../components/OcpsButton'
 import { FullListingTable } from '../../components/FullListingTable'
@@ -32,9 +32,10 @@ export function NHDashboard() {
     return true
   })
 
-  const thieu = myItems.filter(i => i.docStatus === 'thieu').length
-  const ketMkt = myItems.filter(i => i.mktStatus === 'dang_san_xuat' || i.mktStatus === 'cho_nghiem_thu').length
-  const hoanthat = myItems.filter(i => i.seoStatus === 'hoan_tat' || i.seoStatus === 'da_len_web').length
+  // Tạm ẩn thẻ thống kê — bỏ comment khi hiện lại
+  // const thieu = myItems.filter(i => i.docStatus === 'thieu').length
+  // const ketMkt = myItems.filter(i => i.mktStatus === 'dang_san_xuat' || i.mktStatus === 'cho_nghiem_thu').length
+  // const hoanthat = myItems.filter(i => i.seoStatus === 'hoan_tat' || i.seoStatus === 'da_len_web').length
   const vendors = [...new Set(myItems.map(i => i.vendor))]
   const listingRows = filtered.map(item => ({
     key: item.id,
