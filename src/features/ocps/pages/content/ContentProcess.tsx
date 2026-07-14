@@ -18,7 +18,7 @@ const SLOT_DEFS: Array<{ key: SlotKey; label: string; icon: string }> = [
 export function ContentProcess() {
   const { id = '' } = useParams()
   const { currentUser } = useOcpsAuth()
-  const { items, docSlots, revertDocStatus, isContentEligible, confirmSlotStatus, updateContentLink } = useOcpsData()
+  const { items, docSlots, revertDocStatus, isContentEligible, confirmSlotStatus, updateContentLink, uploadFile } = useOcpsData()
   const navigate = useNavigate()
 
   const found = items.find(i => i.id === id)
@@ -73,7 +73,10 @@ export function ContentProcess() {
               label={label}
               icon={icon}
               slot={slots[key]}
-              readOnly
+              // Slot "Tài liệu khác" đồng bộ UI với trang Upload tài liệu: cho up file / up link
+              readOnly={key !== 'khac'}
+              onUpload={key === 'khac' ? file => uploadFile(id, key, file, currentUser?.name) : undefined}
+              allowLink={key === 'khac'}
               onConfirm={status => confirmSlotStatus(id, key, status, 'Content')}
             />
           ))}

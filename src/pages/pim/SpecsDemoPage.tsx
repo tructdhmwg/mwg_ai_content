@@ -1215,12 +1215,13 @@ function SpecsDemoPageContent() {
           >
             <FileText size={16} className={mainTab === 'specs' ? 'text-blue-500' : 'text-gray-400'} /> Tài liệu & Links Tham Khảo
           </button>
+          {/* Tạm ẩn tab Lịch sử Jobs
           <button
             onClick={() => handleTabChange('jobs')}
             className={`flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-all ${mainTab === 'jobs' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/70 ring-1 ring-gray-200/70' : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'}`}
           >
             <History size={16} className={mainTab === 'jobs' ? 'text-blue-500' : 'text-gray-400'} /> Lịch sử Jobs
-          </button>
+          </button> */}
         </div>
       </div>
     )}
@@ -1243,12 +1244,13 @@ function SpecsDemoPageContent() {
       >
         <FileText size={16} className={mainTab === 'specs' ? 'text-blue-500' : 'text-gray-400'} /> Tài liệu & Links Tham Khảo
       </button>
+      {/* Tạm ẩn tab Lịch sử Jobs
       <button
         onClick={() => handleTabChange('jobs')}
         className={`flex h-10 shrink-0 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition-all ${mainTab === 'jobs' ? 'bg-white text-gray-900 shadow-md shadow-gray-200/70 ring-1 ring-gray-200/70' : 'text-gray-500 hover:bg-white/60 hover:text-gray-800'}`}
       >
         <History size={16} className={mainTab === 'jobs' ? 'text-blue-500' : 'text-gray-400'} /> Lịch sử Jobs
-      </button>
+      </button> */}
     </div>
 
     {promptWorkflowDialog && (
