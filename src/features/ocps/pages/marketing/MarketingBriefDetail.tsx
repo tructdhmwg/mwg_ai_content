@@ -5,10 +5,7 @@ import { useOcpsData } from '../../context/OcpsDataContext'
 import { Card } from '../../components/Card'
 import { OcpsButton } from '../../components/OcpsButton'
 import { OcpsBadge } from '../../components/OcpsBadge'
-import { MKT_STATUS_LABEL, NHOM_KENH_LABEL, LOAI_BRIEF_LABEL } from '../../data/ocpsMockData'
 import type { MktStatus } from '../../types'
-
-const STATUS_OPTIONS: MktStatus[] = ['da_tiep_nhan', 'dang_san_xuat', 'hoan_tat']
 
 export function MarketingBriefDetail() {
   const { id = '' } = useParams()
@@ -55,33 +52,9 @@ export function MarketingBriefDetail() {
       {/* Nội dung brief từ NH */}
       <Card className="mb-4">
         <p className="text-xs font-medium text-[#475569] mb-3">Brief từ Ngành hàng</p>
+        {/* Chỉ hiển thị nội dung brief — các field Nhóm kênh/Loại brief/Kênh/Deadline/Budget tạm ẩn */}
         <div className="bg-[#F1F5F9] rounded-lg p-3 space-y-2 text-xs">
-          {brief.nhomKenh && (
-            <div className="flex gap-2">
-              <span className="text-[#94A3B8] w-24 shrink-0">Nhóm kênh:</span>
-              <span className="text-[#0F172A]">{NHOM_KENH_LABEL[brief.nhomKenh] || brief.nhomKenh}</span>
-            </div>
-          )}
-          {brief.loaiBrief && (
-            <div className="flex gap-2">
-              <span className="text-[#94A3B8] w-24 shrink-0">Loại brief:</span>
-              <span className="text-[#0F172A]">{LOAI_BRIEF_LABEL[brief.loaiBrief] || brief.loaiBrief}</span>
-            </div>
-          )}
           <div className="flex gap-2">
-            <span className="text-[#94A3B8] w-24 shrink-0">Kênh:</span>
-            <span className="text-[#0F172A]">{(Array.isArray(brief.kenh) ? brief.kenh : [brief.kenh]).join(', ')}</span>
-          </div>
-          <div className="flex gap-2">
-            <span className="text-[#94A3B8] w-24 shrink-0">Deadline:</span>
-            <span className="text-[#0F172A]">{brief.deadline}</span>
-          </div>
-          <div className="flex gap-2">
-            <span className="text-[#94A3B8] w-24 shrink-0">Budget:</span>
-            <span className="text-[#0F172A]">{brief.budget}</span>
-          </div>
-          <div className="flex gap-2">
-            <span className="text-[#94A3B8] w-24 shrink-0">Brief:</span>
             <span className="text-[#0F172A]">{brief.briefText}</span>
           </div>
         </div>
@@ -106,14 +79,14 @@ export function MarketingBriefDetail() {
       {!isCancelled && (
         <Card>
           <p className="text-sm font-medium text-[#0F172A] mb-3">Cập nhật sản xuất</p>
+          {/* Trạng thái gom về 2 nhóm: Đang xử lý (mọi trạng thái chưa hoàn tất) và Hoàn tất */}
           <select
-            value={status}
+            value={status === 'hoan_tat' ? 'hoan_tat' : 'dang_san_xuat'}
             onChange={e => setStatus(e.target.value as MktStatus)}
             className="w-full text-xs border border-[#E2E8F0] rounded px-3 py-2 mb-3 bg-white text-[#0F172A] outline-none focus:border-[#3B82F6]"
           >
-            {STATUS_OPTIONS.map(s => (
-              <option key={s} value={s}>{MKT_STATUS_LABEL[s]}</option>
-            ))}
+            <option value="dang_san_xuat">Đang xử lý</option>
+            <option value="hoan_tat">Hoàn tất</option>
           </select>
           <input
             type="text"

@@ -71,6 +71,8 @@ export interface SlotFile {
   name: string
   date: string
   by?: string
+  // Tài liệu dạng link (thay vì file upload)
+  url?: string
   // Field phát sinh lúc runtime khi upload qua DataContext
   isLatest?: boolean
   superseded?: boolean

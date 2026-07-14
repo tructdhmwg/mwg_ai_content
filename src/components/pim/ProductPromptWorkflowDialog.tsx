@@ -115,7 +115,6 @@ export function ProductPromptWorkflowDialog({
   const [bonus, setBonus] = useState(() => product.bonus_prompts?.[workflowKey] || '')
   const [feedback, setFeedback] = useState(() => product.feedback_prompts?.[workflowKey] || '')
   const [research, setResearch] = useState(() => product.external_research_by_workflow?.[workflowKey] || false)
-  const showFeedback = workflowKey !== 'wf4_article_images'
 
   const selectedEntry = entries.find(entry => entryKey(entry) === selectedKey)
   const promptText = meta.getPromptText(selectedEntry?.option)
@@ -134,12 +133,10 @@ export function ProductPromptWorkflowDialog({
       ...(product.bonus_prompts || {}),
       [workflowKey]: bonus,
     })
-    if (showFeedback) {
-      onUpdateProductField('feedback_prompts', {
-        ...(product.feedback_prompts || {}),
-        [workflowKey]: feedback,
-      })
-    }
+    onUpdateProductField('feedback_prompts', {
+      ...(product.feedback_prompts || {}),
+      [workflowKey]: feedback,
+    })
     onUpdateProductField('external_research_by_workflow', {
       ...(product.external_research_by_workflow || {}),
       [workflowKey]: research,
@@ -224,7 +221,7 @@ export function ProductPromptWorkflowDialog({
               </div>
             </div>
 
-            <div className={showFeedback ? 'grid gap-4 lg:grid-cols-2' : ''}>
+            <div className="grid gap-4 lg:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-xs font-bold text-gray-700">
                   Yêu cầu bổ sung <span className="font-normal text-gray-400">(Bonus Prompt)</span>
@@ -237,20 +234,18 @@ export function ProductPromptWorkflowDialog({
                   className="w-full resize-y rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 text-[13px] text-gray-800 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10"
                 />
               </div>
-              {showFeedback && (
-                <div>
-                  <label className="mb-1.5 block text-xs font-bold text-amber-700">
-                    Feedback cho AI <span className="font-normal text-amber-500">(Regen)</span>
-                  </label>
-                  <textarea
-                    value={feedback}
-                    onChange={(event) => setFeedback(event.target.value)}
-                    placeholder="Nhập feedback để AI gen lại..."
-                    rows={3}
-                    className="w-full resize-y rounded-lg border border-amber-300 bg-amber-50/50 px-3.5 py-2.5 text-[13px] text-gray-800 outline-none transition focus:ring-2 focus:ring-amber-500/10"
-                  />
-                </div>
-              )}
+              <div>
+                <label className="mb-1.5 block text-xs font-bold text-amber-700">
+                  Feedback cho AI <span className="font-normal text-amber-500">(Regen)</span>
+                </label>
+                <textarea
+                  value={feedback}
+                  onChange={(event) => setFeedback(event.target.value)}
+                  placeholder="Nhập feedback để AI gen lại..."
+                  rows={3}
+                  className="w-full resize-y rounded-lg border border-amber-300 bg-amber-50/50 px-3.5 py-2.5 text-[13px] text-gray-800 outline-none transition focus:ring-2 focus:ring-amber-500/10"
+                />
+              </div>
             </div>
           </div>
         )}

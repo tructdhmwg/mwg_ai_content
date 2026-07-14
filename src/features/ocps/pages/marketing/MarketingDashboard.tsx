@@ -6,7 +6,7 @@ import { Card } from '../../components/Card'
 import { OcpsButton } from '../../components/OcpsButton'
 import { StatCard } from '../../components/StatCard'
 import { FullListingTable } from '../../components/FullListingTable'
-import { FLOW_LABEL, LOAI_NHU_CAU_LABEL, MKT_STATUS_LABEL } from '../../data/ocpsMockData'
+import { FLOW_LABEL } from '../../data/ocpsMockData'
 import type { MktBrief, OcpsItem } from '../../types'
 
 type BriefWithItem = MktBrief & { _item?: OcpsItem }
@@ -21,13 +21,9 @@ export function MarketingDashboard() {
     .filter(b => b.trangThai !== 'da_huy')
     .map(b => ({ ...b, _item: items.find(i => i.id === b.itemId) }))
 
-  const typeCounts: Record<string, number> = {}
-  active.forEach(b => b.loaiNhuCau.forEach(t => { typeCounts[t] = (typeCounts[t] || 0) + 1 }))
-  const total = Object.values(typeCounts).reduce((a, b) => a + b, 0)
-
-  const dangsanxuat = active.filter(b => b.trangThai === 'dang_san_xuat').length
-  const chonghiemthu = active.filter(b => b.trangThai === 'cho_nghiem_thu').length
+  // Gom trạng thái về 2 nhóm: hoàn tất và đang xử lý (mọi trạng thái còn lại)
   const hoanthat = active.filter(b => b.trangThai === 'hoan_tat').length
+  const dangXuLy = active.length - hoanthat
 
   const nganhhangs = [...new Set(active.map(b => b._item?.nganhhang).filter(Boolean))] as string[]
   const vendors = [...new Set(active.map(b => b._item?.vendor).filter(Boolean))] as string[]
@@ -40,7 +36,8 @@ export function MarketingDashboard() {
         (b._item?.modelCode || '').toLowerCase().includes(q)
       if (!match) return false
     }
-    if (filters.trangThai && b.trangThai !== filters.trangThai) return false
+    if (filters.trangThai === 'hoan_tat' && b.trangThai !== 'hoan_tat') return false
+    if (filters.trangThai === 'dang_xu_ly' && b.trangThai === 'hoan_tat') return false
     if (filters.nganhhang && b._item?.nganhhang !== filters.nganhhang) return false
     if (filters.vendor && b._item?.vendor !== filters.vendor) return false
     return true
@@ -68,20 +65,8 @@ export function MarketingDashboard() {
         <p className="text-sm text-[#94A3B8]">Danh sách brief — vận hành như ticket system</p>
       </div>
 
-      {/* Type breakdown */}
-      <div className="grid grid-cols-3 gap-3 mb-5">
-        {Object.entries(typeCounts).map(([type, count]) => (
-          <StatCard
-            key={type}
-            label={LOAI_NHU_CAU_LABEL[type] || type}
-            value={total > 0 ? `${Math.round((count / total) * 100)}%` : '0%'}
-          />
-        ))}
-      </div>
-
-      <div className="grid grid-cols-3 gap-3 mb-5">
-        <StatCard label="Đang sản xuất" value={dangsanxuat} color="text-[#1D4ED8]" />
-        <StatCard label="Chờ nghiệm thu" value={chonghiemthu} color="text-[#92400E]" />
+      <div className="grid grid-cols-2 gap-3 mb-5">
+        <StatCard label="Đang xử lý" value={dangXuLy} color="text-[#1D4ED8]" />
         <StatCard label="Hoàn tất" value={hoanthat} color="text-[#166534]" />
       </div>
 
@@ -104,9 +89,8 @@ export function MarketingDashboard() {
             className="text-xs border border-[#E2E8F0] rounded px-2 py-1.5 bg-white text-[#0F172A]"
           >
             <option value="">Trạng thái: tất cả</option>
-            {Object.entries(MKT_STATUS_LABEL).filter(([k]) => k !== 'chua_yeu_cau' && k !== 'da_huy').map(([k, v]) => (
-              <option key={k} value={k}>{v}</option>
-            ))}
+            <option value="dang_xu_ly">Đang xử lý</option>
+            <option value="hoan_tat">Hoàn tất</option>
           </select>
           <select
             value={filters.nganhhang}

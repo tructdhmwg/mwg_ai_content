@@ -10,7 +10,6 @@ import { WebhookConfigPage } from './pages/config/WebhookConfigPage'
 import { UserListPage } from './pages/admin/UserListPage'
 import { UserFormPage } from './pages/admin/UserFormPage'
 import { ProductListPage } from './pages/pim/ProductListPage'
-import { ProductDetailPage } from './pages/pim/ProductDetailPage'
 import { SpecsDemoPage } from './pages/pim/SpecsDemoPage'
 import { OcpsRoutes } from './features/ocps/routes'
 
@@ -25,7 +24,8 @@ export default function App() {
           <Route path="/jobs/new" element={<CreateJobPage />} />
           <Route path="/jobs/:jobId" element={<JobDetailPage />} />
           <Route path="/products" element={<ProductListPage />} />
-          <Route path="/products/:id" element={<ProductDetailPage />} />
+          {/* Đồng bộ UI chi tiết sản phẩm: mọi sản phẩm dùng chung UI SpecsDemoPage */}
+          <Route path="/products/:id" element={<SpecsDemoPage />} />
           <Route path="/products/:id/specs-demo" element={<SpecsDemoPage />} />
           <Route path="/config/prompts" element={<PromptConfigPage />} />
 

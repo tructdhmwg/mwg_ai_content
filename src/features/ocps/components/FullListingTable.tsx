@@ -30,8 +30,21 @@ function TextCell({ children, strong = false, muted = false }: { children?: stri
   )
 }
 
-function BadgeCell({ status }: { status?: string }) {
-  return <td className="py-2 pr-3">{status ? <OcpsBadge status={status} /> : null}</td>
+// Luồng xử lý chỉ hiển thị 2 giá trị: "Cả hai" và "Chỉ Content"
+function normalizeFlowLabel(label?: string) {
+  if (!label) return ''
+  return label === 'Chỉ Content' ? label : 'Cả hai'
+}
+
+// Content/MKT chỉ hiển thị 2 giá trị: "Đang xử lý" và "Hoàn tất"
+function ProgressBadgeCell({ status }: { status?: string }) {
+  if (!status) return <td className="py-2 pr-3" />
+  const done = status === 'hoan_tat' || status === 'da_len_web'
+  return (
+    <td className="py-2 pr-3">
+      <OcpsBadge status={done ? 'hoan_tat' : 'dang_xu_ly'} label={done ? 'Hoàn tất' : 'Đang xử lý'} />
+    </td>
+  )
 }
 
 function normalizeDocStatus(status?: string) {
@@ -57,7 +70,7 @@ export function FullListingTable({ rows, emptyText }: FullListingTableProps) {
         <thead>
           <tr className="border-b border-[#E2E8F0] text-[#475569] text-left">
             <th className="pb-2 pr-3 font-medium">Mã ERP</th>
-            <th className="pb-2 pr-3 font-medium">Mã model code</th>
+            <th className="pb-2 pr-3 font-medium">Mã modelID</th>
             <th className="pb-2 pr-3 font-medium">Ngày tạo ERP</th>
             <th className="pb-2 pr-3 font-medium">Tên SP</th>
             <th className="pb-2 pr-3 font-medium">Ngành hàng</th>
@@ -80,9 +93,9 @@ export function FullListingTable({ rows, emptyText }: FullListingTableProps) {
               <TextCell>{row.nganhhang}</TextCell>
               <TextCell>{row.vendor}</TextCell>
               <DocStatusCell status={row.docStatus} />
-              <TextCell>{row.flowLabel}</TextCell>
-              <BadgeCell status={row.seoStatus} />
-              <BadgeCell status={row.mktStatus} />
+              <TextCell>{normalizeFlowLabel(row.flowLabel)}</TextCell>
+              <ProgressBadgeCell status={row.seoStatus} />
+              <ProgressBadgeCell status={row.mktStatus} />
               <TextCell muted>{row.ngayGui}</TextCell>
               <td className="py-2">{row.action}</td>
             </tr>

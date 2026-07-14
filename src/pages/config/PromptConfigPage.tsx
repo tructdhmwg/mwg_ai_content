@@ -12,7 +12,6 @@ import {
   ChevronRight,
   Database,
   Edit,
-  Lock,
   Minus,
   Plus,
   Save,
@@ -104,7 +103,8 @@ export function PromptConfigPage() {
   const [promptIsActive, setPromptIsActive] = useState(true)
   const [hasTypedInModal, setHasTypedInModal] = useState(false)
 
-  const addPromptButtonRef = useRef<HTMLButtonElement>(null)
+  // Tạm ẩn nút Thêm prompt — bỏ comment khi hiện lại
+  // const addPromptButtonRef = useRef<HTMLButtonElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)
   const labelInputRef = useRef<HTMLInputElement>(null)
 
@@ -245,7 +245,8 @@ export function PromptConfigPage() {
   const safeCurrentPage = Math.min(currentPage, totalPages)
   const paginatedRecords = filteredRecords.slice((safeCurrentPage - 1) * PAGE_SIZE, safeCurrentPage * PAGE_SIZE)
 
-  const generatedPromptName = activeCategory ? `${activeCategory.name} - ${promptLabel.trim() || '...'}` : ''
+  // Tạm ẩn khối "Tên prompt (tự động tạo)" trong modal — bỏ comment khi hiện lại
+  // const generatedPromptName = activeCategory ? `${activeCategory.name} - ${promptLabel.trim() || '...'}` : ''
   const trimmedPromptLabel = promptLabel.trim()
   const duplicateLabel = useMemo(() => {
     if (!activeCategory || !trimmedPromptLabel) return false
@@ -295,15 +296,16 @@ export function PromptConfigPage() {
     toast('Đã xóa ngành hàng', 'warning')
   }
 
-  const openCreatePromptModal = () => {
-    setModalMode('create')
-    setEditingRecord(null)
-    setPromptLabel('')
-    setPromptText('')
-    setPromptIsActive(true)
-    setHasTypedInModal(false)
-    setModalOpen(true)
-  }
+  // Tạm ẩn nút Thêm prompt — bỏ comment khi hiện lại
+  // const openCreatePromptModal = () => {
+  //   setModalMode('create')
+  //   setEditingRecord(null)
+  //   setPromptLabel('')
+  //   setPromptText('')
+  //   setPromptIsActive(true)
+  //   setHasTypedInModal(false)
+  //   setModalOpen(true)
+  // }
 
   const openEditPromptModal = (record: PromptRecord) => {
     if (!activeCategory) return
@@ -553,6 +555,7 @@ export function PromptConfigPage() {
                       className="h-10 w-full rounded-lg border border-gray-300 bg-white pl-9 pr-3 text-sm text-gray-900 outline-none transition focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
                     />
                   </div>
+                  {/* Tạm ẩn nút Thêm prompt
                   <Button
                     ref={addPromptButtonRef}
                     onClick={openCreatePromptModal}
@@ -560,7 +563,7 @@ export function PromptConfigPage() {
                   >
                     <Plus size={18} />
                     Thêm prompt
-                  </Button>
+                  </Button> */}
                 </div>
 
                 {filteredRecords.length === 0 ? (
@@ -570,10 +573,11 @@ export function PromptConfigPage() {
                     </div>
                     <p className="text-sm font-semibold text-gray-900">Chưa có prompt nào trong {activeWorkflowMeta.label}</p>
                     <p className="mt-1 text-sm text-gray-500">Tạo prompt đầu tiên cho ngành hàng {activeCategory.name}.</p>
+                    {/* Tạm ẩn nút Thêm prompt
                     <Button onClick={openCreatePromptModal} className="mt-5 rounded-lg bg-gray-900 text-white hover:bg-gray-800">
                       <Plus size={18} />
                       Thêm prompt
-                    </Button>
+                    </Button> */}
                   </div>
                 ) : (
                   <>
@@ -581,11 +585,11 @@ export function PromptConfigPage() {
                       <table className="w-full table-fixed">
                         <thead className="bg-gray-50">
                           <tr className="border-b border-gray-200 text-left text-[11.5px] font-bold uppercase tracking-wide text-gray-500">
-                            <th className="w-[36%] px-6 py-3">Tên prompt</th>
-                            <th className="w-[16%] px-6 py-3">Prompt label</th>
-                            <th className="w-[16%] px-6 py-3">Kích hoạt</th>
-                            <th className="w-[22%] px-6 py-3">Cập nhật</th>
-                            <th className="w-[10%] px-6 py-3 text-right">Thao tác</th>
+                            {/* Tạm ẩn cột Tên prompt */}
+                            <th className="w-[30%] px-6 py-3">Prompt label</th>
+                            <th className="w-[24%] px-6 py-3">Kích hoạt</th>
+                            <th className="w-[32%] px-6 py-3">Cập nhật</th>
+                            <th className="w-[14%] px-6 py-3 text-right">Thao tác</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -599,18 +603,16 @@ export function PromptConfigPage() {
                                   highlightedOptionId === record.option.id ? 'bg-green-50' : 'bg-white',
                                 )}
                               >
-                                <td className={cn('px-6 py-5 text-[13.5px] font-medium', record.option.is_active ? 'text-gray-900' : 'text-gray-400')}>
+                                {/* Tạm ẩn cột Tên prompt */}
+                                <td className="px-6 py-5">
                                   <div className="flex items-center gap-2">
-                                    <span>{record.option.name}</span>
+                                    <span className={cn('inline-flex max-w-full rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1 text-xs font-medium', record.option.is_active ? 'text-gray-700' : 'text-gray-400')}>
+                                      <span className="truncate">{label}</span>
+                                    </span>
                                     {record.isLegacyWorkflow && (
                                       <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700">Workflow cũ</span>
                                     )}
                                   </div>
-                                </td>
-                                <td className="px-6 py-5">
-                                  <span className={cn('inline-flex max-w-full rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1 text-xs font-medium', record.option.is_active ? 'text-gray-700' : 'text-gray-400')}>
-                                    <span className="truncate">{label}</span>
-                                  </span>
                                 </td>
                                 <td className="px-6 py-5">
                                   <div className={cn('flex items-center gap-2 text-sm', record.option.is_active ? 'text-gray-600' : 'text-gray-400')}>
@@ -775,6 +777,7 @@ export function PromptConfigPage() {
                 )}
               </div>
 
+              {/* Tạm ẩn khối "Tên prompt (tự động tạo)" — tên vẫn được tự sinh khi lưu
               <div>
                 <label htmlFor="prompt-name" className="mb-2 block text-sm font-bold text-gray-700">
                   Tên prompt <span className="font-normal text-gray-400">(tự động tạo)</span>
@@ -789,12 +792,12 @@ export function PromptConfigPage() {
                   />
                 </div>
                 <p className="mt-2 text-sm text-gray-400">
-                  Tự động ghép theo cấu trúc <code className="rounded border border-gray-200 bg-gray-50 px-1.5 py-0.5 font-mono text-xs text-gray-500">Tên ngành hàng - {'{prompt_label}'}</code>, không chỉnh sửa được.
+                  Tự động ghép theo cấu trúc <code>Tên ngành hàng - prompt_label</code>, không chỉnh sửa được.
                 </p>
                 {modalMode === 'edit' && !editingRecord?.option.prompt_label && (
                   <p className="mt-2 text-sm text-amber-600">Prompt cũ chưa có label riêng. Nhập label để hệ thống tạo lại tên theo cấu trúc mới.</p>
                 )}
-              </div>
+              </div> */}
 
               <div>
                 <label htmlFor="prompt-text" className="mb-2 block text-sm font-bold text-gray-700">

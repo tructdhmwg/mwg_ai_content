@@ -19,7 +19,7 @@ import {
   ArrowLeft, Upload, Trash2, Plus, Sparkles, Save, FileText,
   Settings, AlertTriangle, Globe, File, Info, Loader2, X, FileSpreadsheet,
   Link, History, CheckCircle2, ExternalLink, Image, LayoutList, Zap, ChevronDown,
-  ChevronLeft, ChevronRight, SlidersHorizontal
+  ChevronLeft, ChevronRight, SlidersHorizontal, ImagePlus
 } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { SiteBadge, StatusBadge } from '../../components/ui/Badge'
@@ -832,6 +832,32 @@ function SpecsDemoPageContent() {
       toast('Đã tạo thành công bộ ảnh bài viết bằng AI!', 'success')
     }
     setGeneratingArticleImages(false)
+  }
+
+  // Chèn bộ ảnh bài viết hiện có vào ngay dưới các thẻ H3 trong content_html (không gen lại ảnh)
+  const handleInsertArticleImages = () => {
+    if (!product) return
+    const images = product.article_images || []
+    if (images.length === 0) {
+      toast('Chưa có ảnh bài viết — hãy Gen ảnh bài viết trước', 'info')
+      return
+    }
+    if (!product.content_html) {
+      toast('Chưa có nội dung bài viết để chèn ảnh', 'info')
+      return
+    }
+    let h3Index = 0
+    const nextHtml = product.content_html.replace(/(<h3[^>]*>.*?<\/h3>)([\s\S]*?)(?=<h3>|<\/div>|$)/gi, (match, h3Tag, rest) => {
+      const img = images[h3Index]
+      h3Index++
+      if (img?.url) {
+        const cleanRest = rest.replace(/<img[^>]*>/gi, '')
+        return `${h3Tag}\n  <img src="${img.url}" alt="${img.label || ''}" class="mx-auto my-4 rounded-xl max-w-full shadow-sm" />${cleanRest}`
+      }
+      return match
+    })
+    updateProductField(product.id, 'content_html', nextHtml)
+    toast('Đã chèn ảnh vào bài viết dưới các thẻ H3!', 'success')
   }
 
   const handleRemoveArticleImage = (imgId: string) => {
@@ -1718,6 +1744,7 @@ function SpecsDemoPageContent() {
             toolbarLeft={[
               { label: 'Gen ảnh bài viết', icon: Sparkles, onClick: handleGenArticleImages, disabled: generatingArticleImages || !product.approval_status?.slider_approved || product.approval_status?.final_approved },
               { label: 'Cấu hình prompt', icon: Settings, onClick: () => setPromptWorkflowDialog('wf4_article_images') },
+              { label: 'Chèn ảnh vào bài viết', icon: ImagePlus, onClick: handleInsertArticleImages, disabled: generatingArticleImages },
             ]}
           />
 

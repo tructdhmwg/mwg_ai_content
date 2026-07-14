@@ -168,6 +168,7 @@ export function VendorUploadDetail() {
               onUpload={file => uploadFile(item.id, key, file)}
               ruleHint={key === 'hinhanh' ? formatImageRuleHint(getDocRuleForItem(item)) : undefined}
               templateUrl={key === 'spec' ? getSpecTemplateUrl(item) : undefined}
+              allowLink={key === 'khac'}
             />
           ))}
         </div>

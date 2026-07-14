@@ -93,7 +93,7 @@ export function NHProductDetail() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-[#F1F5F9] rounded-lg p-3">
           {[
             { label: 'Mã ERP', value: item.id },
-            { label: 'Mã model code', value: item.modelCode || '—' },
+            { label: 'Mã modelID', value: item.modelCode || '—' },
             { label: 'Ngày tạo ERP', value: item.erpCreatedAt || '—' },
             { label: 'Tên SP', value: item.ten },
             { label: 'Ngành hàng', value: item.nganhhang },
@@ -129,6 +129,7 @@ export function NHProductDetail() {
               onConfirm={status => confirmSlotStatus(id, key, status, currentUser?.name)}
               ruleHint={key === 'hinhanh' ? formatImageRuleHint(getDocRuleForItem(item)) : undefined}
               templateUrl={key === 'spec' ? getSpecTemplateUrl(item) : undefined}
+              allowLink={key === 'khac'}
             />
           ))}
         </div>

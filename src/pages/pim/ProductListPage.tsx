@@ -327,7 +327,7 @@ export function ProductListPage() {
                     <Fragment key={group.modelCode}>
                       <tr
                         key={group.modelCode}
-                        onClick={() => group.variants.length > 1 ? toggleModel(group.modelCode) : navigate(parent.id === 'PIM-TEST-01' ? `/products/${parent.id}/specs-demo` : `/products/${parent.id}`)}
+                        onClick={() => group.variants.length > 1 ? toggleModel(group.modelCode) : navigate(`/products/${parent.id}`)}
                         className="border-b border-gray-100 bg-gray-50/40 hover:bg-cyan-50/20 cursor-pointer transition-colors"
                       >
                         <td className="px-4 py-4">
@@ -373,7 +373,7 @@ export function ProductListPage() {
                       {showVariants && group.variants.map((p) => {
                         const status = getProductContentStatus(p)
                         const meta = PRODUCT_CONTENT_STATUS_META[status]
-                        const targetPath = p.id === 'PIM-TEST-01' ? `/products/${p.id}/specs-demo` : `/products/${p.id}`
+                        const targetPath = `/products/${p.id}`
 
                         return (
                           <tr

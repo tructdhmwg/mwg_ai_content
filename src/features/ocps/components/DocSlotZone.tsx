@@ -1,5 +1,6 @@
 // Reusable drag-drop zone for a single document slot.
 // Port từ _source_b_reference/src/components/DocSlotZone.jsx.
+import { useState } from 'react'
 import type { DragEvent, ChangeEvent, ReactNode } from 'react'
 import { OcpsButton } from './OcpsButton'
 import { BO_SUNG_STATUS_LABEL } from '../data/ocpsMockData'
@@ -16,6 +17,7 @@ export interface UploadPayload {
   size: number
   date: string
   by: string
+  url?: string
 }
 
 interface DocSlotZoneProps {
@@ -28,11 +30,24 @@ interface DocSlotZoneProps {
   onConfirm?: (status: TrangThaiBoSung) => void
   templateUrl?: string
   showNote?: boolean
+  // Cho phép thêm tài liệu dạng link bên cạnh upload file
+  allowLink?: boolean
 }
 
-export function DocSlotZone({ label, icon, slot = {}, onUpload, readOnly = false, ruleHint, onConfirm, templateUrl, showNote = false }: DocSlotZoneProps) {
+export function DocSlotZone({ label, icon, slot = {}, onUpload, readOnly = false, ruleHint, onConfirm, templateUrl, showNote = false, allowLink = false }: DocSlotZoneProps) {
   const { files = [], ghiChu, trangThaiBoSung } = slot
   const displayStatus: TrangThaiBoSung = trangThaiBoSung ?? 'con_thieu'
+  const [showLinkInput, setShowLinkInput] = useState(false)
+  const [linkValue, setLinkValue] = useState('')
+
+  function handleAddLink() {
+    if (readOnly || !onUpload) return
+    const url = linkValue.trim()
+    if (!url) return
+    onUpload({ name: url, size: 0, date: new Date().toISOString().slice(0, 10), by: 'Bạn', url })
+    setLinkValue('')
+    setShowLinkInput(false)
+  }
 
   function handleDrop(e: DragEvent<HTMLDivElement>) {
     e.preventDefault()
@@ -92,8 +107,12 @@ export function DocSlotZone({ label, icon, slot = {}, onUpload, readOnly = false
           {files.map((f, i) => (
             <div key={i} className="flex flex-col gap-1">
               <div className={`text-xs rounded-lg px-2.5 py-1.5 flex items-center gap-1.5 ${f.superseded ? 'text-[#94A3B8] bg-[#F8FAFC] line-through opacity-60' : 'text-[#475569] bg-[#F1F5F9]'}`}>
-                <span>📄</span>
-                <span className="flex-1 truncate">{f.name}</span>
+                <span>{f.url ? '🔗' : '📄'}</span>
+                {f.url ? (
+                  <a href={f.url} target="_blank" rel="noreferrer" className="flex-1 truncate text-[#3B82F6] hover:underline" onClick={e => e.stopPropagation()}>{f.name}</a>
+                ) : (
+                  <span className="flex-1 truncate">{f.name}</span>
+                )}
                 <span className="text-[#94A3B8] shrink-0">{f.date}</span>
                 {f.isLatest && <span className="text-[#16A34A] font-medium">✓</span>}
               </div>
@@ -107,12 +126,39 @@ export function DocSlotZone({ label, icon, slot = {}, onUpload, readOnly = false
         </div>
       )}
       {!readOnly && (
-        <label className="mt-auto cursor-pointer">
-          <input type="file" className="hidden" onChange={handleInput} />
-          <div className="w-full text-xs text-center text-[#3B82F6] font-medium bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] rounded-lg py-1.5 transition-colors">
-            ↑ Chọn hoặc thả file
+        <div className="mt-auto flex flex-col gap-1.5">
+          {allowLink && showLinkInput && (
+            <div className="flex gap-1.5">
+              <input
+                type="url"
+                autoFocus
+                value={linkValue}
+                onChange={e => setLinkValue(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') handleAddLink(); if (e.key === 'Escape') setShowLinkInput(false) }}
+                placeholder="Dán link tài liệu..."
+                className="flex-1 min-w-0 text-xs border border-[#E2E8F0] rounded-lg px-2 py-1.5 text-[#0F172A] placeholder:text-[#94A3B8] outline-none focus:border-[#3B82F6]"
+              />
+              <OcpsButton size="sm" variant="primary" onClick={handleAddLink}>Thêm</OcpsButton>
+            </div>
+          )}
+          <div className="flex gap-1.5">
+            <label className="flex-1 cursor-pointer">
+              <input type="file" className="hidden" onChange={handleInput} />
+              <div className="w-full text-xs text-center text-[#3B82F6] font-medium bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] rounded-lg py-1.5 transition-colors">
+                ↑ {allowLink ? 'Up file' : 'Chọn hoặc thả file'}
+              </div>
+            </label>
+            {allowLink && (
+              <button
+                type="button"
+                onClick={() => setShowLinkInput(v => !v)}
+                className="flex-1 text-xs text-center text-[#3B82F6] font-medium bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] rounded-lg py-1.5 transition-colors"
+              >
+                🔗 Up link
+              </button>
+            )}
           </div>
-        </label>
+        </div>
       )}
     </div>
   )
