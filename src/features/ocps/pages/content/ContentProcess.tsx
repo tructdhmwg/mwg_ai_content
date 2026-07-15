@@ -108,7 +108,7 @@ export function ContentProcess() {
       {/* Thông tin onweb */}
       <Card className="mb-4">
         <div className="flex items-center gap-2 mb-3">
-          <p className="text-sm font-medium text-[#0F172A]">Thông tin onweb</p>
+          <p className="text-sm font-medium text-[#0F172A]">Cập nhật sản xuất</p>
         </div>
 
         {(item.contentLichSuChinhSua?.length ?? 0) > 0 && (

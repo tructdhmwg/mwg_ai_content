@@ -44,8 +44,8 @@ export function NHProductDetail() {
     loaiNhuCau: [] as string[], kenh: '', deadline: '', budget: '', briefText: '', fileThamKhao: [] as string[],
     nhomKenh: 'DMX', loaiBrief: 'hang_co_budget',
   })
+  // Lý do huỷ nhập tự do (trước là dropdown chọn sẵn)
   const [cancelReason, setCancelReason] = useState('')
-  const [cancelReasonText, setCancelReasonText] = useState('')
   const [showCancel, setShowCancel] = useState(false)
   const [sent, setSent] = useState(!!item?.ngayGuiYeuCau)
   // Tạm ẩn nút Huỷ brief MKT — bỏ comment khi hiện lại
@@ -77,13 +77,12 @@ export function NHProductDetail() {
   }
 
   function handleCancel() {
-    if (!cancelReason || (cancelReason === 'khac' && !cancelReasonText.trim())) return
+    if (!cancelReason.trim()) return
     updateItemStatus(id, { flow: null, seoStatus: 'chua', mktStatus: 'chua_yeu_cau', ngayGuiYeuCau: null })
     setSendMarketing(false)
     setSent(false)
     setShowCancel(false)
     setCancelReason('')
-    setCancelReasonText('')
   }
 
   // Huỷ riêng brief MKT — khác "Huỷ/đổi luồng" (huỷ cả yêu cầu): giữ nguyên nhánh Content đang chạy,
@@ -280,31 +279,18 @@ export function NHProductDetail() {
           <div className="flex items-center gap-2">
             {showCancel ? (
               <div className="flex items-center gap-2">
-                <select
+                <input
+                  type="text"
+                  placeholder="Nhập lý do huỷ..."
                   value={cancelReason}
                   onChange={e => setCancelReason(e.target.value)}
-                  className="text-xs border border-[#E2E8F0] rounded px-2 py-1.5 text-[#0F172A]"
-                >
-                  <option value="">Chọn lý do huỷ...</option>
-                  <option value="doi_luong">Đổi luồng xử lý</option>
-                  <option value="hang_huy">Hãng huỷ ngân sách</option>
-                  <option value="sp_loi">Sản phẩm có vấn đề</option>
-                  <option value="khac">Lý do khác</option>
-                </select>
-                {cancelReason === 'khac' && (
-                  <input
-                    type="text"
-                    placeholder="Nhập lý do huỷ..."
-                    value={cancelReasonText}
-                    onChange={e => setCancelReasonText(e.target.value)}
-                    className="text-xs border border-[#E2E8F0] rounded px-2 py-1.5 text-[#0F172A] placeholder:text-[#94A3B8] w-56 outline-none focus:border-[#3B82F6]"
-                  />
-                )}
+                  className="text-xs border border-[#E2E8F0] rounded px-2 py-1.5 text-[#0F172A] placeholder:text-[#94A3B8] w-56 outline-none focus:border-[#3B82F6]"
+                />
                 <OcpsButton
                   variant="danger"
                   size="sm"
                   onClick={handleCancel}
-                  disabled={!cancelReason || (cancelReason === 'khac' && !cancelReasonText.trim())}
+                  disabled={!cancelReason.trim()}
                 >Xác nhận huỷ</OcpsButton>
                 <OcpsButton size="sm" onClick={() => setShowCancel(false)}>Bỏ qua</OcpsButton>
               </div>
