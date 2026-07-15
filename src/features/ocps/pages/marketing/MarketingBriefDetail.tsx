@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useOcpsData } from '../../context/OcpsDataContext'
 import { Card } from '../../components/Card'
 import { OcpsButton } from '../../components/OcpsButton'
-import { OcpsBadge } from '../../components/OcpsBadge'
+import { OcpsBadge, mktGroupBadge } from '../../components/OcpsBadge'
 import type { MktStatus } from '../../types'
 
 export function MarketingBriefDetail() {
@@ -46,7 +46,7 @@ export function MarketingBriefDetail() {
           <h1 className="text-base font-semibold text-[#0F172A]">{brief.tenSP}</h1>
           <p className="text-xs text-[#94A3B8]">Ngày tạo: {brief.ngayTao} · Người tạo: {brief.nguoiPhuTrach}</p>
         </div>
-        <OcpsBadge status={brief.trangThai} />
+        <OcpsBadge {...mktGroupBadge(brief.trangThai)} />
       </div>
 
       {/* Nội dung brief từ NH */}
@@ -60,12 +60,12 @@ export function MarketingBriefDetail() {
         </div>
       </Card>
 
-      {/* Lịch sử cập nhật nội dung */}
-      {brief.lichSuChinhSua.length > 0 && (
+      {/* Tạm ẩn Lịch sử cập nhật nội dung — đổi `false &&` thành `brief.lichSuChinhSua.length > 0 &&` khi hiện lại */}
+      {false && (
         <Card className="mb-4">
           <p className="text-xs font-medium text-[#475569] mb-2">Lịch sử cập nhật nội dung</p>
           <div className="space-y-2">
-            {brief.lichSuChinhSua.map(cs => (
+            {brief?.lichSuChinhSua?.map(cs => (
               <div key={cs.vong} className="flex gap-3 text-xs">
                 <span className="text-[#94A3B8] shrink-0">Cập nhật lần {cs.vong} ({cs.ngay}):</span>
                 <span className="text-[#0F172A]">{cs.ghiChu}</span>

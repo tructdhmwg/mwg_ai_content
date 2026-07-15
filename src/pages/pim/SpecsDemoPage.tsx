@@ -1693,6 +1693,7 @@ function SpecsDemoPageContent() {
             primaryAction={publishToPimAction}
             toolbarLeft={[
               { label: 'Gen đặc điểm nổi bật', icon: Sparkles, onClick: () => handleGenField('dac_diem_noi_bat'), disabled: generatingFields['dac_diem_noi_bat'] || product.approval_status?.highlights_approved },
+              { label: 'Cấu hình prompt', icon: Settings, onClick: () => setShowPrompts(prev => ({ ...prev, wf4_highlights: true })) },
             ]}
           />
 

@@ -7,7 +7,8 @@ import { useOcpsData } from '../../context/OcpsDataContext'
 import { Card } from '../../components/Card'
 import { OcpsButton } from '../../components/OcpsButton'
 import { FullListingTable } from '../../components/FullListingTable'
-import { DOC_STATUS_LABEL, MKT_STATUS_LABEL, FLOW_LABEL } from '../../data/ocpsMockData'
+// DOC_STATUS_LABEL, MKT_STATUS_LABEL dùng cho filter Tài liệu + MKT đang tạm ẩn
+import { FLOW_LABEL } from '../../data/ocpsMockData'
 
 export function NHDashboard() {
   const { currentUser } = useOcpsAuth()
@@ -88,6 +89,7 @@ export function NHDashboard() {
             <option value="">Tất cả hãng</option>
             {vendors.map(v => <option key={v} value={v}>{v}</option>)}
           </select>
+          {/* Tạm ẩn filter Tài liệu + MKT — bỏ comment khi hiện lại
           <select
             value={filters.doc}
             onChange={e => setFilters(f => ({ ...f, doc: e.target.value }))}
@@ -103,7 +105,7 @@ export function NHDashboard() {
           >
             <option value="">MKT: tất cả</option>
             {Object.entries(MKT_STATUS_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
+          </select> */}
           <div className="flex items-center gap-1.5">
             <span className="text-xs text-[#94A3B8]">Ngày tạo ERP</span>
             <input

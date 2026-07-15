@@ -86,7 +86,8 @@ export function ContentProcess() {
               readOnly={key !== 'khac'}
               onUpload={key === 'khac' ? file => uploadFile(id, key, file, currentUser?.name) : undefined}
               allowLink={key === 'khac'}
-              onConfirm={status => confirmSlotStatus(id, key, status, 'Content')}
+              // Slot Hình ảnh không có nút ✓ Đủ / ✗ Thiếu
+              onConfirm={key === 'hinhanh' ? undefined : status => confirmSlotStatus(id, key, status, 'Content')}
             />
           ))}
         </div>
@@ -111,10 +112,11 @@ export function ContentProcess() {
           <p className="text-sm font-medium text-[#0F172A]">Cập nhật sản xuất</p>
         </div>
 
-        {(item.contentLichSuChinhSua?.length ?? 0) > 0 && (
+        {/* Tạm ẩn Lịch sử cập nhật nội dung — đổi `false &&` thành `(item.contentLichSuChinhSua?.length ?? 0) > 0 &&` khi hiện lại */}
+        {false && (
           <div className="bg-[#F1F5F9] rounded-lg p-3 mb-3">
             <p className="text-xs font-medium text-[#475569] mb-2">Lịch sử cập nhật nội dung</p>
-            {item.contentLichSuChinhSua!.map(cs => (
+            {item?.contentLichSuChinhSua?.map(cs => (
               <div key={cs.vong} className="text-xs text-[#475569]">Cập nhật lần {cs.vong} ({cs.ngay}): {cs.ghiChu}</div>
             ))}
           </div>

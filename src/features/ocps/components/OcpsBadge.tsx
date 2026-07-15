@@ -35,6 +35,16 @@ interface OcpsBadgeProps {
   className?: string
 }
 
+// Gom trạng thái MKT chi tiết (đang sản xuất / chờ nghiệm thu / cần chỉnh sửa...) về 3 nhóm
+// hiển thị: Chờ xử lý / Đang xử lý / Hoàn tất. "Đã huỷ" giữ nguyên.
+// Dùng: <OcpsBadge {...mktGroupBadge(trangThai)} />
+export function mktGroupBadge(status?: string): { status: string; label: string } {
+  if (status === 'hoan_tat') return { status: 'hoan_tat', label: 'Hoàn tất' }
+  if (status === 'da_huy') return { status: 'da_huy', label: 'Đã huỷ' }
+  if (status === 'chua_yeu_cau' || status === 'da_tiep_nhan') return { status: 'cho', label: 'Chờ xử lý' }
+  return { status: 'dang_xu_ly', label: 'Đang xử lý' }
+}
+
 export function OcpsBadge({ status, label, className = '' }: OcpsBadgeProps) {
   const text = label ?? ALL_LABELS[status ?? ''] ?? status
   const { dot, bg, color } = SCHEME[status ?? ''] ?? DEFAULT

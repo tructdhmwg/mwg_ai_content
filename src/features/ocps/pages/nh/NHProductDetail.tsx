@@ -5,7 +5,7 @@ import { useOcpsAuth } from '../../context/OcpsAuthContext'
 import { useOcpsData } from '../../context/OcpsDataContext'
 import { Card } from '../../components/Card'
 import { OcpsButton } from '../../components/OcpsButton'
-import { OcpsBadge } from '../../components/OcpsBadge'
+import { OcpsBadge, mktGroupBadge } from '../../components/OcpsBadge'
 import { DocSlotZone } from '../../components/DocSlotZone'
 import { getDocRuleForItem, formatImageRuleHint, getSpecTemplateUrl } from '../../utils/docRules'
 import { useToast } from '../../../../components/ui/Toast'
@@ -143,7 +143,8 @@ export function NHProductDetail() {
               icon={icon}
               slot={slots[key]}
               onUpload={file => uploadFile(id, key, file)}
-              onConfirm={status => confirmSlotStatus(id, key, status, currentUser?.name)}
+              // Slot Hình ảnh không có nút ✓ Đủ / ✗ Thiếu
+              onConfirm={key === 'hinhanh' ? undefined : status => confirmSlotStatus(id, key, status, currentUser?.name)}
               ruleHint={key === 'hinhanh' ? formatImageRuleHint(getDocRuleForItem(item)) : undefined}
               templateUrl={key === 'spec' ? getSpecTemplateUrl(item) : undefined}
               allowLink={key === 'khac'}
@@ -238,7 +239,7 @@ export function NHProductDetail() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-xs font-medium text-[#475569]">Kết quả Marketing</p>
-                  <OcpsBadge status={resultBrief.trangThai} />
+                  <OcpsBadge {...mktGroupBadge(resultBrief.trangThai)} />
                 </div>
                 <div className="bg-[#F1F5F9] rounded-lg p-3 space-y-2">
                   {resultBrief.linkFolder || resultBrief.linkMedia ? (
