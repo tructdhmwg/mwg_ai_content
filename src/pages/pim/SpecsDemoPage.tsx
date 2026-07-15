@@ -18,7 +18,7 @@ import Placeholder from '@tiptap/extension-placeholder'
 import {
   ArrowLeft, Upload, Trash2, Plus, Sparkles, Save, FileText,
   Settings, AlertTriangle, Globe, File, Info, Loader2, X, FileSpreadsheet,
-  Link, History, CheckCircle2, ExternalLink, Image, LayoutList, Zap, ChevronDown,
+  Link, History, ExternalLink, Image, LayoutList, Zap, ChevronDown,
   ChevronLeft, ChevronRight, SlidersHorizontal, ImagePlus
 } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
@@ -1090,9 +1090,9 @@ function SpecsDemoPageContent() {
         >
           <ArrowLeft size={14} /> Quay lại danh sách
         </button>
+        {/* Tạm ẩn cặp nút Xuất bản lên PIM / Lưu thay đổi ở đầu trang
         <div className="flex gap-2">
-          {/* RUN FULL WF BUTTON */}
-          <Button 
+          <Button
             className="bg-emerald-500 hover:bg-emerald-600 text-white font-bold flex items-center gap-1 shadow-md border-0"
             onClick={() => {
               updateProductField(product.id, 'pim_status', 'published')
@@ -1105,7 +1105,7 @@ function SpecsDemoPageContent() {
           <Button variant="outline" className="bg-white border-gray-200 text-gray-700" onClick={handleSaveAll}>
             <Save size={14} className="mr-1" /> Lưu thay đổi
           </Button>
-        </div>
+        </div> */}
       </div>
 
       {/* Product Info Block & Status dropdowns */}
@@ -1744,7 +1744,8 @@ function SpecsDemoPageContent() {
             secondaryAction={saveSectionAction}
             primaryAction={publishToPimAction}
             toolbarLeft={[
-              { label: 'Gen ảnh bài viết', icon: Sparkles, onClick: handleGenArticleImages, disabled: generatingArticleImages || !product.approval_status?.slider_approved || product.approval_status?.final_approved },
+              // Chỉ cần có Bài viết chi tiết là gen được ảnh (không phụ thuộc duyệt slider/duyệt cuối)
+              { label: 'Gen ảnh bài viết', icon: Sparkles, onClick: handleGenArticleImages, disabled: generatingArticleImages || !product.content_html },
               { label: 'Cấu hình prompt', icon: Settings, onClick: () => setPromptWorkflowDialog('wf4_article_images') },
               { label: 'Chèn ảnh vào bài viết', icon: ImagePlus, onClick: handleInsertArticleImages, disabled: generatingArticleImages },
             ]}
@@ -1752,16 +1753,21 @@ function SpecsDemoPageContent() {
 
           <div className="mb-5 bg-white rounded-xl !rounded-t-none border !border-t-0 border-gray-100 p-5 shadow-sm transition-all hover:shadow-md">
 
-            {/* Grid of article images */}
+            {/* Grid of article images — sản phẩm chưa có ảnh thì hiện UI trống thay vì ảnh demo */}
             {(() => {
-              const demoImages = Array.from({ length: 4 }, (_, i) => ({
-                id: `demo-art-${i}`,
-                url: `https://picsum.photos/seed/${product.id}-art${i}/800/600`,
-                label: `Ảnh minh họa bài viết ${i + 1}`
-              }))
-              const imagesList = product.article_images && product.article_images.length > 0
-                ? product.article_images
-                : demoImages
+              const imagesList = product.article_images || []
+
+              if (imagesList.length === 0) {
+                return (
+                  <div className="flex min-h-[260px] flex-col items-center justify-center px-6 py-10 text-center">
+                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-gray-200 bg-gray-50">
+                      <Image size={26} className="text-gray-400" />
+                    </div>
+                    <p className="text-sm font-semibold text-gray-900">Chưa có ảnh bài viết</p>
+                    <p className="mt-1 text-sm text-gray-500">Bấm "Gen ảnh bài viết" để AI tạo bộ ảnh minh họa gắn theo các thẻ H3.</p>
+                  </div>
+                )
+              }
 
               return (
                 <div className="space-y-4">

@@ -103,8 +103,7 @@ export function PromptConfigPage() {
   const [promptIsActive, setPromptIsActive] = useState(true)
   const [hasTypedInModal, setHasTypedInModal] = useState(false)
 
-  // Tạm ẩn nút Thêm prompt — bỏ comment khi hiện lại
-  // const addPromptButtonRef = useRef<HTMLButtonElement>(null)
+  const addPromptButtonRef = useRef<HTMLButtonElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)
   const labelInputRef = useRef<HTMLInputElement>(null)
 
@@ -296,16 +295,15 @@ export function PromptConfigPage() {
     toast('Đã xóa ngành hàng', 'warning')
   }
 
-  // Tạm ẩn nút Thêm prompt — bỏ comment khi hiện lại
-  // const openCreatePromptModal = () => {
-  //   setModalMode('create')
-  //   setEditingRecord(null)
-  //   setPromptLabel('')
-  //   setPromptText('')
-  //   setPromptIsActive(true)
-  //   setHasTypedInModal(false)
-  //   setModalOpen(true)
-  // }
+  const openCreatePromptModal = () => {
+    setModalMode('create')
+    setEditingRecord(null)
+    setPromptLabel('')
+    setPromptText('')
+    setPromptIsActive(true)
+    setHasTypedInModal(false)
+    setModalOpen(true)
+  }
 
   const openEditPromptModal = (record: PromptRecord) => {
     if (!activeCategory) return
@@ -555,7 +553,6 @@ export function PromptConfigPage() {
                       className="h-10 w-full rounded-lg border border-gray-300 bg-white pl-9 pr-3 text-sm text-gray-900 outline-none transition focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10"
                     />
                   </div>
-                  {/* Tạm ẩn nút Thêm prompt
                   <Button
                     ref={addPromptButtonRef}
                     onClick={openCreatePromptModal}
@@ -563,7 +560,7 @@ export function PromptConfigPage() {
                   >
                     <Plus size={18} />
                     Thêm prompt
-                  </Button> */}
+                  </Button>
                 </div>
 
                 {filteredRecords.length === 0 ? (
@@ -573,11 +570,10 @@ export function PromptConfigPage() {
                     </div>
                     <p className="text-sm font-semibold text-gray-900">Chưa có prompt nào trong {activeWorkflowMeta.label}</p>
                     <p className="mt-1 text-sm text-gray-500">Tạo prompt đầu tiên cho ngành hàng {activeCategory.name}.</p>
-                    {/* Tạm ẩn nút Thêm prompt
                     <Button onClick={openCreatePromptModal} className="mt-5 rounded-lg bg-gray-900 text-white hover:bg-gray-800">
                       <Plus size={18} />
                       Thêm prompt
-                    </Button> */}
+                    </Button>
                   </div>
                 ) : (
                   <>

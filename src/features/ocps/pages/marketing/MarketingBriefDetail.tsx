@@ -44,7 +44,7 @@ export function MarketingBriefDetail() {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-base font-semibold text-[#0F172A]">{brief.tenSP}</h1>
-          <p className="text-xs text-[#94A3B8]">Ngày tạo: {brief.ngayTao} · Phụ trách: {brief.nguoiPhuTrach}</p>
+          <p className="text-xs text-[#94A3B8]">Ngày tạo: {brief.ngayTao} · Người tạo: {brief.nguoiPhuTrach}</p>
         </div>
         <OcpsBadge status={brief.trangThai} />
       </div>
@@ -79,12 +79,17 @@ export function MarketingBriefDetail() {
       {!isCancelled && (
         <Card>
           <p className="text-sm font-medium text-[#0F172A] mb-3">Cập nhật sản xuất</p>
-          {/* Trạng thái gom về 2 nhóm: Đang xử lý (mọi trạng thái chưa hoàn tất) và Hoàn tất */}
+          {/* Trạng thái gom về 3 nhóm: Chờ xử lý (mới tiếp nhận) / Đang xử lý / Hoàn tất */}
           <select
-            value={status === 'hoan_tat' ? 'hoan_tat' : 'dang_san_xuat'}
+            value={
+              status === 'hoan_tat' ? 'hoan_tat'
+              : status === 'chua_yeu_cau' || status === 'da_tiep_nhan' ? 'da_tiep_nhan'
+              : 'dang_san_xuat'
+            }
             onChange={e => setStatus(e.target.value as MktStatus)}
             className="w-full text-xs border border-[#E2E8F0] rounded px-3 py-2 mb-3 bg-white text-[#0F172A] outline-none focus:border-[#3B82F6]"
           >
+            <option value="da_tiep_nhan">Chờ xử lý</option>
             <option value="dang_san_xuat">Đang xử lý</option>
             <option value="hoan_tat">Hoàn tất</option>
           </select>

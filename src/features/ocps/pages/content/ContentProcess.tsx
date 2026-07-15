@@ -7,7 +7,7 @@ import { Card } from '../../components/Card'
 import { OcpsButton } from '../../components/OcpsButton'
 import { OcpsBadge } from '../../components/OcpsBadge'
 import { DocSlotZone } from '../../components/DocSlotZone'
-import type { SlotKey } from '../../types'
+import type { SeoStatus, SlotKey } from '../../types'
 
 const SLOT_DEFS: Array<{ key: SlotKey; label: string; icon: string }> = [
   { key: 'hinhanh', label: 'Hình ảnh', icon: '🖼️' },
@@ -18,7 +18,7 @@ const SLOT_DEFS: Array<{ key: SlotKey; label: string; icon: string }> = [
 export function ContentProcess() {
   const { id = '' } = useParams()
   const { currentUser } = useOcpsAuth()
-  const { items, docSlots, revertDocStatus, isContentEligible, confirmSlotStatus, updateContentLink, uploadFile } = useOcpsData()
+  const { items, docSlots, revertDocStatus, isContentEligible, confirmSlotStatus, updateContentLink, updateItemStatus, uploadFile, flowRequests } = useOcpsData()
   const navigate = useNavigate()
 
   const found = items.find(i => i.id === id)
@@ -28,6 +28,7 @@ export function ContentProcess() {
   const wasEligibleOnOpen = useMemo(() => isContentEligible(found), [id]) // eslint-disable-line react-hooks/exhaustive-deps
   const item = wasEligibleOnOpen ? found : null
   const slots = docSlots[id] || {}
+  const flowRequest = flowRequests.find(fr => fr.itemId === id)
 
   const [linkWeb, setLinkWeb] = useState(item?.linkWeb || '')
   const [missingNote, setMissingNote] = useState('')
@@ -59,6 +60,7 @@ export function ContentProcess() {
         <div>
           <h1 className="text-base font-semibold text-[#0F172A]">{item.id} — {item.ten}</h1>
           <p className="text-xs text-[#94A3B8]">{item.nganhhang} · {item.vendor}</p>
+          <p className="text-xs text-[#94A3B8]">Ngày tạo: {flowRequest?.createdAt || item.erpCreatedAt} · Người tạo: {flowRequest?.createdBy || '—'}</p>
         </div>
         <OcpsBadge status={item.seoStatus} />
       </div>
@@ -111,6 +113,20 @@ export function ContentProcess() {
           </div>
         )}
 
+        {/* Trạng thái gom về 3 nhóm: Chờ xử lý / Đang xử lý / Hoàn tất — đổi là lưu ngay */}
+        <select
+          value={
+            item.seoStatus === 'da_len_web' || item.seoStatus === 'hoan_tat' ? 'hoan_tat'
+            : item.seoStatus === 'dang_xu_ly' ? 'dang_xu_ly'
+            : 'cho'
+          }
+          onChange={e => updateItemStatus(id, { seoStatus: e.target.value as SeoStatus })}
+          className="w-full text-xs border border-[#E2E8F0] rounded px-3 py-2 mb-3 bg-white text-[#0F172A] outline-none focus:border-[#3B82F6]"
+        >
+          <option value="cho">Chờ xử lý</option>
+          <option value="dang_xu_ly">Đang xử lý</option>
+          <option value="hoan_tat">Hoàn tất</option>
+        </select>
         <input
           type="text"
           placeholder="Dán link website"

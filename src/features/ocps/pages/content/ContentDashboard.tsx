@@ -17,19 +17,24 @@ export function ContentDashboard() {
   // Đã ưu tiên: trễ SLA nhiều nhất trước, sau đó gửi yêu cầu sớm nhất trước
   const eligible = getContentQueue(items)
 
-  // Trạng thái gom về 2 nhóm: Hoàn tất (da_len_web/hoan_tat) và Chờ xử lý (còn lại)
-  const isDone = (s?: string) => s === 'da_len_web' || s === 'hoan_tat'
+  // Trạng thái gom về 3 nhóm: Chờ xử lý (chưa bắt đầu) / Đang xử lý / Hoàn tất
+  const statusGroup = (s?: string) => {
+    if (s === 'da_len_web' || s === 'hoan_tat') return 'hoan_tat'
+    if (s === 'dang_xu_ly') return 'dang_xu_ly'
+    return 'cho_xu_ly'
+  }
 
   const filtered = eligible.filter(i =>
-    (!filterStatus || (filterStatus === 'hoan_tat' ? isDone(i.seoStatus) : !isDone(i.seoStatus))) &&
+    (!filterStatus || statusGroup(i.seoStatus) === filterStatus) &&
     (!search ||
       i.id.toLowerCase().includes(search.toLowerCase()) ||
       i.ten.toLowerCase().includes(search.toLowerCase()) ||
       (i.modelCode || '').toLowerCase().includes(search.toLowerCase()))
   )
 
-  const done = eligible.filter(i => isDone(i.seoStatus)).length
-  const cho = eligible.length - done
+  const cho = eligible.filter(i => statusGroup(i.seoStatus) === 'cho_xu_ly').length
+  const dang = eligible.filter(i => statusGroup(i.seoStatus) === 'dang_xu_ly').length
+  const done = eligible.filter(i => statusGroup(i.seoStatus) === 'hoan_tat').length
   const aiPending = eligible.filter(i => i.docStatus === 'du_full' && i.seoStatus === 'da_len_web').length
   const listingRows = filtered.map(item => ({
     key: item.id,
@@ -54,8 +59,9 @@ export function ContentDashboard() {
         <p className="text-sm text-[#94A3B8]">Danh sách sản phẩm đủ điều kiện xử lý</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mb-5">
+      <div className="grid grid-cols-3 gap-3 mb-5">
         <StatCard label="Chờ xử lý" value={cho} color="text-[#92400E]" />
+        <StatCard label="Đang xử lý" value={dang} color="text-[#1D4ED8]" />
         <StatCard label="Hoàn tất" value={done} color="text-[#166534]" />
       </div>
 
@@ -84,6 +90,7 @@ export function ContentDashboard() {
           >
             <option value="">Tất cả trạng thái</option>
             <option value="cho_xu_ly">Chờ xử lý</option>
+            <option value="dang_xu_ly">Đang xử lý</option>
             <option value="hoan_tat">Hoàn tất</option>
           </select>
         </div>

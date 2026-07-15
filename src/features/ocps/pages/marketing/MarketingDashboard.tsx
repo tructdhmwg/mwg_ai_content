@@ -21,9 +21,15 @@ export function MarketingDashboard() {
     .filter(b => b.trangThai !== 'da_huy')
     .map(b => ({ ...b, _item: items.find(i => i.id === b.itemId) }))
 
-  // Gom trạng thái về 2 nhóm: hoàn tất và đang xử lý (mọi trạng thái còn lại)
-  const hoanthat = active.filter(b => b.trangThai === 'hoan_tat').length
-  const dangXuLy = active.length - hoanthat
+  // Gom trạng thái về 3 nhóm: Chờ xử lý (mới tiếp nhận, chưa bắt đầu) / Đang xử lý / Hoàn tất
+  const statusGroup = (s: string) => {
+    if (s === 'hoan_tat') return 'hoan_tat'
+    if (s === 'chua_yeu_cau' || s === 'da_tiep_nhan') return 'cho_xu_ly'
+    return 'dang_xu_ly'
+  }
+  const choXuLy = active.filter(b => statusGroup(b.trangThai) === 'cho_xu_ly').length
+  const dangXuLy = active.filter(b => statusGroup(b.trangThai) === 'dang_xu_ly').length
+  const hoanthat = active.filter(b => statusGroup(b.trangThai) === 'hoan_tat').length
 
   const nganhhangs = [...new Set(active.map(b => b._item?.nganhhang).filter(Boolean))] as string[]
   const vendors = [...new Set(active.map(b => b._item?.vendor).filter(Boolean))] as string[]
@@ -36,8 +42,7 @@ export function MarketingDashboard() {
         (b._item?.modelCode || '').toLowerCase().includes(q)
       if (!match) return false
     }
-    if (filters.trangThai === 'hoan_tat' && b.trangThai !== 'hoan_tat') return false
-    if (filters.trangThai === 'dang_xu_ly' && b.trangThai === 'hoan_tat') return false
+    if (filters.trangThai && statusGroup(b.trangThai) !== filters.trangThai) return false
     if (filters.nganhhang && b._item?.nganhhang !== filters.nganhhang) return false
     if (filters.vendor && b._item?.vendor !== filters.vendor) return false
     return true
@@ -65,7 +70,8 @@ export function MarketingDashboard() {
         <p className="text-sm text-[#94A3B8]">Danh sách brief — vận hành như ticket system</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mb-5">
+      <div className="grid grid-cols-3 gap-3 mb-5">
+        <StatCard label="Chờ xử lý" value={choXuLy} color="text-[#92400E]" />
         <StatCard label="Đang xử lý" value={dangXuLy} color="text-[#1D4ED8]" />
         <StatCard label="Hoàn tất" value={hoanthat} color="text-[#166534]" />
       </div>
@@ -89,6 +95,7 @@ export function MarketingDashboard() {
             className="text-xs border border-[#E2E8F0] rounded px-2 py-1.5 bg-white text-[#0F172A]"
           >
             <option value="">Trạng thái: tất cả</option>
+            <option value="cho_xu_ly">Chờ xử lý</option>
             <option value="dang_xu_ly">Đang xử lý</option>
             <option value="hoan_tat">Hoàn tất</option>
           </select>

@@ -36,13 +36,28 @@ function normalizeFlowLabel(label?: string) {
   return label === 'Chỉ Content' ? label : 'Cả hai'
 }
 
-// Content/MKT chỉ hiển thị 2 giá trị: "Đang xử lý" và "Hoàn tất"
-function ProgressBadgeCell({ status }: { status?: string }) {
+// Content/MKT hiển thị theo Luồng xử lý:
+// - Chưa có luồng (hoặc nhánh không nằm trong luồng, VD MKT khi "Chỉ Content") → "Chưa yêu cầu"
+// - Có luồng → 3 trạng thái: "Chờ xử lý", "Đang xử lý", "Hoàn tất"
+function ProgressBadgeCell({ status, requested }: { status?: string; requested: boolean }) {
   if (!status) return <td className="py-2 pr-3" />
+  if (!requested) {
+    return (
+      <td className="py-2 pr-3">
+        <OcpsBadge status="chua_yeu_cau" label="Chưa yêu cầu" />
+      </td>
+    )
+  }
   const done = status === 'hoan_tat' || status === 'da_len_web'
+  const waiting = status === 'chua' || status === 'chua_yeu_cau' || status === 'cho' || status === 'da_tiep_nhan'
+  const display = done
+    ? { status: 'hoan_tat', label: 'Hoàn tất' }
+    : waiting
+      ? { status: 'cho', label: 'Chờ xử lý' }
+      : { status: 'dang_xu_ly', label: 'Đang xử lý' }
   return (
     <td className="py-2 pr-3">
-      <OcpsBadge status={done ? 'hoan_tat' : 'dang_xu_ly'} label={done ? 'Hoàn tất' : 'Đang xử lý'} />
+      <OcpsBadge status={display.status} label={display.label} />
     </td>
   )
 }
@@ -84,7 +99,9 @@ export function FullListingTable({ rows, emptyText }: FullListingTableProps) {
           </tr>
         </thead>
         <tbody>
-          {rows.map(row => (
+          {rows.map(row => {
+            const flow = normalizeFlowLabel(row.flowLabel)
+            return (
             <tr key={row.key} className="border-b border-[#F8FAFC] hover:bg-[#F8FAFC]">
               <TextCell strong>{row.maErp}</TextCell>
               <TextCell>{row.modelCode}</TextCell>
@@ -93,13 +110,16 @@ export function FullListingTable({ rows, emptyText }: FullListingTableProps) {
               <TextCell>{row.nganhhang}</TextCell>
               <TextCell>{row.vendor}</TextCell>
               <DocStatusCell status={row.docStatus} />
-              <TextCell>{normalizeFlowLabel(row.flowLabel)}</TextCell>
-              <ProgressBadgeCell status={row.seoStatus} />
-              <ProgressBadgeCell status={row.mktStatus} />
-              <TextCell muted>{row.ngayGui}</TextCell>
+              <TextCell>{flow}</TextCell>
+              {/* Content thuộc mọi luồng; MKT chỉ thuộc luồng "Cả hai" */}
+              <ProgressBadgeCell status={row.seoStatus} requested={!!flow} />
+              <ProgressBadgeCell status={row.mktStatus} requested={flow === 'Cả hai'} />
+              {/* Chưa gửi yêu cầu (chưa có luồng) thì Ngày gửi để trống */}
+              <TextCell muted>{flow ? row.ngayGui : ''}</TextCell>
               <td className="py-2">{row.action}</td>
             </tr>
-          ))}
+            )
+          })}
         </tbody>
       </table>
       {rows.length === 0 && (

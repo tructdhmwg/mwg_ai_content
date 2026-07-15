@@ -8,6 +8,7 @@ import { OcpsButton } from '../../components/OcpsButton'
 import { OcpsBadge } from '../../components/OcpsBadge'
 import { DocSlotZone } from '../../components/DocSlotZone'
 import { getDocRuleForItem, formatImageRuleHint, getSpecTemplateUrl } from '../../utils/docRules'
+import { useToast } from '../../../../components/ui/Toast'
 import type { Flow, ItemDocSlots, SlotKey } from '../../types'
 
 const SLOT_DEFS: Array<{ key: SlotKey; label: string; icon: string }> = [
@@ -23,14 +24,17 @@ function getContentNotes(slots: Partial<ItemDocSlots> | undefined) {
 export function NHProductDetail() {
   const { id = '' } = useParams()
   const { currentUser } = useOcpsAuth()
-  const { items, docSlots, briefs, uploadFile, sendFlowRequest, updateItemStatus, confirmSlotStatus, cancelBrief } = useOcpsData()
+  // cancelBrief tạm bỏ khỏi destructure — dùng lại khi hiện nút Huỷ brief MKT
+  const { items, docSlots, briefs, uploadFile, sendFlowRequest, updateItemStatus, confirmSlotStatus, flowRequests } = useOcpsData()
   const navigate = useNavigate()
+  const { toast } = useToast()
 
   const found = items.find(i => i.id === id)
   // Admin vào được mọi /ocps/* (quyết định c) nên không chặn theo nganhhang với admin
   const item = found && (currentUser?.role === 'admin' || found.nganhhang === currentUser?.nganhhang) ? found : null
   const slots = docSlots[id] || {}
   const contentNotes = getContentNotes(slots)
+  const flowRequest = flowRequests.find(fr => fr.itemId === id)
 
   // Content/IT luôn là luồng mặc định — không có lựa chọn "Chỉ Marketing" để tránh SP thiếu bước
   // lên web/Content. Marketing chỉ là tuỳ chọn thêm (checkbox); 'chi_mkt' chỉ còn tồn tại ở dữ liệu
@@ -41,10 +45,12 @@ export function NHProductDetail() {
     nhomKenh: 'DMX', loaiBrief: 'hang_co_budget',
   })
   const [cancelReason, setCancelReason] = useState('')
+  const [cancelReasonText, setCancelReasonText] = useState('')
   const [showCancel, setShowCancel] = useState(false)
   const [sent, setSent] = useState(!!item?.ngayGuiYeuCau)
-  const [showCancelBrief, setShowCancelBrief] = useState(false)
-  const [cancelBriefReason, setCancelBriefReason] = useState('')
+  // Tạm ẩn nút Huỷ brief MKT — bỏ comment khi hiện lại
+  // const [showCancelBrief, setShowCancelBrief] = useState(false)
+  // const [cancelBriefReason, setCancelBriefReason] = useState('')
 
   if (!item) return <p className="text-sm text-[#94A3B8]">Không tìm thấy sản phẩm</p>
 
@@ -61,31 +67,43 @@ export function NHProductDetail() {
     setSent(true)
   }
 
+  // Lưu sau khi đã gửi — đẩy lại thông tin qua Hàng đợi Content và Brief Marketing.
+  // Nếu đã có brief MKT đang chạy thì không tạo brief trùng, chỉ gửi lại flow request.
+  function handleSaveUpdate() {
+    sendFlowRequest(id, item!.ten, 'ca_hai', activeBrief ? null : { ...brief })
+    setSendMarketing(true)
+    setSent(true)
+    toast('Đã đẩy thông tin qua Hàng đợi Content và Brief Marketing', 'success')
+  }
+
   function handleCancel() {
-    if (!cancelReason) return
+    if (!cancelReason || (cancelReason === 'khac' && !cancelReasonText.trim())) return
     updateItemStatus(id, { flow: null, seoStatus: 'chua', mktStatus: 'chua_yeu_cau', ngayGuiYeuCau: null })
     setSendMarketing(false)
     setSent(false)
     setShowCancel(false)
     setCancelReason('')
+    setCancelReasonText('')
   }
 
   // Huỷ riêng brief MKT — khác "Huỷ/đổi luồng" (huỷ cả yêu cầu): giữ nguyên nhánh Content đang chạy,
   // chỉ dừng Marketing (đúng fail case "NH huỷ yêu cầu Marketing" — MKT nhận notify, docStatus/Content không đổi)
-  function handleCancelBrief() {
-    if (!cancelBriefReason.trim() || !activeBrief) return
-    cancelBrief(activeBrief.id, cancelBriefReason, currentUser?.name)
-    setShowCancelBrief(false)
-    setCancelBriefReason('')
-  }
+  // Tạm ẩn nút Huỷ brief MKT — bỏ comment khi hiện lại
+  // function handleCancelBrief() {
+  //   if (!cancelBriefReason.trim() || !activeBrief) return
+  //   cancelBrief(activeBrief.id, cancelBriefReason, currentUser?.name)
+  //   setShowCancelBrief(false)
+  //   setCancelBriefReason('')
+  // }
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="flex items-center gap-2 mb-5">
+      <div className="flex items-center gap-2 mb-1">
         <button onClick={() => navigate('/ocps/nh/dashboard')} className="text-xs text-[#94A3B8] hover:text-[#0F172A]">← Dashboard</button>
         <span className="text-[#E2E8F0]">/</span>
         <span className="text-xs text-[#0F172A]">{id}</span>
       </div>
+      <p className="text-xs text-[#94A3B8] mb-4">Ngày tạo: {flowRequest?.createdAt || item.erpCreatedAt} · Người tạo: {flowRequest?.createdBy || '—'}</p>
 
       {/* A — Thông tin ERP */}
       <Card className="mb-4">
@@ -273,12 +291,30 @@ export function NHProductDetail() {
                   <option value="sp_loi">Sản phẩm có vấn đề</option>
                   <option value="khac">Lý do khác</option>
                 </select>
-                <OcpsButton variant="danger" size="sm" onClick={handleCancel} disabled={!cancelReason}>Xác nhận huỷ</OcpsButton>
+                {cancelReason === 'khac' && (
+                  <input
+                    type="text"
+                    placeholder="Nhập lý do huỷ..."
+                    value={cancelReasonText}
+                    onChange={e => setCancelReasonText(e.target.value)}
+                    className="text-xs border border-[#E2E8F0] rounded px-2 py-1.5 text-[#0F172A] placeholder:text-[#94A3B8] w-56 outline-none focus:border-[#3B82F6]"
+                  />
+                )}
+                <OcpsButton
+                  variant="danger"
+                  size="sm"
+                  onClick={handleCancel}
+                  disabled={!cancelReason || (cancelReason === 'khac' && !cancelReasonText.trim())}
+                >Xác nhận huỷ</OcpsButton>
                 <OcpsButton size="sm" onClick={() => setShowCancel(false)}>Bỏ qua</OcpsButton>
               </div>
             ) : (
-              <OcpsButton size="sm" variant="ghost" onClick={() => setShowCancel(true)}>Huỷ / đổi luồng</OcpsButton>
+              <div className="flex items-center gap-2">
+                <OcpsButton size="sm" variant="danger" onClick={() => setShowCancel(true)}>Huỷ</OcpsButton>
+                <OcpsButton size="sm" variant="primary" onClick={handleSaveUpdate}>Lưu</OcpsButton>
+              </div>
             )}
+            {/* Tạm ẩn nút Huỷ brief MKT
             {activeBrief && (
               showCancelBrief ? (
                 <div className="flex items-center gap-2">
@@ -295,7 +331,7 @@ export function NHProductDetail() {
               ) : (
                 <OcpsButton size="sm" variant="ghost" onClick={() => setShowCancelBrief(true)}>Huỷ brief MKT</OcpsButton>
               )
-            )}
+            )} */}
           </div>
         ) : (
           <div />

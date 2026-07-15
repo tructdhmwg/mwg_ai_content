@@ -9,6 +9,7 @@ import { DocSlotZone } from '../../components/DocSlotZone'
 import { OcpsBadge } from '../../components/OcpsBadge'
 import { FullListingTable } from '../../components/FullListingTable'
 import { getDocRuleForItem, formatImageRuleHint, getSpecTemplateUrl } from '../../utils/docRules'
+import { useToast } from '../../../../components/ui/Toast'
 import { DOC_STATUS_LABEL, FLOW_LABEL } from '../../data/ocpsMockData'
 import type { ItemDocSlots, SlotKey } from '../../types'
 
@@ -118,13 +119,21 @@ export function VendorUploadDetail() {
   const { id = '' } = useParams()
   const navigate = useNavigate()
   const { currentUser } = useOcpsAuth()
-  const { items, docSlots, uploadFile, scopeItemsForUser } = useOcpsData()
+  const { items, docSlots, uploadFile, scopeItemsForUser, flowRequests } = useOcpsData()
 
   const item = scopeItemsForUser(items, currentUser).find(i => i.id === id)
+  const flowRequest = flowRequests.find(fr => fr.itemId === id)
   const slots = item ? docSlots[item.id] : undefined
   const contentNotes = getContentNotes(slots)
+  const { toast } = useToast()
 
   if (!item) return <p className="text-sm text-[#94A3B8]">Không tìm thấy sản phẩm</p>
+
+  // File/link đã được lưu ngay khi upload — nút Lưu xác nhận hoàn tất và quay về danh sách
+  function handleSave() {
+    toast('Đã lưu tài liệu', 'success')
+    navigate('/ocps/vendor/upload')
+  }
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -139,6 +148,7 @@ export function VendorUploadDetail() {
           <div>
             <p className="text-sm font-semibold text-[#0F172A] mb-1">{item.id} — {item.ten}</p>
             <p className="text-xs text-[#94A3B8]">{item.nganhhang} · {item.vendor}</p>
+            <p className="text-xs text-[#94A3B8]">Ngày tạo: {flowRequest?.createdAt || item.erpCreatedAt} · Người tạo: {flowRequest?.createdBy || '—'}</p>
           </div>
           <OcpsBadge status={item.docStatus} />
         </div>
@@ -171,6 +181,9 @@ export function VendorUploadDetail() {
               allowLink={key === 'khac'}
             />
           ))}
+        </div>
+        <div className="flex justify-end mt-4">
+          <OcpsButton variant="primary" size="sm" onClick={handleSave}>Lưu</OcpsButton>
         </div>
       </Card>
     </div>

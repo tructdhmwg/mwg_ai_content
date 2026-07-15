@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
   LogOut, Database, Settings,
   Upload, LayoutDashboard, ListChecks, Megaphone, Home
@@ -34,7 +34,10 @@ const ROLE_LABEL: Record<string, string> = {
   viewer: 'Viewer',
 }
 
-function NavItem({ to, icon: Icon, label, end }: { to: string; icon: React.ElementType; label: string; end?: boolean }) {
+function NavItem({ to, icon: Icon, label, end, activePrefix }: { to: string; icon: React.ElementType; label: string; end?: boolean; activePrefix?: string }) {
+  const { pathname } = useLocation()
+  // Active theo prefix (vd. mọi trang /ocps/nh/* đều sáng item "Dashboard NH")
+  const prefixActive = !!activePrefix && (pathname === activePrefix || pathname.startsWith(activePrefix + '/'))
   return (
     <NavLink
       to={to}
@@ -42,7 +45,7 @@ function NavItem({ to, icon: Icon, label, end }: { to: string; icon: React.Eleme
       className={({ isActive }) =>
         cn(
           'flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-all',
-          isActive
+          isActive || prefixActive
             ? 'bg-white/10 text-white border-l-[3px] border-cyan-400 pl-3.5'
             : 'text-white/65 hover:text-white hover:bg-white/6'
         )
@@ -104,7 +107,14 @@ export function Sidebar() {
           <>
             <div className="px-2 mb-1 mt-4 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Vận hành OCPS</div>
             {ocpsRoleItems.map((item) => (
-              <NavItem key={item.to} to={item.to} icon={item.icon} label={item.label} />
+              <NavItem
+                key={item.to}
+                to={item.to}
+                icon={item.icon}
+                label={item.label}
+                // Sáng item khi ở bất kỳ trang con nào cùng segment (vd. /ocps/nh/product/:id)
+                activePrefix={item.to.split('/').slice(0, 3).join('/')}
+              />
             ))}
           </>
         )}
