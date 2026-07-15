@@ -32,14 +32,21 @@ export function ContentProcess() {
 
   const [linkWeb, setLinkWeb] = useState(item?.linkWeb || '')
   const [missingNote, setMissingNote] = useState('')
+  // Trạng thái gom về 3 nhóm cho select — chỉ lưu khi bấm "Lưu cập nhật"
+  const [seoStatusSel, setSeoStatusSel] = useState<SeoStatus>(
+    item?.seoStatus === 'da_len_web' || item?.seoStatus === 'hoan_tat' ? 'hoan_tat'
+    : item?.seoStatus === 'dang_xu_ly' ? 'dang_xu_ly'
+    : 'cho'
+  )
 
   if (!item) return <p className="text-sm text-[#94A3B8]">Không tìm thấy sản phẩm</p>
 
   // Không cần NH duyệt — Content có thể gửi/cập nhật lại link bất kỳ lúc nào, kể cả sau khi đã lên
   // web/hoàn tất (VD có feedback cần chỉnh nội dung); mỗi lần cập nhật đều được ghi vào lịch sử.
-  function handleStep1() {
-    if (!linkWeb.trim()) return
-    updateContentLink(id, linkWeb, currentUser?.name)
+  // Lưu cả link (nếu có, ghi lịch sử qua updateContentLink) lẫn trạng thái đã chọn.
+  function handleSaveOnweb() {
+    if (linkWeb.trim() && linkWeb !== item!.linkWeb) updateContentLink(id, linkWeb, currentUser?.name)
+    updateItemStatus(id, { seoStatus: seoStatusSel })
   }
 
   function sendMissingNote() {
@@ -113,14 +120,10 @@ export function ContentProcess() {
           </div>
         )}
 
-        {/* Trạng thái gom về 3 nhóm: Chờ xử lý / Đang xử lý / Hoàn tất — đổi là lưu ngay */}
+        {/* Trạng thái gom về 3 nhóm: Chờ xử lý / Đang xử lý / Hoàn tất */}
         <select
-          value={
-            item.seoStatus === 'da_len_web' || item.seoStatus === 'hoan_tat' ? 'hoan_tat'
-            : item.seoStatus === 'dang_xu_ly' ? 'dang_xu_ly'
-            : 'cho'
-          }
-          onChange={e => updateItemStatus(id, { seoStatus: e.target.value as SeoStatus })}
+          value={seoStatusSel}
+          onChange={e => setSeoStatusSel(e.target.value as SeoStatus)}
           className="w-full text-xs border border-[#E2E8F0] rounded px-3 py-2 mb-3 bg-white text-[#0F172A] outline-none focus:border-[#3B82F6]"
         >
           <option value="cho">Chờ xử lý</option>
@@ -134,9 +137,9 @@ export function ContentProcess() {
           onChange={e => setLinkWeb(e.target.value)}
           className="w-full text-xs border border-[#E2E8F0] rounded px-3 py-2 mb-3 text-[#0F172A] placeholder:text-[#94A3B8] outline-none focus:border-[#3B82F6]"
         />
-        <OcpsButton variant="primary" size="sm" onClick={handleStep1} disabled={!linkWeb.trim()}>
-          Đánh dấu đã lên web
-        </OcpsButton>
+        <div className="flex justify-end">
+          <OcpsButton variant="primary" size="sm" onClick={handleSaveOnweb}>Lưu cập nhật</OcpsButton>
+        </div>
       </Card>
     </div>
   )
