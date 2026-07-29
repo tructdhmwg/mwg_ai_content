@@ -1,7 +1,7 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
   LogOut, Database, Settings,
-  Upload, LayoutDashboard, ListChecks, Megaphone, Home
+  Upload, LayoutDashboard, ListChecks, Megaphone, Home, Tag
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useAuthStore } from '../../store/authStore'
@@ -118,6 +118,11 @@ export function Sidebar() {
             ))}
           </>
         )}
+
+        <div className="px-2 mb-1 mt-4 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Chiến dịch POSM</div>
+        <NavItem to="/posm/nh/dashboard" icon={LayoutDashboard} label="Dashboard NH" />
+        <NavItem to="/posm/promotions" icon={Tag} label="Chiến dịch POSM" />
+        <NavItem to="/posm/marketing/dashboard" icon={Megaphone} label="Dashboard MKT" />
 
         {/* Tạm ẩn nhóm Quản trị (Người dùng) */}
         {/* <div className="px-2 mb-1 mt-4 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Quản trị</div>

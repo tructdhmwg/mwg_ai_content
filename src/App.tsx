@@ -12,6 +12,10 @@ import { UserFormPage } from './pages/admin/UserFormPage'
 import { ProductListPage } from './pages/pim/ProductListPage'
 import { SpecsDemoPage } from './pages/pim/SpecsDemoPage'
 import { OcpsRoutes } from './features/ocps/routes'
+import { PosmNhDashboardPage } from './pages/posm/PosmNhDashboardPage'
+import { PosmPromotionsPage } from './pages/posm/PosmPromotionsPage'
+import { PosmMktDashboardPage } from './pages/posm/PosmMktDashboardPage'
+import { PosmCampaignDetailPage } from './pages/posm/PosmCampaignDetailPage'
 
 export default function App() {
   return (
@@ -34,6 +38,12 @@ export default function App() {
           <Route path="/admin/users/new" element={<UserFormPage />} />
           <Route path="/admin/users/:id" element={<UserFormPage />} />
           <Route path="/ocps/*" element={<OcpsRoutes />} />
+          <Route path="/posm/nh/dashboard" element={<PosmNhDashboardPage />} />
+          <Route path="/posm/nh/dashboard/:id" element={<PosmCampaignDetailPage />} />
+          <Route path="/posm/promotions" element={<PosmPromotionsPage />} />
+          <Route path="/posm/promotions/:id" element={<PosmCampaignDetailPage />} />
+          <Route path="/posm/marketing/dashboard" element={<PosmMktDashboardPage />} />
+          <Route path="/posm/marketing/dashboard/:id" element={<PosmCampaignDetailPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </ToastProvider>
