@@ -153,16 +153,19 @@ export function NHProductDetail() {
         </div>
       </Card>
 
-      <Card className="mb-4">
-        <p className="text-sm font-medium text-[#0F172A] mb-2">Ghi chú của content</p>
-        <div className="min-h-10 rounded border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#475569]">
-          {contentNotes.length > 0 ? (
-            contentNotes.map((note, index) => <p key={`${index}-${note}`}>{note}</p>)
-          ) : (
-            <p className="text-[#94A3B8]">Chưa có ghi chú</p>
-          )}
-        </div>
-      </Card>
+      {/* Ẩn khi Content + MKT đều "Chưa yêu cầu" (chưa gửi luồng xử lý) */}
+      {!(!item.flow && item.mktStatus === 'chua_yeu_cau') && (
+        <Card className="mb-4">
+          <p className="text-sm font-medium text-[#0F172A] mb-2">Ghi chú của content</p>
+          <div className="min-h-10 rounded border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#475569]">
+            {contentNotes.length > 0 ? (
+              contentNotes.map((note, index) => <p key={`${index}-${note}`}>{note}</p>)
+            ) : (
+              <p className="text-[#94A3B8]">Chưa có ghi chú</p>
+            )}
+          </div>
+        </Card>
+      )}
 
       {/* C — Chọn luồng */}
       <Card className="mb-4">
@@ -325,12 +328,9 @@ export function NHProductDetail() {
         )}
         <div className="flex gap-2">
           {!sent && (
-            <>
-              <OcpsButton size="sm">Lưu yêu cầu</OcpsButton>
-              <OcpsButton variant="primary" size="sm" onClick={handleSend} disabled={!canSend}>
-                Gửi yêu cầu xử lý
-              </OcpsButton>
-            </>
+            <OcpsButton variant="primary" size="sm" onClick={handleSend} disabled={!canSend}>
+              Gửi yêu cầu xử lý
+            </OcpsButton>
           )}
           {sent && (
             <div className="flex items-center gap-2">

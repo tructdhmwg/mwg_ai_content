@@ -18,7 +18,8 @@ const SLOT_DEFS: Array<{ key: SlotKey; label: string; icon: string }> = [
 export function ContentProcess() {
   const { id = '' } = useParams()
   const { currentUser } = useOcpsAuth()
-  const { items, docSlots, revertDocStatus, isContentEligible, confirmSlotStatus, updateContentLink, updateItemStatus, uploadFile, flowRequests } = useOcpsData()
+  // revertDocStatus dùng cho nút Gửi ghi chú đang tạm ẩn — thêm lại vào destructuring khi hiện lại
+  const { items, docSlots, isContentEligible, confirmSlotStatus, updateContentLink, updateItemStatus, uploadFile, flowRequests } = useOcpsData()
   const navigate = useNavigate()
 
   const found = items.find(i => i.id === id)
@@ -49,11 +50,12 @@ export function ContentProcess() {
     updateItemStatus(id, { seoStatus: seoStatusSel })
   }
 
-  function sendMissingNote() {
-    if (!missingNote.trim()) return
-    revertDocStatus(id, missingNote)
-    setMissingNote('')
-  }
+  // Tạm ẩn nút Gửi ghi chú — bỏ comment cùng nút khi hiện lại
+  // function sendMissingNote() {
+  //   if (!missingNote.trim()) return
+  //   revertDocStatus(id, missingNote)
+  //   setMissingNote('')
+  // }
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -103,7 +105,8 @@ export function ContentProcess() {
           rows={2}
           className="w-full text-xs border border-[#E2E8F0] rounded px-3 py-2 mb-2 text-[#0F172A] placeholder:text-[#94A3B8] outline-none focus:border-[#3B82F6] resize-none"
         />
-        <OcpsButton size="sm" onClick={sendMissingNote} disabled={!missingNote.trim()}>Gửi ghi chú</OcpsButton>
+        {/* Tạm ẩn nút Gửi ghi chú — bỏ comment khi hiện lại
+        <OcpsButton size="sm" onClick={sendMissingNote} disabled={!missingNote.trim()}>Gửi ghi chú</OcpsButton> */}
       </Card>
 
       {/* Thông tin onweb */}

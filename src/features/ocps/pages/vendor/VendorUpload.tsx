@@ -10,7 +10,8 @@ import { OcpsBadge } from '../../components/OcpsBadge'
 import { FullListingTable } from '../../components/FullListingTable'
 import { getDocRuleForItem, formatImageRuleHint, getSpecTemplateUrl } from '../../utils/docRules'
 import { useToast } from '../../../../components/ui/Toast'
-import { DOC_STATUS_LABEL, FLOW_LABEL } from '../../data/ocpsMockData'
+// DOC_STATUS_LABEL dùng cho filter Trạng thái tài liệu đang tạm ẩn
+import { FLOW_LABEL } from '../../data/ocpsMockData'
 import type { ItemDocSlots, SlotKey } from '../../types'
 
 const SLOT_DEFS: Array<{ key: SlotKey; label: string; icon: string }> = [
@@ -98,6 +99,7 @@ export function VendorUpload() {
             <option value="">Hãng: tất cả</option>
             {vendors.map(v => <option key={v} value={v}>{v}</option>)}
           </select>
+          {/* Tạm ẩn filter Trạng thái tài liệu — bỏ comment khi hiện lại
           <select
             value={filters.doc}
             onChange={e => setFilters(f => ({ ...f, doc: e.target.value }))}
@@ -105,7 +107,7 @@ export function VendorUpload() {
           >
             <option value="">Trạng thái: tất cả</option>
             {Object.entries(DOC_STATUS_LABEL).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
+          </select> */}
         </div>
 
         <FullListingTable rows={listingRows} emptyText="Không có sản phẩm nào" />
