@@ -1,7 +1,8 @@
 import { Fragment, useState } from 'react'
 import { Plus, X, ImageIcon } from 'lucide-react'
 import { OcpsButton } from '../../features/ocps/components/OcpsButton'
-import { NGANH_HANG_OPTIONS, type PosmCategorySlot, type PosmSlotRegistration, type PosmTier } from './posmMockData'
+import { formatDateTime } from '../../lib/utils'
+import { FLYER_TIER_LIMITS, NGANH_HANG_OPTIONS, type PosmCategorySlot, type PosmSlotRegistration, type PosmTier } from './posmMockData'
 
 function formatVnd(n: number) {
   return n.toLocaleString('vi-VN') + 'đ'
@@ -37,6 +38,7 @@ function AddProductRow({ nganhHang, onSubmit }: { nganhHang: string; onSubmit: (
       <td className="px-1.5 py-1"><input type="number" min={0} className={cellInputClass} placeholder="Giá KM" value={form.promoPrice} onChange={(e) => setForm((f) => ({ ...f, promoPrice: e.target.value }))} /></td>
       <td className="px-1.5 py-1"><input className={cellInputClass} placeholder="Ghi chú" value={form.note} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))} /></td>
       <td className="px-1.5 py-1"><input className={cellInputClass} placeholder="Link ảnh" value={form.picUrl} onChange={(e) => setForm((f) => ({ ...f, picUrl: e.target.value }))} /></td>
+      <td className="px-2.5 py-1.5 text-center text-[10px] text-[#94A3B8] italic" colSpan={2}>Tự động khi đăng ký</td>
       <td className="px-1.5 py-1 whitespace-nowrap">
         <OcpsButton size="sm" variant="primary" onClick={submit} disabled={!canSubmit} className="whitespace-nowrap">+ Đăng ký</OcpsButton>
       </td>
@@ -44,57 +46,73 @@ function AddProductRow({ nganhHang, onSubmit }: { nganhHang: string; onSubmit: (
   )
 }
 
-// Quản lý danh sách ngành hàng + số slot của 1 tầng/mặt — tách riêng khỏi bảng sản phẩm, chỉ tab Chiến dịch POSM (editable) mới thấy
-function CategoryManager({ categories, onChange }: { categories: PosmCategorySlot[]; onChange: (next: PosmCategorySlot[]) => void }) {
+// Quản lý danh sách ngành hàng + số slot của 1 tầng/mặt — tách riêng khỏi bảng sản phẩm, chỉ tab Chiến dịch POSM (editable) mới thấy.
+// maxSlots: tổng slotCount tối đa của TẦNG này (FLYER_TIER_LIMITS) — không giới hạn khi Infinity (vd. Banner không có quy định tầng).
+function CategoryManager({ categories, maxSlots, onChange }: { categories: PosmCategorySlot[]; maxSlots: number; onChange: (next: PosmCategorySlot[]) => void }) {
   const [newNganhHang, setNewNganhHang] = useState('')
-  const [newSlotCount, setNewSlotCount] = useState('4')
+  const [newSlotCount, setNewSlotCount] = useState('1')
   const available = NGANH_HANG_OPTIONS.filter((nh) => !categories.some((c) => c.nganhHang === nh))
+  const usedSlots = categories.reduce((sum, c) => sum + c.slotCount, 0)
+  const remaining = Math.max(0, maxSlots - usedSlots)
 
   const addCategory = () => {
-    if (!newNganhHang) return
-    const slotCount = Math.max(1, Number(newSlotCount) || 1)
+    if (!newNganhHang || remaining <= 0) return
+    const slotCount = Math.min(Math.max(1, Number(newSlotCount) || 1), remaining)
     onChange([...categories, { id: crypto.randomUUID(), nganhHang: newNganhHang, slotCount, registrations: [] }])
     setNewNganhHang('')
-    setNewSlotCount('4')
+    setNewSlotCount('1')
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5 mb-2">
-      {categories.map((cat) => (
-        <span key={cat.id} className="inline-flex items-center gap-1.5 text-[11px] bg-[#F1F5F9] text-[#475569] rounded-full pl-2.5 pr-1.5 py-1">
-          {cat.nganhHang} · {cat.registrations.length}/{cat.slotCount} slot
-          <button onClick={() => onChange(categories.filter((c) => c.id !== cat.id))} className="text-[#94A3B8] hover:text-[#EF4444]"><X size={11} /></button>
-        </span>
-      ))}
-      {available.length > 0 && (
-        <div className="flex items-center gap-1">
-          <select
-            value={newNganhHang}
-            onChange={(e) => setNewNganhHang(e.target.value)}
-            className="border border-[#E2E8F0] rounded px-1.5 py-1 text-[11px] text-[#0F172A] outline-none focus:border-[#3B82F6]"
-          >
-            <option value="">+ Ngành hàng...</option>
-            {available.map((nh) => <option key={nh} value={nh}>{nh}</option>)}
-          </select>
-          <input
-            type="number"
-            min={1}
-            value={newSlotCount}
-            onChange={(e) => setNewSlotCount(e.target.value)}
-            className="w-12 border border-[#E2E8F0] rounded px-1.5 py-1 text-[11px] text-[#0F172A] outline-none focus:border-[#3B82F6]"
-          />
-          <OcpsButton size="sm" onClick={addCategory} disabled={!newNganhHang}>
-            <Plus size={11} /> Thêm
-          </OcpsButton>
-        </div>
+    <div className="mb-2">
+      <div className="flex flex-wrap items-center gap-1.5">
+        {categories.map((cat) => (
+          <span key={cat.id} className="inline-flex items-center gap-1.5 text-[11px] bg-[#F1F5F9] text-[#475569] rounded-full pl-2.5 pr-1.5 py-1">
+            {cat.nganhHang} · {cat.registrations.length}/{cat.slotCount} slot
+            <button onClick={() => onChange(categories.filter((c) => c.id !== cat.id))} className="text-[#94A3B8] hover:text-[#EF4444]"><X size={11} /></button>
+          </span>
+        ))}
+        {available.length > 0 && remaining > 0 && (
+          <div className="flex items-center gap-1">
+            <select
+              value={newNganhHang}
+              onChange={(e) => setNewNganhHang(e.target.value)}
+              className="border border-[#E2E8F0] rounded px-1.5 py-1 text-[11px] text-[#0F172A] outline-none focus:border-[#3B82F6]"
+            >
+              <option value="">+ Ngành hàng...</option>
+              {available.map((nh) => <option key={nh} value={nh}>{nh}</option>)}
+            </select>
+            <input
+              type="number"
+              min={1}
+              max={remaining}
+              value={newSlotCount}
+              onChange={(e) => setNewSlotCount(e.target.value)}
+              className="w-12 border border-[#E2E8F0] rounded px-1.5 py-1 text-[11px] text-[#0F172A] outline-none focus:border-[#3B82F6]"
+            />
+            <OcpsButton size="sm" onClick={addCategory} disabled={!newNganhHang}>
+              <Plus size={11} /> Thêm
+            </OcpsButton>
+          </div>
+        )}
+      </div>
+      {Number.isFinite(maxSlots) && (
+        <p className="text-[11px] text-[#94A3B8] mt-1">
+          Đã dùng {usedSlots}/{maxSlots} slot của tầng
+          {remaining === 0 && <span className="text-[#DC2626]"></span>}
+        </p>
       )}
     </div>
   )
 }
 
-// Bảng sản phẩm ngang, mỗi hàng 1 sản phẩm — theo đúng mẫu bảng Excel (Ngành hàng / Mã SP / Tên SP / Giá gốc / Giá KM / Ghi chú / PIC)
-// showReview/canReview: cột Feedback + Duyệt của NH — chỉ hiện khi chiến dịch đang ở trạng thái "MKT trả kết quả", chỉ NH sửa được (canReview)
-function ProductTable({ categories, canRegister, showReview, canReview, onChange }: { categories: PosmCategorySlot[]; canRegister: boolean; showReview: boolean; canReview: boolean; onChange: (next: PosmCategorySlot[]) => void }) {
+// Bảng sản phẩm ngang, mỗi hàng 1 sản phẩm — theo đúng mẫu bảng Excel (Ngành hàng / Mã SP / Tên SP / Giá gốc / Giá KM / Ghi chú / PIC).
+// Luôn hiển thị ĐỦ slotCount dòng cho mỗi ngành hàng: dòng đã đăng ký trước, phần còn trống hiển thị placeholder
+// (khi canRegister, dòng trống đầu tiên là form nhập — AddProductRow — các dòng trống còn lại là placeholder).
+// canRegister cũng quyết định các dòng ĐÃ đăng ký có sửa được không (trừ cột Ngành hàng, luôn tĩnh) — không có nút xoá:
+// 1 slot đã có sản phẩm là vĩnh viễn, chỉ sửa được nội dung, không gỡ bỏ được (xem PosmCampaignDetailPage: canRegister
+// truyền vào đây đã tắt sẵn khi chiến dịch ở trạng thái "Hoàn tất").
+function ProductTable({ categories, canRegister, onChange }: { categories: PosmCategorySlot[]; canRegister: boolean; onChange: (next: PosmCategorySlot[]) => void }) {
   if (categories.length === 0) {
     return <p className="text-xs text-[#94A3B8]">Chưa cấu hình ngành hàng</p>
   }
@@ -105,7 +123,10 @@ function ProductTable({ categories, canRegister, showReview, canReview, onChange
     if (!cat) return
     updateCategory(catId, { ...cat, registrations: cat.registrations.map((r) => (r.id === regId ? { ...r, ...partial } : r)) })
   }
-  const emptyColSpan = 6 + (showReview ? 2 : 0)
+  // Đóng dấu "Người cập nhật"/"Ngày cập nhật" khi rời khỏi ô chỉnh sửa (onBlur) — không đóng dấu theo từng phím gõ.
+  const stampUpdated = (catId: string, regId: string, nganhHang: string) =>
+    updateRegistration(catId, regId, { updatedBy: `NH ${nganhHang}`, updatedAt: new Date().toISOString() })
+  const emptyColSpan = 8 + (canRegister ? 1 : 0)
 
   return (
     <div className="overflow-x-auto border border-[#E2E8F0] rounded-lg">
@@ -119,82 +140,114 @@ function ProductTable({ categories, canRegister, showReview, canReview, onChange
             <th className="px-2.5 py-2 font-medium">Giá KM</th>
             <th className="px-2.5 py-2 font-medium">Ghi chú</th>
             <th className="px-2.5 py-2 font-medium">Link hình (drive hoặc web)</th>
-            {showReview && <th className="px-2.5 py-2 font-medium">Feedback NH</th>}
-            {showReview && <th className="px-2.5 py-2 font-medium">Duyệt</th>}
+            <th className="px-2.5 py-2 font-medium">Người cập nhật</th>
+            <th className="px-2.5 py-2 font-medium">Ngày cập nhật</th>
             {canRegister && <th className="px-2.5 py-2 font-medium w-8" />}
           </tr>
         </thead>
         <tbody>
           {categories.map((cat) => {
-            const isFull = cat.registrations.length >= cat.slotCount
+            const emptySlots = Math.max(0, cat.slotCount - cat.registrations.length)
+            const isFull = emptySlots === 0
+            // Khi canRegister: dòng trống đầu tiên là AddProductRow (form nhập), các dòng trống còn lại là placeholder.
+            const placeholderCount = canRegister ? Math.max(0, emptySlots - 1) : emptySlots
             return (
               <Fragment key={cat.id}>
                 {cat.registrations.map((r) => (
                   <tr key={r.id} className="border-t border-[#F1F5F9] hover:bg-[#F8FAFC]">
                     <td className="px-2.5 py-1.5 text-[#0F172A] font-medium whitespace-nowrap">{cat.nganhHang}</td>
-                    <td className="px-2.5 py-1.5 font-mono text-[#475569]">{r.productCode}</td>
-                    <td className="px-2.5 py-1.5 text-[#0F172A]">{r.productName}</td>
-                    <td className="px-2.5 py-1.5 text-[#94A3B8] whitespace-nowrap">
-                      {r.originalPrice != null ? <span className={r.promoPrice != null ? 'line-through' : ''}>{formatVnd(r.originalPrice)}</span> : '—'}
-                    </td>
-                    <td className="px-2.5 py-1.5 text-[#DC2626] font-medium whitespace-nowrap">{r.promoPrice != null ? formatVnd(r.promoPrice) : '—'}</td>
-                    <td className="px-2.5 py-1.5 text-[#94A3B8] italic">{r.note || '—'}</td>
-                    <td className="px-2.5 py-1.5">
-                      {r.picUrl ? (
-                        <a href={r.picUrl} target="_blank" rel="noreferrer" className="text-[#3B82F6] hover:underline inline-flex items-center gap-1 whitespace-nowrap">
-                          <ImageIcon size={11} /> Xem
-                        </a>
-                      ) : '—'}
-                    </td>
-                    {showReview && (
-                      <td className="px-1.5 py-1">
-                        {canReview ? (
+                    {canRegister ? (
+                      <>
+                        <td className="px-1.5 py-1">
                           <input
                             className={cellInputClass}
-                            placeholder="Feedback..."
-                            value={r.nhFeedback ?? ''}
-                            onChange={(e) => updateRegistration(cat.id, r.id, { nhFeedback: e.target.value })}
+                            value={r.productCode}
+                            onChange={(e) => updateRegistration(cat.id, r.id, { productCode: e.target.value })}
+                            onBlur={() => stampUpdated(cat.id, r.id, cat.nganhHang)}
                           />
-                        ) : (
-                          <span className="text-[#94A3B8] italic">{r.nhFeedback || '—'}</span>
-                        )}
-                      </td>
-                    )}
-                    {showReview && (
-                      <td className="px-2.5 py-1.5 text-center">
-                        {canReview ? (
+                        </td>
+                        <td className="px-1.5 py-1">
                           <input
-                            type="checkbox"
-                            checked={!!r.nhApproved}
-                            onChange={(e) => updateRegistration(cat.id, r.id, { nhApproved: e.target.checked })}
-                            className="w-3.5 h-3.5 accent-[#16A34A] cursor-pointer"
+                            className={cellInputClass}
+                            value={r.productName}
+                            onChange={(e) => updateRegistration(cat.id, r.id, { productName: e.target.value })}
+                            onBlur={() => stampUpdated(cat.id, r.id, cat.nganhHang)}
                           />
-                        ) : r.nhApproved ? (
-                          <span className="text-[#16A34A] font-medium">✓ Đã duyệt</span>
-                        ) : (
-                          <span className="text-[#CBD5E1]">—</span>
-                        )}
-                      </td>
+                        </td>
+                        <td className="px-1.5 py-1">
+                          <input
+                            type="number" min={0}
+                            className={cellInputClass}
+                            value={r.originalPrice ?? ''}
+                            onChange={(e) => updateRegistration(cat.id, r.id, { originalPrice: e.target.value ? Number(e.target.value) : undefined })}
+                            onBlur={() => stampUpdated(cat.id, r.id, cat.nganhHang)}
+                          />
+                        </td>
+                        <td className="px-1.5 py-1">
+                          <input
+                            type="number" min={0}
+                            className={cellInputClass}
+                            value={r.promoPrice ?? ''}
+                            onChange={(e) => updateRegistration(cat.id, r.id, { promoPrice: e.target.value ? Number(e.target.value) : undefined })}
+                            onBlur={() => stampUpdated(cat.id, r.id, cat.nganhHang)}
+                          />
+                        </td>
+                        <td className="px-1.5 py-1">
+                          <input
+                            className={cellInputClass}
+                            value={r.note ?? ''}
+                            onChange={(e) => updateRegistration(cat.id, r.id, { note: e.target.value || undefined })}
+                            onBlur={() => stampUpdated(cat.id, r.id, cat.nganhHang)}
+                          />
+                        </td>
+                        <td className="px-1.5 py-1">
+                          <input
+                            className={cellInputClass}
+                            value={r.picUrl ?? ''}
+                            onChange={(e) => updateRegistration(cat.id, r.id, { picUrl: e.target.value || undefined })}
+                            onBlur={() => stampUpdated(cat.id, r.id, cat.nganhHang)}
+                          />
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="px-2.5 py-1.5 font-mono text-[#475569]">{r.productCode}</td>
+                        <td className="px-2.5 py-1.5 text-[#0F172A]">{r.productName}</td>
+                        <td className="px-2.5 py-1.5 text-[#94A3B8] whitespace-nowrap">
+                          {r.originalPrice != null ? formatVnd(r.originalPrice) : '—'}
+                        </td>
+                        <td className="px-2.5 py-1.5 text-[#DC2626] font-medium whitespace-nowrap">{r.promoPrice != null ? formatVnd(r.promoPrice) : '—'}</td>
+                        <td className="px-2.5 py-1.5 text-[#94A3B8] italic">{r.note || '—'}</td>
+                        <td className="px-2.5 py-1.5">
+                          {r.picUrl ? (
+                            <a href={r.picUrl} target="_blank" rel="noreferrer" className="text-[#3B82F6] hover:underline inline-flex items-center gap-1 whitespace-nowrap">
+                              <ImageIcon size={11} /> Xem
+                            </a>
+                          ) : '—'}
+                        </td>
+                      </>
                     )}
-                    {canRegister && (
-                      <td className="px-2.5 py-1.5">
-                        <button
-                          onClick={() => updateCategory(cat.id, { ...cat, registrations: cat.registrations.filter((x) => x.id !== r.id) })}
-                          className="text-[#CBD5E1] hover:text-[#EF4444]"
-                        ><X size={12} /></button>
-                      </td>
-                    )}
+                    <td className="px-2.5 py-1.5 text-[#475569] whitespace-nowrap">{r.updatedBy || '—'}</td>
+                    <td className="px-2.5 py-1.5 text-[#94A3B8] whitespace-nowrap">{r.updatedAt ? formatDateTime(r.updatedAt) : '—'}</td>
+                    {/* Không có nút xoá — 1 slot đã đăng ký sản phẩm là vĩnh viễn, chỉ sửa được nội dung. Ô trống giữ đúng số cột với AddProductRow. */}
+                    {canRegister && <td className="px-2.5 py-1.5" />}
                   </tr>
                 ))}
-                {cat.registrations.length === 0 && !canRegister && (
-                  <tr className="border-t border-[#F1F5F9]">
+                {canRegister && !isFull && (
+                  <AddProductRow
+                    nganhHang={cat.nganhHang}
+                    onSubmit={(reg) => updateCategory(cat.id, {
+                      ...cat,
+                      registrations: [...cat.registrations, { id: crypto.randomUUID(), ...reg, updatedBy: `NH ${cat.nganhHang}`, updatedAt: new Date().toISOString() }],
+                    })}
+                  />
+                )}
+                {Array.from({ length: placeholderCount }).map((_, i) => (
+                  <tr key={`${cat.id}-empty-${i}`} className="border-t border-[#F1F5F9]">
                     <td className="px-2.5 py-1.5 text-[#0F172A] font-medium whitespace-nowrap">{cat.nganhHang}</td>
                     <td colSpan={emptyColSpan} className="px-2.5 py-1.5 text-[#CBD5E1]">Chưa có sản phẩm đăng ký</td>
                   </tr>
-                )}
-                {canRegister && !isFull && (
-                  <AddProductRow nganhHang={cat.nganhHang} onSubmit={(reg) => updateCategory(cat.id, { ...cat, registrations: [...cat.registrations, { id: crypto.randomUUID(), ...reg }] })} />
-                )}
+                ))}
               </Fragment>
             )
           })}
@@ -204,27 +257,29 @@ function ProductTable({ categories, canRegister, showReview, canReview, onChange
   )
 }
 
-function TierSide({ tiers, editable, canRegister, showReview, canReview, onChange }: { tiers: PosmTier[]; editable: boolean; canRegister: boolean; showReview: boolean; canReview: boolean; onChange: (tiers: PosmTier[]) => void }) {
+function TierSide({ side, tiers, editable, canRegister, onChange }: { side: 'front' | 'back'; tiers: PosmTier[]; editable: boolean; canRegister: boolean; onChange: (tiers: PosmTier[]) => void }) {
   return (
     <div className="space-y-4">
-      {tiers.map((tier) => (
-        <div key={tier.id} className="border border-[#E2E8F0] rounded-lg p-3 bg-white">
-          <p className="text-xs font-semibold text-[#0F172A] mb-2">{tier.label}</p>
-          {editable && (
-            <CategoryManager
+      {tiers.map((tier, idx) => {
+        const maxSlots = FLYER_TIER_LIMITS[side][idx] ?? Infinity
+        return (
+          <div key={tier.id} className="border border-[#E2E8F0] rounded-lg p-3 bg-white">
+            <p className="text-xs font-semibold text-[#0F172A] mb-2">{tier.label}</p>
+            {editable && (
+              <CategoryManager
+                categories={tier.categories}
+                maxSlots={maxSlots}
+                onChange={(next) => onChange(tiers.map((t) => (t.id === tier.id ? { ...t, categories: next } : t)))}
+              />
+            )}
+            <ProductTable
               categories={tier.categories}
+              canRegister={canRegister}
               onChange={(next) => onChange(tiers.map((t) => (t.id === tier.id ? { ...t, categories: next } : t)))}
             />
-          )}
-          <ProductTable
-            categories={tier.categories}
-            canRegister={canRegister}
-            showReview={showReview}
-            canReview={canReview}
-            onChange={(next) => onChange(tiers.map((t) => (t.id === tier.id ? { ...t, categories: next } : t)))}
-          />
-        </div>
-      ))}
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -233,8 +288,6 @@ interface Props {
   layoutType: string
   editable: boolean
   canRegister: boolean
-  showReview: boolean
-  canReview: boolean
   frontTiers: PosmTier[]
   backTiers: PosmTier[]
   bannerCategories: PosmCategorySlot[]
@@ -243,18 +296,18 @@ interface Props {
   onChangeBannerCategories: (categories: PosmCategorySlot[]) => void
 }
 
-export function PosmFlyerSketch({ layoutType, editable, canRegister, showReview, canReview, frontTiers, backTiers, bannerCategories, onChangeFrontTiers, onChangeBackTiers, onChangeBannerCategories }: Props) {
+export function PosmFlyerSketch({ layoutType, editable, canRegister, frontTiers, backTiers, bannerCategories, onChangeFrontTiers, onChangeBackTiers, onChangeBannerCategories }: Props) {
   if (layoutType === 'Tờ rơi') {
     return (
       <div className="space-y-5">
         <p className="text-xs font-medium text-[#475569]">Sơ đồ tờ rơi</p>
         <div>
           <p className="text-xs font-semibold text-[#94A3B8] mb-2">Mặt trước</p>
-          <TierSide tiers={frontTiers} editable={editable} canRegister={canRegister} showReview={showReview} canReview={canReview} onChange={onChangeFrontTiers} />
+          <TierSide side="front" tiers={frontTiers} editable={editable} canRegister={canRegister} onChange={onChangeFrontTiers} />
         </div>
         <div>
           <p className="text-xs font-semibold text-[#94A3B8] mb-2">Mặt sau</p>
-          <TierSide tiers={backTiers} editable={editable} canRegister={canRegister} showReview={showReview} canReview={canReview} onChange={onChangeBackTiers} />
+          <TierSide side="back" tiers={backTiers} editable={editable} canRegister={canRegister} onChange={onChangeBackTiers} />
         </div>
       </div>
     )
@@ -264,8 +317,8 @@ export function PosmFlyerSketch({ layoutType, editable, canRegister, showReview,
     return (
       <div>
         <p className="text-xs font-medium text-[#475569] mb-3">Sơ đồ banner</p>
-        {editable && <CategoryManager categories={bannerCategories} onChange={onChangeBannerCategories} />}
-        <ProductTable categories={bannerCategories} canRegister={canRegister} showReview={showReview} canReview={canReview} onChange={onChangeBannerCategories} />
+        {editable && <CategoryManager categories={bannerCategories} maxSlots={Infinity} onChange={onChangeBannerCategories} />}
+        <ProductTable categories={bannerCategories} canRegister={canRegister} onChange={onChangeBannerCategories} />
       </div>
     )
   }
