@@ -1,25 +1,28 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
-  LogOut, Database, Settings,
-  Upload, LayoutDashboard, ListChecks, Megaphone, Home, Tag
+  LogOut, LayoutDashboard, Megaphone, Tag
+  // Tạm ẩn cùng các nhóm nav bên dưới: Database, Settings, Upload, ListChecks, Home
 } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useAuthStore } from '../../store/authStore'
-import { useOcpsAuth } from '../../features/ocps/context/OcpsAuthContext'
 import { useToast } from '../ui/Toast'
 
+// Tạm ẩn nav khu OCPS (Upload tài liệu / Dashboard NH / Hàng đợi Content / Brief Marketing) — sidebar
+// hiện chỉ còn nhóm Chiến dịch POSM. Route vẫn còn, chỉ ẩn lối vào ở sidebar.
+// import { useOcpsAuth } from '../../features/ocps/context/OcpsAuthContext'
+//
 // Nav khu OCPS theo vai trò OCPS hiệu lực (bridge từ user A — xem OcpsAuthContext).
 // Admin thấy tất cả items của các role + nhóm giám sát/cấu hình riêng.
-const OCPS_NAV: Record<string, Array<{ to: string; label: string; icon: React.ElementType }>> = {
-  vendor: [{ to: '/ocps/vendor/upload', label: 'Upload tài liệu', icon: Upload }],
-  nh: [
-    { to: '/ocps/nh/dashboard', label: 'Dashboard NH', icon: LayoutDashboard },
-    // Tạm ẩn Báo cáo NH
-    // { to: '/ocps/nh/report', label: 'Báo cáo NH', icon: BarChart3 },
-  ],
-  content: [{ to: '/ocps/content/dashboard', label: 'Hàng đợi Content', icon: ListChecks }],
-  marketing: [{ to: '/ocps/marketing/dashboard', label: 'Brief Marketing', icon: Megaphone }],
-}
+// const OCPS_NAV: Record<string, Array<{ to: string; label: string; icon: React.ElementType }>> = {
+//   vendor: [{ to: '/ocps/vendor/upload', label: 'Upload tài liệu', icon: Upload }],
+//   nh: [
+//     { to: '/ocps/nh/dashboard', label: 'Dashboard NH', icon: LayoutDashboard },
+//     // Tạm ẩn Báo cáo NH
+//     // { to: '/ocps/nh/report', label: 'Báo cáo NH', icon: BarChart3 },
+//   ],
+//   content: [{ to: '/ocps/content/dashboard', label: 'Hàng đợi Content', icon: ListChecks }],
+//   marketing: [{ to: '/ocps/marketing/dashboard', label: 'Brief Marketing', icon: Megaphone }],
+// }
 
 const ROLE_BADGE: Record<string, string> = {
   admin:           'bg-red-500/20 text-red-300',
@@ -59,14 +62,15 @@ function NavItem({ to, icon: Icon, label, end, activePrefix }: { to: string; ico
 
 export function Sidebar() {
   const { user, logout } = useAuthStore()
-  const { effectiveOcpsRole } = useOcpsAuth()
   const { toast } = useToast()
   const navigate = useNavigate()
 
+  // Tạm ẩn cùng nhóm nav OCPS:
+  // const { effectiveOcpsRole } = useOcpsAuth()
   // Chức năng theo vai trò OCPS (vendor/nh/content/marketing) — admin thấy tất cả.
-  const ocpsRoleItems = effectiveOcpsRole === 'admin'
-    ? Object.values(OCPS_NAV).flat()
-    : OCPS_NAV[effectiveOcpsRole ?? ''] ?? []
+  // const ocpsRoleItems = effectiveOcpsRole === 'admin'
+  //   ? Object.values(OCPS_NAV).flat()
+  //   : OCPS_NAV[effectiveOcpsRole ?? ''] ?? []
 
   const handleLogout = () => {
     if (confirm('Đăng xuất khỏi hệ thống?')) {
@@ -95,6 +99,8 @@ export function Sidebar() {
 
       {/* Nav — scroll nội bộ khi vượt chiều cao, để footer logout luôn cố định ở chân */}
       <nav className="flex-1 min-h-0 overflow-y-auto px-2 py-4 flex flex-col gap-1">
+        {/* Tạm ẩn Trang chủ + nhóm Sản phẩm / Cấu hình / Vận hành OCPS — sidebar chỉ còn nhóm Chiến dịch POSM.
+            Các route vẫn hoạt động nếu vào bằng URL, chỉ ẩn lối vào ở sidebar.
         <NavItem to="/" icon={Home} label="Trang chủ" end />
 
         <div className="px-2 mb-1 mt-4 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Sản phẩm</div>
@@ -118,8 +124,9 @@ export function Sidebar() {
             ))}
           </>
         )}
+        */}
 
-        <div className="px-2 mb-1 mt-4 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Chiến dịch POSM</div>
+        <div className="px-2 mb-1 text-[10px] text-white/30 font-semibold uppercase tracking-wider">Chiến dịch POSM</div>
         <NavItem to="/posm/nh/dashboard" icon={LayoutDashboard} label="Dashboard NH" />
         <NavItem to="/posm/promotions" icon={Tag} label="Chiến dịch POSM" />
         <NavItem to="/posm/marketing/dashboard" icon={Megaphone} label="Dashboard MKT" />
