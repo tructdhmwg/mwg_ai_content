@@ -9,9 +9,10 @@ import { usePosmStore } from '../../store/posmStore'
 import { formatDate, formatDateTime } from '../../lib/utils'
 import { PosmFlyerSketch } from './PosmFlyerSketch'
 import { PosmDotBadge } from './PosmDotBadge'
+import { PosmFlyerWireframe } from './PosmFlyerWireframe'
 import { PosmMktArtworkSection } from './PosmMktArtworkSection'
 import { PosmNhReviewSection } from './PosmNhReviewSection'
-import { artworkSlots, FLYER_TIER_LIMITS, isFullyRegistered, LAYOUT_TYPES, STATUS_META, WF_STATUS_META, type PosmCampaign, type PosmCampaignGroup, type PosmCampaignStatus, type PosmMktArtwork, type PosmTier } from './posmMockData'
+import { artworkSlots, campaignNganhHangs, FLYER_TIER_LIMITS, isFullyRegistered, LAYOUT_TYPES, STATUS_META, WF_STATUS_META, type PosmCampaign, type PosmCampaignGroup, type PosmCampaignStatus, type PosmMktArtwork, type PosmTier } from './posmMockData'
 
 // editable: sửa thông tin/cấu trúc chiến dịch (chỉ tab Chiến dịch POSM)
 // canRegister: ngành hàng đăng ký sản phẩm vào slot có sẵn + feedback/duyệt cả chiến dịch (chỉ tab Dashboard NH)
@@ -138,10 +139,15 @@ export function PosmCampaignDetailPage() {
   const showMktArtwork =
     !isCreate && !!existing &&
     (['transferred_mkt', 'mkt_proccessing', 'mkt_done', 'nh_approved', 'completed'] as PosmCampaignStatus[]).includes(existing.status)
+  // Các trạng thái từ khi MKT đã trả thành phẩm trở đi — dùng chung cho: hiện khu Feedback & Duyệt NH (showReview),
+  // và chuyển nút "AI kiểm tra thành quả của Marketing" sang chạy lại AI Workflow trên ảnh MKT đã nộp (hasMktResult)
+  // thay vì soát dữ liệu tầng/slot như các trạng thái trước đó.
+  const MKT_RESULT_STATUSES: PosmCampaignStatus[] = ['mkt_done', 'nh_approved', 'completed']
   // Feedback + duyệt của NH cho CẢ chiến dịch (không theo từng dòng sản phẩm) — hiện (đọc) từ khi "MKT trả kết quả" trở đi,
   // chỉ NH sửa được (canReview) và chỉ khi đang đúng trạng thái "MKT trả kết quả".
-  const showReview = !!existing && (['mkt_done', 'nh_approved', 'completed'] as PosmCampaignStatus[]).includes(existing.status)
+  const showReview = !!existing && MKT_RESULT_STATUSES.includes(existing.status)
   const canReview = canRegister && existing?.status === 'mkt_done'
+  const hasMktResult = !!existing && MKT_RESULT_STATUSES.includes(existing.status)
 
   // Tab Dashboard NH không có nút Lưu cho phần đăng ký slot (đăng ký sản phẩm lưu thẳng vào store ngay khi thao tác);
   // riêng feedback/duyệt cả chiến dịch có nút Lưu riêng (xem handleSaveReview).
@@ -157,13 +163,23 @@ export function PosmCampaignDetailPage() {
     updateCampaign(existing.id, { ...partial, ...statusPartial })
   }
 
-  // Lưu feedback + duyệt của NH cho cả chiến dịch — tick Duyệt rồi Lưu sẽ chuyển trạng thái sang "NH duyệt".
+  // Lưu feedback + duyệt của NH cho cả chiến dịch — tick Duyệt rồi Lưu sẽ chuyển trạng thái sang "NH duyệt"
+  // và đóng dấu 1 dòng duyệt cho TỪNG ngành hàng tham gia chiến dịch (ai duyệt, lúc nào).
   const handleSaveReview = (feedback: string, approved: boolean) => {
     if (!existing) return
+    const now = new Date().toISOString()
     updateCampaign(existing.id, {
       nhFeedback: feedback.trim() || undefined,
       nhApproved: approved,
       status: approved ? 'nh_approved' : existing.status,
+      nhApprovals: approved
+        ? campaignNganhHangs(existing).map((nganhHang) => ({
+            nganhHang,
+            approvedBy: `NH ${nganhHang}`,
+            approvedAt: now,
+            feedback: feedback.trim() || undefined,
+          }))
+        : existing.nhApprovals,
     })
     toast(approved ? 'Đã duyệt chiến dịch' : 'Đã lưu feedback', 'success')
   }
@@ -224,6 +240,23 @@ export function PosmCampaignDetailPage() {
         wfResult: `AI Workflow: kiểm tra ${files.length}/${labels.length} hình — bố cục đúng chuẩn, đủ ngành hàng đăng ký, không phát hiện lỗi.`,
       })
     }, 2500)
+  }
+
+  // Chạy lại AI Workflow kiểm tra thành phẩm MKT đã nộp (không cần MKT upload lại) — nút "AI kiểm tra thành quả của
+  // Marketing" ở tab Chiến dịch POSM gọi hàm này từ giai đoạn "MKT trả kết quả" trở đi (xem hasMktResult). Ghi thẳng
+  // vào store như handleUploadArtwork nên kết quả hiện ngay ở khu "Thành phẩm MKT & kiểm tra AI" (đọc từ `existing`, cả 3 tab).
+  const handleRecheckArtwork = () => {
+    if (!existing) return
+    const slotCount = artworkSlots(existing.layoutType).length
+    const artworkCount = existing.mktArtworks?.length ?? 0
+    updateCampaign(existing.id, { wfStatus: 'running', wfCheckedAt: undefined, wfResult: undefined })
+    setTimeout(() => {
+      updateCampaign(existing.id, {
+        wfStatus: 'passed',
+        wfCheckedAt: new Date().toISOString(),
+        wfResult: `AI Workflow: kiểm tra lại ${artworkCount}/${slotCount} hình — bố cục đúng chuẩn, đủ ngành hàng đăng ký, không phát hiện lỗi.`,
+      })
+    }, 1500)
   }
 
   return (
@@ -300,6 +333,9 @@ export function PosmCampaignDetailPage() {
               )}
             </div>
           </div>
+
+          {/* Phác thảo bố cục in 2 mặt — chỉ xem, đặt trước bảng cấu hình chi tiết bên dưới */}
+          <PosmFlyerWireframe layoutType={form.layoutType} frontTiers={form.frontTiers} backTiers={form.backTiers} />
 
           <PosmFlyerSketch
             layoutType={form.layoutType}
@@ -407,6 +443,7 @@ export function PosmCampaignDetailPage() {
             canReview={canReview}
             feedback={existing?.nhFeedback}
             approved={existing?.nhApproved}
+            approvals={existing?.nhApprovals}
             onSave={handleSaveReview}
           />
 
@@ -430,8 +467,12 @@ export function PosmCampaignDetailPage() {
                 {form.dataCheckCheckedAt && form.dataCheckStatus !== 'running' && (
                   <p className="text-[11px] text-[#94A3B8]">Kiểm tra lúc: {formatDateTime(form.dataCheckCheckedAt)}</p>
                 )}
-                <OcpsButton size="sm" onClick={handleRunDataCheck} disabled={form.dataCheckStatus === 'running'}>
-                  {form.dataCheckStatus === 'running' ? (
+                <OcpsButton
+                  size="sm"
+                  onClick={hasMktResult ? handleRecheckArtwork : handleRunDataCheck}
+                  disabled={hasMktResult ? existing?.wfStatus === 'running' : form.dataCheckStatus === 'running'}
+                >
+                  {(hasMktResult ? existing?.wfStatus === 'running' : form.dataCheckStatus === 'running') ? (
                     <span className="inline-flex items-center gap-1.5"><Loader2 size={12} className="animate-spin" /> Đang chạy AI Workflow...</span>
                   ) : 'AI kiểm tra thành quả của Marketing'}
                 </OcpsButton>

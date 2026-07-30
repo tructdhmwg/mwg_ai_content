@@ -1,18 +1,21 @@
 import { useState } from 'react'
 import { OcpsButton } from '../../features/ocps/components/OcpsButton'
+import { formatDateTime } from '../../lib/utils'
+import type { PosmNhApproval } from './posmMockData'
 
 interface Props {
   visible: boolean
   canReview: boolean
   feedback?: string
   approved?: boolean
+  approvals?: PosmNhApproval[]
   onSave: (feedback: string, approved: boolean) => void
 }
 
 // Feedback + duyệt của NH cho CẢ chiến dịch (không phải theo từng dòng sản phẩm) — chỉ NH sửa được (canReview),
 // và chỉ khi chiến dịch đang ở trạng thái "MKT trả kết quả". Có nút Lưu riêng: tick Duyệt + Lưu sẽ chuyển
 // trạng thái sang "NH duyệt" (xem PosmCampaignDetailPage.handleSaveReview).
-export function PosmNhReviewSection({ visible, canReview, feedback, approved, onSave }: Props) {
+export function PosmNhReviewSection({ visible, canReview, feedback, approved, approvals = [], onSave }: Props) {
   const [draftFeedback, setDraftFeedback] = useState(feedback ?? '')
   const [draftApproved, setDraftApproved] = useState(!!approved)
 
@@ -51,6 +54,35 @@ export function PosmNhReviewSection({ visible, canReview, feedback, approved, on
               <span className="text-xs text-[#CBD5E1]">Chưa duyệt</span>
             )}
           </>
+        )}
+
+        {/* Chi tiết duyệt theo từng ngành hàng — hiện từ khi chiến dịch được NH duyệt */}
+        {approvals.length > 0 && (
+          <div className="pt-1">
+            <p className="text-[11px] font-medium text-[#475569] mb-1.5">Chi tiết duyệt theo ngành hàng</p>
+            <div className="overflow-x-auto border border-[#E2E8F0] rounded-lg">
+              <table className="w-full text-xs min-w-[520px]">
+                <thead>
+                  <tr className="bg-[#F8FAFC] border-b border-[#E2E8F0] text-[#475569] text-left">
+                    <th className="px-2.5 py-2 font-medium">Ngành hàng</th>
+                    <th className="px-2.5 py-2 font-medium">Người duyệt</th>
+                    <th className="px-2.5 py-2 font-medium">Thời gian duyệt</th>
+                    <th className="px-2.5 py-2 font-medium">Feedback</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {approvals.map((a) => (
+                    <tr key={a.nganhHang} className="border-t border-[#F1F5F9]">
+                      <td className="px-2.5 py-1.5 text-[#0F172A] font-medium whitespace-nowrap">{a.nganhHang}</td>
+                      <td className="px-2.5 py-1.5 text-[#475569] whitespace-nowrap">{a.approvedBy}</td>
+                      <td className="px-2.5 py-1.5 text-[#94A3B8] whitespace-nowrap">{formatDateTime(a.approvedAt)}</td>
+                      <td className="px-2.5 py-1.5 text-[#94A3B8] italic">{a.feedback || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         )}
       </div>
     </div>

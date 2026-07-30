@@ -94,6 +94,14 @@ export interface PosmCategorySlot {
   registrations: PosmSlotRegistration[]
 }
 
+// 1 lượt duyệt của 1 ngành hàng tham gia chiến dịch — ai duyệt, lúc nào (kèm feedback riêng nếu có)
+export interface PosmNhApproval {
+  nganhHang: string
+  approvedBy: string
+  approvedAt: string
+  feedback?: string
+}
+
 export interface PosmTier {
   id: string
   label: string
@@ -128,6 +136,9 @@ export interface PosmCampaign {
   // khi chiến dịch đang ở trạng thái "MKT trả kết quả"; nhApproved=true khi lưu sẽ chuyển trạng thái sang "NH duyệt".
   nhFeedback?: string
   nhApproved?: boolean
+  // Chi tiết duyệt theo TỪNG ngành hàng tham gia chiến dịch (ai duyệt, lúc nào) — sinh ra khi NH bấm duyệt,
+  // hiển thị ở chi tiết phiếu từ trạng thái "NH duyệt" trở đi.
+  nhApprovals?: PosmNhApproval[]
   // AI Workflow kiểm tra DỮ LIỆU cấu hình chiến dịch (khác WF kiểm tra thành phẩm MKT ở trên) — user tab Chiến dịch POSM
   // chủ động chạy để tự soát lại cấu hình tầng/slot + thông tin campaign trước khi lưu.
   dataCheckStatus?: PosmWfStatus
@@ -135,46 +146,36 @@ export interface PosmCampaign {
   dataCheckResult?: string
 }
 
+type CampaignSlots = Pick<PosmCampaign, 'layoutType' | 'frontTiers' | 'backTiers' | 'bannerCategories'>
+
+// Gom mọi ngành hàng-slot của chiến dịch (banner: 1 mặt; tờ rơi: mọi tầng của cả 2 mặt)
+function allCategories(campaign: CampaignSlots): PosmCategorySlot[] {
+  return campaign.layoutType === 'Banner'
+    ? (campaign.bannerCategories ?? [])
+    : [...(campaign.frontTiers ?? []), ...(campaign.backTiers ?? [])].flatMap((t) => t.categories)
+}
+
 // Đã đăng ký đủ sản phẩm cho MỌI slot chưa (mọi ngành hàng ở mọi tầng/mặt đều registrations.length === slotCount)?
 // Dùng để tự chuyển trạng thái "Đủ sản phẩm" ngay khi NH đăng ký xong slot cuối cùng (xem PosmCampaignDetailPage.persistIfRegisterOnly).
-export function isFullyRegistered(campaign: Pick<PosmCampaign, 'layoutType' | 'frontTiers' | 'backTiers' | 'bannerCategories'>): boolean {
-  const categories =
-    campaign.layoutType === 'Banner'
-      ? (campaign.bannerCategories ?? [])
-      : [...(campaign.frontTiers ?? []), ...(campaign.backTiers ?? [])].flatMap((t) => t.categories)
+export function isFullyRegistered(campaign: CampaignSlots): boolean {
+  const categories = allCategories(campaign)
   if (categories.length === 0) return false
   return categories.every((c) => c.registrations.length >= c.slotCount)
 }
 
+// Danh sách ngành hàng (không trùng, giữ thứ tự xuất hiện) đang tham gia chiến dịch — dùng để dựng danh sách duyệt theo từng NH.
+export function campaignNganhHangs(campaign: CampaignSlots): string[] {
+  return [...new Set(allCategories(campaign).map((c) => c.nganhHang))]
+}
+
 // ---- Helpers dựng data demo ----------------------------------------------------
-
-// Thumbnail giả lập cho thành phẩm MKT — SVG data-URI (không cần file/mạng), màu theo layout.
-function artworkThumb(label: string, hex: string): string {
-  const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160">` +
-    `<rect width="160" height="160" fill="${hex}"/>` +
-    `<text x="80" y="86" font-family="Arial, sans-serif" font-size="15" font-weight="600" fill="#ffffff" text-anchor="middle">${label}</text>` +
-    `</svg>`
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`
-}
-
-// Sinh đủ bộ hình thành phẩm cho 1 layout (đúng số lượng + nhãn theo LAYOUT_ARTWORK_SLOTS).
-function mockArtworks(layoutType: string, key: string): PosmMktArtwork[] {
-  const color = LAYOUT_META[layoutType]?.dot ?? '#64748B'
-  return artworkSlots(layoutType).map((label, i) => ({
-    id: `${key}-art-${i + 1}`,
-    label,
-    name: `${key}-${i + 1}.png`,
-    url: artworkThumb(label, color),
-  }))
-}
 
 function svgDataUri(svg: string): string {
   return `data:image/svg+xml,${encodeURIComponent(svg)}`
 }
 
-// Mockup thành phẩm MKT cho tờ rơi "Laptop tựu trường T8" — dựng lại theo đúng bố cục/màu/nội dung ảnh mẫu thực tế
-// (thay cho khối màu trơn generic của artworkThumb), dùng riêng cho phiếu 3 & 6 (cùng nội dung tờ rơi này).
+// Mockup thành phẩm MKT cho tờ rơi "Laptop tựu trường T8" — dựng lại theo đúng bố cục/màu/nội dung ảnh mẫu thực tế.
+// Mọi phiếu Tờ rơi đã có thành phẩm đều dùng chung bộ hình này để data "Thành phẩm MKT & kiểm tra AI" đồng bộ nhau.
 function t8FrontArtwork(): string {
   return svgDataUri(
     `<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160">` +
@@ -255,49 +256,92 @@ function regs(prefix: string, items: RegInput[], updatedAt?: string): PosmSlotRe
   }))
 }
 
-// Bộ sản phẩm mẫu cho tờ rơi "nhẹ" (các trạng thái không phải showcase).
-// PHONES2 chỉ 2 sản phẩm vì tầng đặt "Điện thoại" là mặt trước Tầng 1 (cap FLYER_TIER_LIMITS.front[0] = 2).
-const PHONES2: RegInput[] = [
-  ['0194253789012', 'iPhone 17 128GB', 22990000, 21490000],
-  ['8806095123456', 'Samsung Galaxy S26 5G', 19990000, 18490000],
-]
-const LAPTOPS2: RegInput[] = [
-  ['4711387296451', 'Laptop Asus Vivobook 15 A1504', 12990000, 10990000],
-  ['0195949012345', 'MacBook Air M4 13"', 27990000, 26490000],
-]
-const HOME2: RegInput[] = [
-  ['8934563021458', 'Nồi chiên không dầu Sunhouse 5L', 1990000, 1590000],
-  ['8809123456789', 'Robot hút bụi Ecovacs Deebot', 6990000, 5490000],
+// Kho sản phẩm mẫu theo ngành hàng — đủ số lượng để lấp ĐẦY slot của ngành hàng đó trong khung tờ rơi chuẩn bên dưới.
+const PRODUCT_POOL: Record<string, RegInput[]> = {
+  'Điện thoại': [
+    ['0194253789012', 'iPhone 17 128GB', 22990000, 21490000],
+    ['8806095123456', 'Samsung Galaxy S26 5G', 19990000, 18490000],
+  ],
+  Laptop: [
+    ['4711387296451', 'Laptop Asus Vivobook 15 A1504', 12990000, 10990000],
+    ['0195949012345', 'MacBook Air M4 13"', 27990000, 26490000],
+    ['0196123456789', 'Laptop Dell Inspiron 15', 15990000, 13990000],
+    ['0196234567890', 'Laptop Lenovo IdeaPad Slim 3', 11990000, 10490000],
+    ['0196345678901', 'Laptop HP 240 G9', 12990000, 11490000],
+    ['0196456789012', 'Laptop Acer Aspire 3', 13990000, 12490000],
+    ['0196567890123', 'Laptop MSI Modern 14', 14990000, 13290000],
+    ['0196678901234', 'Laptop Gaming Acer Nitro V', 25990000, 22990000],
+    ['0196789012345', 'Laptop AI Asus Zenbook 14', 23990000, 21990000],
+    ['0196890123456', 'Laptop Sinh viên HP 15', 17990000, 15990000],
+  ],
+  'Gia dụng': [
+    ['8934563021458', 'Nồi chiên không dầu Sunhouse 5L', 1990000, 1590000],
+    ['8809123456789', 'Robot hút bụi Ecovacs Deebot', 6990000, 5490000],
+    ['8935001100028', 'Bình đun siêu tốc Rapido RK2015-C 2L', 399000, 250000],
+    ['8935001100042', 'Quạt đứng Midea FS40-10NAVN(K)', 690000, 450000, 'https://www.dienmayxanh.com/quat-dieu-hoa'],
+  ],
+  'Đồng hồ - Phụ kiện': [
+    ['8840001000017', 'Cáp sạc Type-C 1m', 59000, 39000],
+    ['8840001000024', 'Adapter sạc 20W', 149000, 99000],
+    ['8840001000031', 'Chuột không dây DareU LM106G', 99000, 69000],
+    ['8840001000055', 'Sạc dự phòng JP388 10.000mAh', 199000, 149000],
+    ['8840005500035', 'Đồng hồ thông minh Xiaomi Watch', 990000, 790000],
+  ],
+  'Mẹ & bé': [
+    ['8936012300011', 'Bỉm Bobby size M 62 miếng', 259000, 219000],
+    ['8936012300028', 'Sữa bột Nan Nga 800g', 550000, 490000],
+    ['8936012300035', 'Xe đẩy em bé gấp gọn', 1990000, 1590000],
+    ['8936012300042', 'Ghế ăn dặm đa năng', 890000, 690000],
+  ],
+  'Làm đẹp - Sức khoẻ': [
+    ['8938012400011', 'Sữa rửa mặt Cetaphil 500ml', 350000, 290000],
+    ['8938012400028', 'Kem chống nắng Anessa', 550000, 450000],
+    ['8938012400035', 'Máy massage cầm tay', 690000, 490000],
+    ['8938012400042', 'Vitamin C DHC 60 viên', 250000, 190000],
+  ],
+}
+
+// Khung tờ rơi 2 mặt chuẩn: ngành hàng + slot của từng tầng, tổng mỗi tầng khớp đúng FLYER_TIER_LIMITS (trước 2,10 · sau 4,5,8).
+// Mọi chiến dịch Tờ rơi chỉ được tạo khi đã lấp đầy đúng mức này (validation ở handleSave) nên không tầng nào để trống.
+const STANDARD_FLYER: { side: 'front' | 'back'; label: string; cats: Array<[nganhHang: string, slots: number]> }[] = [
+  { side: 'front', label: 'Tầng 1 · Điện thoại', cats: [['Điện thoại', 2]] },
+  { side: 'front', label: 'Tầng 2 · Laptop', cats: [['Laptop', 10]] },
+  { side: 'back', label: 'Tầng 1 · Gia dụng', cats: [['Gia dụng', 4]] },
+  { side: 'back', label: 'Tầng 2 · Đồng hồ - Phụ kiện', cats: [['Đồng hồ - Phụ kiện', 5]] },
+  { side: 'back', label: 'Tầng 3 · Mẹ & bé - Làm đẹp', cats: [['Mẹ & bé', 4], ['Làm đẹp - Sức khoẻ', 4]] },
 ]
 
-// Khung tờ rơi 2 mặt "nhẹ" (Điện thoại mặt trước T1, Laptop mặt trước T2, Gia dụng mặt sau T1) — fill sản phẩm theo trạng thái.
-// Mọi tầng LUÔN được cấu hình ĐỦ ngành hàng + slot đúng FLYER_TIER_LIMITS (trước 2,10 · sau 4,5,8) — vì mọi chiến dịch Tờ rơi
-// chỉ được tạo khi đã lấp đầy đúng mức này (xem validation ở handleSave), nên không tầng nào được để trống dù ở trạng thái nào.
-// Riêng phần "đăng ký sản phẩm" (registrations) mới phản ánh tiến độ NH — có thể rỗng/dở dang tuỳ trạng thái.
-function lightFlyer(key: string, opts: { phones?: RegInput[]; laptops?: RegInput[]; home?: RegInput[]; updatedAt?: string } = {}): Pick<PosmCampaign, 'frontTiers' | 'backTiers'> {
-  const at = opts.updatedAt
-  return {
-    frontTiers: [
-      { id: `${key}-f1`, label: 'Tầng 1 · Điện thoại', categories: [
-        { id: `${key}-f1c1`, nganhHang: 'Điện thoại', slotCount: 2, registrations: regs(`${key}f1`, opts.phones ?? [], at) },
-      ] },
-      { id: `${key}-f2`, label: 'Tầng 2 · Laptop', categories: [
-        { id: `${key}-f2c1`, nganhHang: 'Laptop', slotCount: 10, registrations: regs(`${key}f2`, opts.laptops ?? [], at) },
-      ] },
-    ],
-    backTiers: [
-      { id: `${key}-b1`, label: 'Tầng 1 · Gia dụng', categories: [
-        { id: `${key}-b1c1`, nganhHang: 'Gia dụng', slotCount: 4, registrations: regs(`${key}b1`, opts.home ?? [], at) },
-      ] },
-      { id: `${key}-b2`, label: 'Tầng 2 · Đồng hồ - Phụ kiện', categories: [
-        { id: `${key}-b2c1`, nganhHang: 'Đồng hồ - Phụ kiện', slotCount: 5, registrations: [] },
-      ] },
-      { id: `${key}-b3`, label: 'Tầng 3 · Mẹ & bé - Làm đẹp', categories: [
-        { id: `${key}-b3c1`, nganhHang: 'Mẹ & bé', slotCount: 4, registrations: [] },
-        { id: `${key}-b3c2`, nganhHang: 'Làm đẹp - Sức khoẻ', slotCount: 4, registrations: [] },
-      ] },
-    ],
-  }
+// Dựng khung tờ rơi chuẩn với mức lấp đầy đăng ký sản phẩm theo trạng thái phiếu:
+//   'empty'   → chỉ có khung slot, chưa đăng ký gì (trạng thái "Mới")
+//   'partial' → mới đăng ký dở ngành hàng đầu tiên (trạng thái "Đang cập nhật")
+//   'full'    → mọi slot của mọi ngành hàng đã đăng ký đủ (từ "Đủ sản phẩm" trở đi)
+function standardFlyer(key: string, fill: 'empty' | 'partial' | 'full', updatedAt?: string): Pick<PosmCampaign, 'frontTiers' | 'backTiers'> {
+  const build = (side: 'front' | 'back') =>
+    STANDARD_FLYER.filter((t) => t.side === side).map((tier, ti) => ({
+      id: `${key}-${side}${ti + 1}`,
+      label: tier.label,
+      categories: tier.cats.map(([nganhHang, slots], ci) => {
+        const pool = PRODUCT_POOL[nganhHang] ?? []
+        const take = fill === 'full' ? slots : fill === 'partial' && side === 'front' && ti === 0 && ci === 0 ? 1 : 0
+        return {
+          id: `${key}-${side}${ti + 1}c${ci + 1}`,
+          nganhHang,
+          slotCount: slots,
+          registrations: regs(`${key}${side}${ti + 1}${ci + 1}`, pool.slice(0, take), updatedAt),
+        }
+      }),
+    }))
+  return { frontTiers: build('front'), backTiers: build('back') }
+}
+
+// Dựng danh sách duyệt theo từng ngành hàng của chiến dịch — mỗi NH 1 dòng: ai duyệt, lúc nào (giãn cách 25 phút cho tự nhiên).
+function mockNhApprovals(tiers: Pick<PosmCampaign, 'frontTiers' | 'backTiers'>, baseAt: string, feedback?: string): PosmNhApproval[] {
+  return campaignNganhHangs({ layoutType: 'Tờ rơi', ...tiers }).map((nganhHang, i) => ({
+    nganhHang,
+    approvedBy: staffFor(nganhHang),
+    approvedAt: new Date(new Date(baseAt).getTime() + i * 25 * 60_000).toISOString(),
+    feedback: i === 0 ? feedback : undefined,
+  }))
 }
 
 // Tờ rơi "Laptop tựu trường T8" — nội dung mặt trước/sau lấy đúng theo ảnh mẫu thực tế:
@@ -399,27 +443,7 @@ export const posmNhCampaigns: PosmCampaign[] = [
     startDate: '2026-08-08', endDate: '2026-08-20',
     description: 'Tờ rơi phát tại khu vực có chi nhánh mới khai trương.',
     note: 'Đã cấu hình đủ slot tờ rơi 2 mặt theo đúng quy định (2-10-4-5-8), chờ NH đăng ký sản phẩm.',
-    frontTiers: [
-      { id: 'c1-f1', label: 'Tầng 1', categories: [
-        { id: 'c1-f1c1', nganhHang: 'Điện thoại', slotCount: 2, registrations: [] },
-      ] },
-      { id: 'c1-f2', label: 'Tầng 2', categories: [
-        { id: 'c1-f2c1', nganhHang: 'Laptop', slotCount: 6, registrations: [] },
-        { id: 'c1-f2c2', nganhHang: 'Tablet', slotCount: 4, registrations: [] },
-      ] },
-    ],
-    backTiers: [
-      { id: 'c1-b1', label: 'Tầng 1', categories: [
-        { id: 'c1-b1c1', nganhHang: 'Gia dụng', slotCount: 4, registrations: [] },
-      ] },
-      { id: 'c1-b2', label: 'Tầng 2', categories: [
-        { id: 'c1-b2c1', nganhHang: 'Đồng hồ - Phụ kiện', slotCount: 5, registrations: [] },
-      ] },
-      { id: 'c1-b3', label: 'Tầng 3', categories: [
-        { id: 'c1-b3c1', nganhHang: 'Mẹ & bé', slotCount: 4, registrations: [] },
-        { id: 'c1-b3c2', nganhHang: 'Làm đẹp - Sức khoẻ', slotCount: 4, registrations: [] },
-      ] },
-    ],
+    ...standardFlyer('c1', 'empty'),
     dataCheckStatus: 'passed',
     dataCheckCheckedAt: '2026-07-26T08:00:00',
     dataCheckResult: 'AI Workflow: dữ liệu chiến dịch hợp lệ — đủ slot mọi tầng, thông tin campaign đầy đủ.',
@@ -431,7 +455,7 @@ export const posmNhCampaigns: PosmCampaign[] = [
     id: '2', group: 'nh', layoutType: 'Tờ rơi', campaignName: 'Tờ rơi Flash Sale cuối tuần', createdAt: '2026-07-20', status: 'checked',
     startDate: '2026-08-01', endDate: '2026-08-03',
     description: 'Tờ rơi flash sale áp dụng 2 ngày cuối tuần.',
-    ...lightFlyer('c2', { phones: PHONES2.slice(0, 1), updatedAt: '2026-07-21T09:10:00' }),
+    ...standardFlyer('c2', 'partial', '2026-07-21T09:10:00'),
   },
 
   // (9) Đủ sản phẩm — mọi slot ở mọi ngành hàng/tầng đã đăng ký đủ sản phẩm (Điện thoại 2/2, Laptop 6/6, Tablet 4/4,
@@ -498,6 +522,9 @@ export const posmNhCampaigns: PosmCampaign[] = [
         ], '2026-07-28T09:00:00') },
       ] },
     ],
+    dataCheckStatus: 'passed',
+    dataCheckCheckedAt: '2026-07-28T10:00:00',
+    dataCheckResult: 'AI Workflow: dữ liệu chiến dịch hợp lệ — đủ slot mọi tầng, thông tin campaign đầy đủ.',
   },
 
   // (3) MKT trả kết quả — SHOWCASE theo tờ rơi "Laptop tựu trường T8" (đợt chạy 14–23/8): đủ 2 mặt + 2 hình + WF passed.
@@ -514,6 +541,9 @@ export const posmNhCampaigns: PosmCampaign[] = [
     wfResult: 'AI Workflow: kiểm tra 2/2 mặt tờ rơi — font, màu thương hiệu, giá & tên sản phẩm khớp phiếu đăng ký.',
     nhFeedback: 'Đang rà lại giá KM nhóm phụ kiện quà tặng 0đ trước khi duyệt.',
     nhApproved: false,
+    dataCheckStatus: 'passed',
+    dataCheckCheckedAt: '2026-07-06T09:00:00',
+    dataCheckResult: 'AI Workflow: dữ liệu chiến dịch hợp lệ — đủ slot mọi tầng, thông tin campaign đầy đủ.',
   },
 ]
 
@@ -524,7 +554,10 @@ export const posmPromotionCampaigns: PosmCampaign[] = [
     startDate: '2026-07-28', endDate: '2026-08-05',
     description: 'Tờ rơi chương trình sinh nhật Điện Máy Xanh.',
     note: 'NH đã fill đủ slot, chuyển MKT dàn layout.',
-    ...lightFlyer('c4', { phones: PHONES2, laptops: LAPTOPS2, home: HOME2, updatedAt: '2026-07-15T14:20:00' }),
+    ...standardFlyer('c4', 'full', '2026-07-15T14:20:00'),
+    dataCheckStatus: 'passed',
+    dataCheckCheckedAt: '2026-07-11T09:00:00',
+    dataCheckResult: 'AI Workflow: dữ liệu chiến dịch hợp lệ — đủ slot mọi tầng, thông tin campaign đầy đủ.',
   },
 
   // (5) NH duyệt — đủ slot, NH đã lưu duyệt cho cả phiếu
@@ -532,14 +565,18 @@ export const posmPromotionCampaigns: PosmCampaign[] = [
     id: '5', group: 'promotions', layoutType: 'Tờ rơi', campaignName: 'Tờ rơi ra mắt TV & Laptop 2026', createdAt: '2026-06-28', status: 'nh_approved',
     startDate: '2026-07-10', endDate: '2026-07-31',
     description: 'Tờ rơi ra mắt dòng sản phẩm mới, NH đã duyệt toàn bộ chiến dịch.',
-    ...lightFlyer('c5', { phones: PHONES2, laptops: LAPTOPS2, home: HOME2, updatedAt: '2026-07-02T10:00:00' }),
-    mktArtworks: mockArtworks('Tờ rơi', '5'),
+    ...standardFlyer('c5', 'full', '2026-07-02T10:00:00'),
+    mktArtworks: t8Artwork('5'),
     mktArtworkUploadedAt: '2026-07-04T09:00:00',
     wfStatus: 'passed',
     wfCheckedAt: '2026-07-04T09:01:10',
-    wfResult: 'AI Workflow: bố cục đúng chuẩn, đủ ngành hàng đăng ký, không phát hiện lỗi.',
+    wfResult: 'AI Workflow: kiểm tra 2/2 mặt tờ rơi — font, màu thương hiệu, giá & tên sản phẩm khớp phiếu đăng ký.',
     nhFeedback: 'Đạt yêu cầu, duyệt toàn bộ chiến dịch.',
     nhApproved: true,
+    nhApprovals: mockNhApprovals(standardFlyer('c5', 'full'), '2026-07-05T08:30:00', 'Đạt yêu cầu, duyệt toàn bộ chiến dịch.'),
+    dataCheckStatus: 'passed',
+    dataCheckCheckedAt: '2026-06-29T09:00:00',
+    dataCheckResult: 'AI Workflow: dữ liệu chiến dịch hợp lệ — đủ slot mọi tầng, thông tin campaign đầy đủ.',
   },
 
   // (6) Hoàn tất — cùng nội dung tờ rơi "Laptop tựu trường T8" như phiếu 3, nhưng là đợt chạy TRƯỚC đó (12–21/6),
@@ -556,6 +593,10 @@ export const posmPromotionCampaigns: PosmCampaign[] = [
     wfResult: 'AI Workflow: kiểm tra 2/2 mặt tờ rơi — font, màu thương hiệu, giá & tên sản phẩm khớp phiếu đăng ký.',
     nhFeedback: 'Đạt yêu cầu, duyệt toàn bộ chiến dịch.',
     nhApproved: true,
+    nhApprovals: mockNhApprovals(t8FlyerTiers('c6', '2026-06-05T09:00:00'), '2026-06-09T08:15:00', 'Đạt yêu cầu, duyệt toàn bộ chiến dịch.'),
+    dataCheckStatus: 'passed',
+    dataCheckCheckedAt: '2026-06-02T09:00:00',
+    dataCheckResult: 'AI Workflow: dữ liệu chiến dịch hợp lệ — đủ slot mọi tầng, thông tin campaign đầy đủ.',
   },
 ]
 
@@ -565,10 +606,13 @@ export const posmMktCampaigns: PosmCampaign[] = [
     id: '7', group: 'mkt', layoutType: 'Tờ rơi', campaignName: 'Tờ rơi ưu đãi thành viên VIP', createdAt: '2026-07-22', status: 'mkt_proccessing',
     startDate: '2026-07-29', endDate: '2026-08-12',
     description: 'Tờ rơi ưu đãi riêng khách hàng thành viên VIP.',
-    ...lightFlyer('c7', { phones: PHONES2, laptops: LAPTOPS2, home: HOME2, updatedAt: '2026-07-25T11:30:00' }),
-    mktArtworks: mockArtworks('Tờ rơi', '7'),
+    ...standardFlyer('c7', 'full', '2026-07-25T11:30:00'),
+    mktArtworks: t8Artwork('7'),
     mktArtworkUploadedAt: '2026-07-28T16:40:00',
     wfStatus: 'running',
+    dataCheckStatus: 'passed',
+    dataCheckCheckedAt: '2026-07-23T09:00:00',
+    dataCheckResult: 'AI Workflow: dữ liệu chiến dịch hợp lệ — đủ slot mọi tầng, thông tin campaign đầy đủ.',
   },
 
   // (8) MKT trả kết quả (thứ 2) — đủ 2 hình + WF passed, NH CHƯA nhập feedback/duyệt gì (trạng thái trống, mới nhận kết quả)
@@ -576,11 +620,16 @@ export const posmMktCampaigns: PosmCampaign[] = [
     id: '8', group: 'mkt', layoutType: 'Tờ rơi', campaignName: 'Tờ rơi Điện máy mùa nắng nóng', createdAt: '2026-07-01', status: 'mkt_done',
     startDate: '2026-07-15', endDate: '2026-08-15',
     description: 'Tờ rơi nhóm điện máy cao điểm mùa nắng nóng.',
-    ...lightFlyer('c8', { phones: PHONES2, laptops: LAPTOPS2, home: HOME2, updatedAt: '2026-07-04T16:45:00' }),
-    mktArtworks: mockArtworks('Tờ rơi', '8'),
+    ...standardFlyer('c8', 'full', '2026-07-04T16:45:00'),
+    mktArtworks: t8Artwork('8'),
     mktArtworkUploadedAt: '2026-07-06T11:05:00',
     wfStatus: 'passed',
     wfCheckedAt: '2026-07-06T11:06:15',
     wfResult: 'AI Workflow: kiểm tra 2/2 mặt tờ rơi — bố cục & nhận diện đạt, đối chiếu giá khớp phiếu.',
+    nhFeedback: 'Giá & tên sản phẩm khớp phiếu đăng ký, đạt yêu cầu.',
+    nhApproved: false,
+    dataCheckStatus: 'passed',
+    dataCheckCheckedAt: '2026-07-02T09:00:00',
+    dataCheckResult: 'AI Workflow: dữ liệu chiến dịch hợp lệ — đủ slot mọi tầng, thông tin campaign đầy đủ.',
   },
 ]

@@ -148,9 +148,6 @@ function ProductTable({ categories, canRegister, onChange }: { categories: PosmC
         <tbody>
           {categories.map((cat) => {
             const emptySlots = Math.max(0, cat.slotCount - cat.registrations.length)
-            const isFull = emptySlots === 0
-            // Khi canRegister: dòng trống đầu tiên là AddProductRow (form nhập), các dòng trống còn lại là placeholder.
-            const placeholderCount = canRegister ? Math.max(0, emptySlots - 1) : emptySlots
             return (
               <Fragment key={cat.id}>
                 {cat.registrations.map((r) => (
@@ -233,21 +230,25 @@ function ProductTable({ categories, canRegister, onChange }: { categories: PosmC
                     {canRegister && <td className="px-2.5 py-1.5" />}
                   </tr>
                 ))}
-                {canRegister && !isFull && (
-                  <AddProductRow
-                    nganhHang={cat.nganhHang}
-                    onSubmit={(reg) => updateCategory(cat.id, {
-                      ...cat,
-                      registrations: [...cat.registrations, { id: crypto.randomUUID(), ...reg, updatedBy: `NH ${cat.nganhHang}`, updatedAt: new Date().toISOString() }],
-                    })}
-                  />
-                )}
-                {Array.from({ length: placeholderCount }).map((_, i) => (
-                  <tr key={`${cat.id}-empty-${i}`} className="border-t border-[#F1F5F9]">
-                    <td className="px-2.5 py-1.5 text-[#0F172A] font-medium whitespace-nowrap">{cat.nganhHang}</td>
-                    <td colSpan={emptyColSpan} className="px-2.5 py-1.5 text-[#CBD5E1]">Chưa có sản phẩm đăng ký</td>
-                  </tr>
-                ))}
+                {/* Mỗi slot còn trống là 1 dòng nhập độc lập (khi được đăng ký) — không còn dòng placeholder trơ,
+                    để NH điền thẳng vào đúng dòng slot muốn dùng thay vì chỉ có 1 dòng nhập ở đầu. */}
+                {canRegister
+                  ? Array.from({ length: emptySlots }).map((_, i) => (
+                      <AddProductRow
+                        key={`${cat.id}-add-${i}`}
+                        nganhHang={cat.nganhHang}
+                        onSubmit={(reg) => updateCategory(cat.id, {
+                          ...cat,
+                          registrations: [...cat.registrations, { id: crypto.randomUUID(), ...reg, updatedBy: `NH ${cat.nganhHang}`, updatedAt: new Date().toISOString() }],
+                        })}
+                      />
+                    ))
+                  : Array.from({ length: emptySlots }).map((_, i) => (
+                      <tr key={`${cat.id}-empty-${i}`} className="border-t border-[#F1F5F9]">
+                        <td className="px-2.5 py-1.5 text-[#0F172A] font-medium whitespace-nowrap">{cat.nganhHang}</td>
+                        <td colSpan={emptyColSpan} className="px-2.5 py-1.5 text-[#CBD5E1]">Chưa có sản phẩm đăng ký</td>
+                      </tr>
+                    ))}
               </Fragment>
             )
           })}
