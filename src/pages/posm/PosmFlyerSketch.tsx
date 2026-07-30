@@ -1,5 +1,6 @@
-import { Fragment, useState } from 'react'
-import { Plus, X, ImageIcon } from 'lucide-react'
+import { Fragment, useEffect, useState } from 'react'
+import { Plus, Pencil, X, ImageIcon } from 'lucide-react'
+import { Dialog } from '../../components/ui/Dialog'
 import { OcpsButton } from '../../features/ocps/components/OcpsButton'
 import { formatDateTime } from '../../lib/utils'
 import { FLYER_TIER_LIMITS, NGANH_HANG_OPTIONS, type PosmCategorySlot, type PosmSlotRegistration, type PosmTier } from './posmMockData'
@@ -16,12 +17,36 @@ function priceFeedback(r: PosmSlotRegistration): { label: string; color: string 
   return { label: 'Hợp lệ', color: '#16A34A' }
 }
 
-const cellInputClass = 'w-full border border-[#E2E8F0] rounded px-1.5 py-1 text-xs text-[#0F172A] placeholder:text-[#94A3B8] outline-none focus:border-[#3B82F6]'
-const EMPTY_REG_FORM = { productCode: '', productName: '', originalPrice: '', promoPrice: '', note: '', picUrl: '' }
+const dialogInputClass = 'w-full text-xs border border-[#E2E8F0] rounded px-3 py-2 text-[#0F172A] placeholder:text-[#94A3B8] outline-none focus:border-[#3B82F6]'
+const dialogLabelClass = 'block text-xs font-medium text-[#475569] mb-1.5'
+const EMPTY_REG_FORM = { productCode: '', productName: '', originalPrice: '', promoPrice: '', promotion1: '', promotion2: '', promotion3: '', picUrl: '' }
 
-// Hàng nhập liệu ngang (mã SP / tên SP / giá gốc / giá KM / ghi chú / PIC đều là input trên cùng 1 hàng) — theo mẫu bảng Excel gốc
-function AddProductRow({ nganhHang, onSubmit }: { nganhHang: string; onSubmit: (reg: Omit<PosmSlotRegistration, 'id'>) => void }) {
+// Popup thêm mới/chỉnh sửa 1 dòng sản phẩm — bảng chi tiết phiếu chỉ hiển thị (không cho điền trực tiếp),
+// mọi thao tác thêm/sửa đều qua popup này để tránh sửa nhầm lúc đang xem. initial có giá trị = đang sửa dòng
+// đã đăng ký (giữ nguyên updatedBy/updatedAt cũ, chỉ đóng dấu lại khi lưu); không có = đang đăng ký slot trống.
+function ProductFormDialog({ open, nganhHang, initial, onClose, onSubmit }: {
+  open: boolean
+  nganhHang: string
+  initial?: PosmSlotRegistration
+  onClose: () => void
+  onSubmit: (reg: Omit<PosmSlotRegistration, 'id' | 'updatedBy' | 'updatedAt'>) => void
+}) {
   const [form, setForm] = useState(EMPTY_REG_FORM)
+
+  useEffect(() => {
+    if (!open) return
+    setForm(initial ? {
+      productCode: initial.productCode,
+      productName: initial.productName,
+      originalPrice: initial.originalPrice?.toString() ?? '',
+      promoPrice: initial.promoPrice?.toString() ?? '',
+      promotion1: initial.promotion1 ?? '',
+      promotion2: initial.promotion2 ?? '',
+      promotion3: initial.promotion3 ?? '',
+      picUrl: initial.picUrl ?? '',
+    } : EMPTY_REG_FORM)
+  }, [open, initial])
+
   const canSubmit = !!form.productCode.trim() && !!form.productName.trim()
 
   const submit = () => {
@@ -31,26 +56,69 @@ function AddProductRow({ nganhHang, onSubmit }: { nganhHang: string; onSubmit: (
       productName: form.productName.trim(),
       originalPrice: form.originalPrice ? Number(form.originalPrice) : undefined,
       promoPrice: form.promoPrice ? Number(form.promoPrice) : undefined,
-      note: form.note.trim() || undefined,
+      promotion1: form.promotion1.trim() || undefined,
+      promotion2: form.promotion2.trim() || undefined,
+      promotion3: form.promotion3.trim() || undefined,
       picUrl: form.picUrl.trim() || undefined,
     })
-    setForm(EMPTY_REG_FORM)
+    onClose()
   }
 
   return (
-    <tr className="border-t border-[#F1F5F9] bg-[#F8FAFC]">
-      <td className="px-2.5 py-1.5 text-[#94A3B8] italic whitespace-nowrap">{nganhHang}</td>
-      <td className="px-1.5 py-1"><input className={cellInputClass} placeholder="Mã SP *" value={form.productCode} onChange={(e) => setForm((f) => ({ ...f, productCode: e.target.value }))} /></td>
-      <td className="px-1.5 py-1"><input className={cellInputClass} placeholder="Tên sản phẩm *" value={form.productName} onChange={(e) => setForm((f) => ({ ...f, productName: e.target.value }))} /></td>
-      <td className="px-1.5 py-1"><input type="number" min={0} className={cellInputClass} placeholder="Giá gốc" value={form.originalPrice} onChange={(e) => setForm((f) => ({ ...f, originalPrice: e.target.value }))} /></td>
-      <td className="px-1.5 py-1"><input type="number" min={0} className={cellInputClass} placeholder="Giá KM" value={form.promoPrice} onChange={(e) => setForm((f) => ({ ...f, promoPrice: e.target.value }))} /></td>
-      <td className="px-1.5 py-1"><input className={cellInputClass} placeholder="Ghi chú" value={form.note} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))} /></td>
-      <td className="px-1.5 py-1"><input className={cellInputClass} placeholder="Link ảnh" value={form.picUrl} onChange={(e) => setForm((f) => ({ ...f, picUrl: e.target.value }))} /></td>
-      <td className="px-2.5 py-1.5 text-center text-[10px] text-[#94A3B8] italic" colSpan={3}>Tự động khi đăng ký</td>
-      <td className="px-1.5 py-1 whitespace-nowrap">
-        <OcpsButton size="sm" variant="primary" onClick={submit} disabled={!canSubmit} className="whitespace-nowrap">+ Đăng ký</OcpsButton>
-      </td>
-    </tr>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title={initial ? 'Sửa sản phẩm' : 'Thêm sản phẩm'}
+      subtitle={nganhHang}
+      className="max-w-lg"
+      footer={
+        <div className="flex gap-2 ml-auto">
+          <OcpsButton variant="ghost" onClick={onClose}>Hủy</OcpsButton>
+          <OcpsButton variant="primary" onClick={submit} disabled={!canSubmit}>{initial ? 'Lưu thay đổi' : '+ Đăng ký'}</OcpsButton>
+        </div>
+      }
+    >
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={dialogLabelClass}>Mã SP <span style={{ color: '#EF4444' }}>*</span></label>
+            <input className={dialogInputClass} value={form.productCode} onChange={(e) => setForm((f) => ({ ...f, productCode: e.target.value }))} />
+          </div>
+          <div>
+            <label className={dialogLabelClass}>Tên SP hiển thị <span style={{ color: '#EF4444' }}>*</span></label>
+            <input className={dialogInputClass} value={form.productName} onChange={(e) => setForm((f) => ({ ...f, productName: e.target.value }))} />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className={dialogLabelClass}>Giá gốc</label>
+            <input type="number" min={0} className={dialogInputClass} value={form.originalPrice} onChange={(e) => setForm((f) => ({ ...f, originalPrice: e.target.value }))} />
+          </div>
+          <div>
+            <label className={dialogLabelClass}>Giá KM</label>
+            <input type="number" min={0} className={dialogInputClass} value={form.promoPrice} onChange={(e) => setForm((f) => ({ ...f, promoPrice: e.target.value }))} />
+          </div>
+        </div>
+        <div>
+          <label className={dialogLabelClass}>Link hình (drive hoặc web)</label>
+          <input className={dialogInputClass} value={form.picUrl} onChange={(e) => setForm((f) => ({ ...f, picUrl: e.target.value }))} />
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          <div>
+            <label className={dialogLabelClass}>Khuyến mãi 1</label>
+            <input className={dialogInputClass} value={form.promotion1} onChange={(e) => setForm((f) => ({ ...f, promotion1: e.target.value }))} />
+          </div>
+          <div>
+            <label className={dialogLabelClass}>Khuyến mãi 2</label>
+            <input className={dialogInputClass} value={form.promotion2} onChange={(e) => setForm((f) => ({ ...f, promotion2: e.target.value }))} />
+          </div>
+          <div>
+            <label className={dialogLabelClass}>Khuyến mãi 3</label>
+            <input className={dialogInputClass} value={form.promotion3} onChange={(e) => setForm((f) => ({ ...f, promotion3: e.target.value }))} />
+          </div>
+        </div>
+      </div>
+    </Dialog>
   )
 }
 
@@ -114,27 +182,35 @@ function CategoryManager({ categories, maxSlots, onChange }: { categories: PosmC
   )
 }
 
-// Bảng sản phẩm ngang, mỗi hàng 1 sản phẩm — theo đúng mẫu bảng Excel (Ngành hàng / Mã SP / Tên SP / Giá gốc / Giá KM / Ghi chú / PIC).
-// Luôn hiển thị ĐỦ slotCount dòng cho mỗi ngành hàng: dòng đã đăng ký trước, phần còn trống hiển thị placeholder
-// (khi canRegister, dòng trống đầu tiên là form nhập — AddProductRow — các dòng trống còn lại là placeholder).
-// canRegister cũng quyết định các dòng ĐÃ đăng ký có sửa được không (trừ cột Ngành hàng, luôn tĩnh) — không có nút xoá:
-// 1 slot đã có sản phẩm là vĩnh viễn, chỉ sửa được nội dung, không gỡ bỏ được (xem PosmCampaignDetailPage: canRegister
-// truyền vào đây đã tắt sẵn khi chiến dịch ở trạng thái "Hoàn tất").
+// Bảng sản phẩm ngang, mỗi hàng 1 sản phẩm — theo đúng mẫu bảng Excel (Ngành hàng / Mã SP / Tên SP / Giá gốc / Giá KM / Khuyến mãi 1-3 / PIC).
+// Luôn hiển thị ĐỦ slotCount dòng cho mỗi ngành hàng: dòng đã đăng ký trước, phần còn trống hiển thị placeholder.
+// Bảng luôn CHỈ ĐỌC — không cho điền/sửa trực tiếp trên bảng; canRegister chỉ quyết định có hiện nút "Sửa"/"+ Thêm"
+// (mở popup ProductFormDialog) hay không. Cột Ngành hàng luôn tĩnh dù ở trạng thái nào. Không có nút xoá — 1 slot
+// đã có sản phẩm là vĩnh viễn, chỉ sửa được nội dung (xem PosmCampaignDetailPage: canRegister truyền vào đây đã
+// tắt sẵn khi chiến dịch ở trạng thái "Hoàn tất").
 function ProductTable({ categories, canRegister, onChange }: { categories: PosmCategorySlot[]; canRegister: boolean; onChange: (next: PosmCategorySlot[]) => void }) {
+  const [dialog, setDialog] = useState<{ catId: string; reg?: PosmSlotRegistration } | null>(null)
+
   if (categories.length === 0) {
     return <p className="text-xs text-[#94A3B8]">Chưa cấu hình ngành hàng</p>
   }
 
   const updateCategory = (catId: string, next: PosmCategorySlot) => onChange(categories.map((c) => (c.id === catId ? next : c)))
-  const updateRegistration = (catId: string, regId: string, partial: Partial<PosmSlotRegistration>) => {
-    const cat = categories.find((c) => c.id === catId)
+
+  const handleDialogSubmit = (reg: Omit<PosmSlotRegistration, 'id' | 'updatedBy' | 'updatedAt'>) => {
+    if (!dialog) return
+    const cat = categories.find((c) => c.id === dialog.catId)
     if (!cat) return
-    updateCategory(catId, { ...cat, registrations: cat.registrations.map((r) => (r.id === regId ? { ...r, ...partial } : r)) })
+    const stamp = { updatedBy: `NH ${cat.nganhHang}`, updatedAt: new Date().toISOString() }
+    updateCategory(cat.id, {
+      ...cat,
+      registrations: dialog.reg
+        ? cat.registrations.map((r) => (r.id === dialog.reg!.id ? { ...r, ...reg, ...stamp } : r))
+        : [...cat.registrations, { id: crypto.randomUUID(), ...reg, ...stamp }],
+    })
   }
-  // Đóng dấu "Người cập nhật"/"Ngày cập nhật" khi rời khỏi ô chỉnh sửa (onBlur) — không đóng dấu theo từng phím gõ.
-  const stampUpdated = (catId: string, regId: string, nganhHang: string) =>
-    updateRegistration(catId, regId, { updatedBy: `NH ${nganhHang}`, updatedAt: new Date().toISOString() })
-  const emptyColSpan = 9 + (canRegister ? 1 : 0)
+
+  const dialogCat = dialog ? categories.find((c) => c.id === dialog.catId) : undefined
 
   return (
     <div className="overflow-x-auto border border-[#E2E8F0] rounded-lg">
@@ -146,12 +222,14 @@ function ProductTable({ categories, canRegister, onChange }: { categories: PosmC
             <th className="px-2.5 py-2 font-medium">Tên SP hiển thị</th>
             <th className="px-2.5 py-2 font-medium">Giá gốc</th>
             <th className="px-2.5 py-2 font-medium">Giá KM</th>
-            <th className="px-2.5 py-2 font-medium">Ghi chú</th>
+            <th className="px-2.5 py-2 font-medium">Khuyến mãi 1</th>
+            <th className="px-2.5 py-2 font-medium">Khuyến mãi 2</th>
+            <th className="px-2.5 py-2 font-medium">Khuyến mãi 3</th>
             <th className="px-2.5 py-2 font-medium">Link hình (drive hoặc web)</th>
             <th className="px-2.5 py-2 font-medium">Người cập nhật</th>
             <th className="px-2.5 py-2 font-medium">Ngày cập nhật</th>
             <th className="px-2.5 py-2 font-medium">Feedback AI</th>
-            {canRegister && <th className="px-2.5 py-2 font-medium w-8" />}
+            {canRegister && <th className="px-2.5 py-2 font-medium w-16" />}
           </tr>
         </thead>
         <tbody>
@@ -162,113 +240,66 @@ function ProductTable({ categories, canRegister, onChange }: { categories: PosmC
                 {cat.registrations.map((r) => {
                   const feedback = priceFeedback(r)
                   return (
-                  <tr key={r.id} className="border-t border-[#F1F5F9] hover:bg-[#F8FAFC]">
-                    <td className="px-2.5 py-1.5 text-[#0F172A] font-medium whitespace-nowrap">{cat.nganhHang}</td>
-                    {canRegister ? (
-                      <>
-                        <td className="px-1.5 py-1">
-                          <input
-                            className={cellInputClass}
-                            value={r.productCode}
-                            onChange={(e) => updateRegistration(cat.id, r.id, { productCode: e.target.value })}
-                            onBlur={() => stampUpdated(cat.id, r.id, cat.nganhHang)}
-                          />
+                    <tr key={r.id} className="border-t border-[#F1F5F9] hover:bg-[#F8FAFC]">
+                      <td className="px-2.5 py-1.5 text-[#0F172A] font-medium whitespace-nowrap">{cat.nganhHang}</td>
+                      <td className="px-2.5 py-1.5 font-mono text-[#475569]">{r.productCode}</td>
+                      <td className="px-2.5 py-1.5 text-[#0F172A]">{r.productName}</td>
+                      <td className="px-2.5 py-1.5 text-[#94A3B8] whitespace-nowrap">
+                        {r.originalPrice != null ? formatVnd(r.originalPrice) : '—'}
+                      </td>
+                      <td className="px-2.5 py-1.5 text-[#DC2626] font-medium whitespace-nowrap">{r.promoPrice != null ? formatVnd(r.promoPrice) : '—'}</td>
+                      <td className="px-2.5 py-1.5 text-[#94A3B8] italic">{r.promotion1 || '—'}</td>
+                      <td className="px-2.5 py-1.5 text-[#94A3B8] italic">{r.promotion2 || '—'}</td>
+                      <td className="px-2.5 py-1.5 text-[#94A3B8] italic">{r.promotion3 || '—'}</td>
+                      <td className="px-2.5 py-1.5">
+                        {r.picUrl ? (
+                          <a href={r.picUrl} target="_blank" rel="noreferrer" className="text-[#3B82F6] hover:underline inline-flex items-center gap-1 whitespace-nowrap">
+                            <ImageIcon size={11} /> Xem
+                          </a>
+                        ) : '—'}
+                      </td>
+                      <td className="px-2.5 py-1.5 text-[#475569] whitespace-nowrap">{r.updatedBy || '—'}</td>
+                      <td className="px-2.5 py-1.5 text-[#94A3B8] whitespace-nowrap">{r.updatedAt ? formatDateTime(r.updatedAt) : '—'}</td>
+                      <td className="px-2.5 py-1.5 whitespace-nowrap">
+                        <span className="font-medium" style={{ color: feedback.color }}>{feedback.label}</span>
+                      </td>
+                      {/* Không có nút xoá — 1 slot đã đăng ký sản phẩm là vĩnh viễn, chỉ sửa được nội dung qua popup. */}
+                      {canRegister && (
+                        <td className="px-2.5 py-1.5 whitespace-nowrap">
+                          <button onClick={() => setDialog({ catId: cat.id, reg: r })} className="inline-flex items-center gap-1 text-[#2563EB] hover:underline font-medium">
+                            <Pencil size={11} /> Sửa
+                          </button>
                         </td>
-                        <td className="px-1.5 py-1">
-                          <input
-                            className={cellInputClass}
-                            value={r.productName}
-                            onChange={(e) => updateRegistration(cat.id, r.id, { productName: e.target.value })}
-                            onBlur={() => stampUpdated(cat.id, r.id, cat.nganhHang)}
-                          />
-                        </td>
-                        <td className="px-1.5 py-1">
-                          <input
-                            type="number" min={0}
-                            className={cellInputClass}
-                            value={r.originalPrice ?? ''}
-                            onChange={(e) => updateRegistration(cat.id, r.id, { originalPrice: e.target.value ? Number(e.target.value) : undefined })}
-                            onBlur={() => stampUpdated(cat.id, r.id, cat.nganhHang)}
-                          />
-                        </td>
-                        <td className="px-1.5 py-1">
-                          <input
-                            type="number" min={0}
-                            className={cellInputClass}
-                            value={r.promoPrice ?? ''}
-                            onChange={(e) => updateRegistration(cat.id, r.id, { promoPrice: e.target.value ? Number(e.target.value) : undefined })}
-                            onBlur={() => stampUpdated(cat.id, r.id, cat.nganhHang)}
-                          />
-                        </td>
-                        <td className="px-1.5 py-1">
-                          <input
-                            className={cellInputClass}
-                            value={r.note ?? ''}
-                            onChange={(e) => updateRegistration(cat.id, r.id, { note: e.target.value || undefined })}
-                            onBlur={() => stampUpdated(cat.id, r.id, cat.nganhHang)}
-                          />
-                        </td>
-                        <td className="px-1.5 py-1">
-                          <input
-                            className={cellInputClass}
-                            value={r.picUrl ?? ''}
-                            onChange={(e) => updateRegistration(cat.id, r.id, { picUrl: e.target.value || undefined })}
-                            onBlur={() => stampUpdated(cat.id, r.id, cat.nganhHang)}
-                          />
-                        </td>
-                      </>
-                    ) : (
-                      <>
-                        <td className="px-2.5 py-1.5 font-mono text-[#475569]">{r.productCode}</td>
-                        <td className="px-2.5 py-1.5 text-[#0F172A]">{r.productName}</td>
-                        <td className="px-2.5 py-1.5 text-[#94A3B8] whitespace-nowrap">
-                          {r.originalPrice != null ? formatVnd(r.originalPrice) : '—'}
-                        </td>
-                        <td className="px-2.5 py-1.5 text-[#DC2626] font-medium whitespace-nowrap">{r.promoPrice != null ? formatVnd(r.promoPrice) : '—'}</td>
-                        <td className="px-2.5 py-1.5 text-[#94A3B8] italic">{r.note || '—'}</td>
-                        <td className="px-2.5 py-1.5">
-                          {r.picUrl ? (
-                            <a href={r.picUrl} target="_blank" rel="noreferrer" className="text-[#3B82F6] hover:underline inline-flex items-center gap-1 whitespace-nowrap">
-                              <ImageIcon size={11} /> Xem
-                            </a>
-                          ) : '—'}
-                        </td>
-                      </>
-                    )}
-                    <td className="px-2.5 py-1.5 text-[#475569] whitespace-nowrap">{r.updatedBy || '—'}</td>
-                    <td className="px-2.5 py-1.5 text-[#94A3B8] whitespace-nowrap">{r.updatedAt ? formatDateTime(r.updatedAt) : '—'}</td>
-                    <td className="px-2.5 py-1.5 whitespace-nowrap">
-                      <span className="font-medium" style={{ color: feedback.color }}>{feedback.label}</span>
-                    </td>
-                    {/* Không có nút xoá — 1 slot đã đăng ký sản phẩm là vĩnh viễn, chỉ sửa được nội dung. Ô trống giữ đúng số cột với AddProductRow. */}
-                    {canRegister && <td className="px-2.5 py-1.5" />}
-                  </tr>
+                      )}
+                    </tr>
                   )
                 })}
-                {/* Mỗi slot còn trống là 1 dòng nhập độc lập (khi được đăng ký) — không còn dòng placeholder trơ,
-                    để NH điền thẳng vào đúng dòng slot muốn dùng thay vì chỉ có 1 dòng nhập ở đầu. */}
-                {canRegister
-                  ? Array.from({ length: emptySlots }).map((_, i) => (
-                      <AddProductRow
-                        key={`${cat.id}-add-${i}`}
-                        nganhHang={cat.nganhHang}
-                        onSubmit={(reg) => updateCategory(cat.id, {
-                          ...cat,
-                          registrations: [...cat.registrations, { id: crypto.randomUUID(), ...reg, updatedBy: `NH ${cat.nganhHang}`, updatedAt: new Date().toISOString() }],
-                        })}
-                      />
-                    ))
-                  : Array.from({ length: emptySlots }).map((_, i) => (
-                      <tr key={`${cat.id}-empty-${i}`} className="border-t border-[#F1F5F9]">
-                        <td className="px-2.5 py-1.5 text-[#0F172A] font-medium whitespace-nowrap">{cat.nganhHang}</td>
-                        <td colSpan={emptyColSpan} className="px-2.5 py-1.5 text-[#CBD5E1]">Chưa có sản phẩm đăng ký</td>
-                      </tr>
-                    ))}
+                {Array.from({ length: emptySlots }).map((_, i) => (
+                  <tr key={`${cat.id}-empty-${i}`} className="border-t border-[#F1F5F9]">
+                    <td className="px-2.5 py-1.5 text-[#0F172A] font-medium whitespace-nowrap">{cat.nganhHang}</td>
+                    <td colSpan={11} className="px-2.5 py-1.5 text-[#CBD5E1]">Chưa có sản phẩm đăng ký</td>
+                    {canRegister && (
+                      <td className="px-2.5 py-1.5 whitespace-nowrap">
+                        <button onClick={() => setDialog({ catId: cat.id })} className="inline-flex items-center gap-1 text-[#2563EB] hover:underline font-medium">
+                          <Plus size={11} /> Thêm
+                        </button>
+                      </td>
+                    )}
+                  </tr>
+                ))}
               </Fragment>
             )
           })}
         </tbody>
       </table>
+
+      <ProductFormDialog
+        open={!!dialog}
+        nganhHang={dialogCat?.nganhHang ?? ''}
+        initial={dialog?.reg}
+        onClose={() => setDialog(null)}
+        onSubmit={handleDialogSubmit}
+      />
     </div>
   )
 }

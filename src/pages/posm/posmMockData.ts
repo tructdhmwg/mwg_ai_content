@@ -72,6 +72,14 @@ export interface PosmMktArtwork {
   name: string
   label: string
   url?: string
+  // MIME của file MKT nộp lên — PDF không xem được bằng <img> nên hiển thị dạng thẻ file + link mở.
+  // Không có thì suy ra từ đuôi file (xem isPdfArtwork).
+  mime?: string
+}
+
+// File nộp lên là PDF (file in) chứ không phải hình? Ưu tiên mime, không có thì xét đuôi tên file.
+export function isPdfArtwork(artwork: PosmMktArtwork): boolean {
+  return artwork.mime === 'application/pdf' || /\.pdf$/i.test(artwork.name)
 }
 
 // 1 dòng nhận xét AI Workflow theo từng tầng/ngành hàng khi kiểm tra thành phẩm — bổ sung cho wfResult (1 dòng tổng quát)
@@ -87,9 +95,12 @@ export interface PosmSlotRegistration {
   productName: string
   originalPrice?: number
   promoPrice?: number
-  note?: string
+  // 3 dòng khuyến mãi TEXT tự do (vd. "Mua 1 tặng 1", "Giảm thêm 10% qua app") — khác promoPrice (số tiền), đây là mô tả.
+  promotion1?: string
+  promotion2?: string
+  promotion3?: string
   picUrl?: string
-  // Audit ngắn cho từng dòng sản phẩm — tự set khi NH đăng ký (AddProductRow), không nhập tay.
+  // Audit ngắn cho từng dòng sản phẩm — tự set khi NH đăng ký/sửa qua popup (ProductFormDialog), không nhập tay.
   updatedBy?: string
   updatedAt?: string
 }
@@ -288,6 +299,7 @@ function staffFor(seed: string): string {
 }
 
 // Tạo danh sách đăng ký sản phẩm gọn gàng từ tuple [mã, tên, giá gốc, giá KM, (link hình - tuỳ chọn)].
+// Khuyến mãi 1/2/3 (text) không có trong data mẫu — để trống, NH tự điền khi đăng ký thực tế.
 // updatedAt (tuỳ chọn): thời điểm cả lô sản phẩm này được NH đăng ký/chỉnh sửa — "Người cập nhật" suy ra xoay vòng theo mã SP.
 function regs(prefix: string, items: RegInput[], updatedAt?: string): PosmSlotRegistration[] {
   return items.map(([productCode, productName, originalPrice, promoPrice, picUrl], i) => ({
@@ -380,10 +392,10 @@ function standardFlyer(key: string, fill: 'empty' | 'partial' | 'full', updatedA
   return { frontTiers: build('front'), backTiers: build('back') }
 }
 
-// Ghép thêm Ghi chú/Link hình cho từng dòng sản phẩm theo mã SP — dùng để làm giàu dữ liệu cho 1 phiếu CỤ THỂ
+// Ghép thêm Link hình cho từng dòng sản phẩm theo mã SP — dùng để làm giàu dữ liệu cho 1 phiếu CỤ THỂ
 // (vd. đã "MKT trả kết quả"/"Hoàn tất") mà KHÔNG đụng tới PRODUCT_POOL/t8FlyerTiers dùng chung, nên các phiếu
-// khác lấy cùng sản phẩm gốc vẫn giữ nguyên, không tự nhiên có thêm ghi chú/link.
-function withExtras(tiers: Pick<PosmCampaign, 'frontTiers' | 'backTiers'>, extras: Record<string, { note?: string; picUrl?: string }>): Pick<PosmCampaign, 'frontTiers' | 'backTiers'> {
+// khác lấy cùng sản phẩm gốc vẫn giữ nguyên, không tự nhiên có thêm link.
+function withExtras(tiers: Pick<PosmCampaign, 'frontTiers' | 'backTiers'>, extras: Record<string, { picUrl?: string }>): Pick<PosmCampaign, 'frontTiers' | 'backTiers'> {
   const applyTiers = (list: PosmTier[]) => list.map((t) => ({
     ...t,
     categories: t.categories.map((c) => ({
@@ -394,67 +406,32 @@ function withExtras(tiers: Pick<PosmCampaign, 'frontTiers' | 'backTiers'>, extra
   return { frontTiers: applyTiers(tiers.frontTiers ?? []), backTiers: applyTiers(tiers.backTiers ?? []) }
 }
 
-// Ghi chú + link hình cho 24 sản phẩm của tờ rơi "Laptop tựu trường T8" — dùng chung cho phiếu 3 (MKT trả kết quả)
+// Link hình cho 23 sản phẩm của tờ rơi "Laptop tựu trường T8" — dùng chung cho phiếu 3 (MKT trả kết quả)
 // và phiếu 6 (Hoàn tất), vì 2 phiếu này cùng nội dung t8FlyerTiers.
-const T8_NOTE_LINKS: Record<string, { note?: string; picUrl?: string }> = {
-  '8850009900017': { note: 'Chỉ 2 suất/ngày, khách xếp hàng trước 9h', picUrl: 'https://www.dienmayxanh.com/may-in/canon-pixma-g2010' },
-  '8850009900024': { note: 'Quay số ngẫu nhiên, không đổi được sản phẩm khác', picUrl: 'https://www.dienmayxanh.com/phu-kien/combo-qua-tang-t8' },
-  '8840001000017': { note: 'Tặng kèm khi mua điện thoại từ 5 triệu', picUrl: 'https://www.dienmayxanh.com/phu-kien-dien-thoai/cap-sac-type-c-1m' },
-  '8840001000024': { note: 'Hàng chính hãng, bảo hành 12 tháng', picUrl: 'https://www.dienmayxanh.com/phu-kien-dien-thoai/adapter-sac-20w' },
-  '8840001000031': { note: 'Còn 50 sản phẩm tại kho HCM', picUrl: 'https://www.dienmayxanh.com/phu-kien-may-tinh/chuot-dareu-lm106g' },
-  '8840001000048': { note: 'Cần bổ sung hình chụp thực tế trước khi in', picUrl: 'https://www.dienmayxanh.com/balo-tui-chong-soc/togo-keo-ngang' },
-  '8840001000055': { note: 'Ưu tiên trưng bày đầu kệ phụ kiện', picUrl: 'https://www.dienmayxanh.com/sac-du-phong/jp388-10000mah' },
-  '8935001100011': { note: 'Áp dụng đổi trả trong 7 ngày', picUrl: 'https://www.dienmayxanh.com/do-dung-nha-bep/chao-chong-dinh-26cm' },
-  '8935001100028': { note: 'Tặng kèm khăn lau bếp', picUrl: 'https://www.dienmayxanh.com/binh-dun-sieu-toc/rapido-rk2015-c' },
-  '8935001100035': { note: 'Hàng trưng bày, còn 8 sản phẩm', picUrl: 'https://www.dienmayxanh.com/ban-ui-hoi-nuoc/tefal-fv1955e0' },
-  '8935001100042': { note: 'Giao hàng miễn phí nội thành' },
-  '8935001100059': { note: 'Tặng kèm hộp giữ nhiệt', picUrl: 'https://www.dienmayxanh.com/noi-com-dien/bluestone-rcb-5520' },
-  '8850002200015': { note: 'Áp dụng khi mua kèm Laptop văn phòng', picUrl: 'https://www.dienmayxanh.com/man-hinh-may-tinh/dell-24-inch' },
-  '8850002200022': { note: 'Tặng Office 365 bản quyền 1 năm', picUrl: 'https://www.dienmayxanh.com/laptop/hp-15-sinh-vien' },
-  '8850002200039': { note: 'Ưu tiên trưng bày khu vực AI PC', picUrl: 'https://www.dienmayxanh.com/laptop/asus-zenbook-14-ai' },
-  '8850002200046': { note: 'Chờ xác nhận lại giá KM từ NCC', picUrl: 'https://www.dienmayxanh.com/laptop-gaming/acer-nitro-v' },
-  '8850002300012': { note: 'Áp dụng trả góp 0%', picUrl: 'https://www.dienmayxanh.com/dtdd/samsung-galaxy-a16' },
-  '8850002300029': { note: 'Tặng kèm ốp lưng chính hãng', picUrl: 'https://www.dienmayxanh.com/dtdd/samsung-galaxy-a56' },
-  '8850002300036': { note: 'Trả chậm 0% qua thẻ tín dụng', picUrl: 'https://www.dienmayxanh.com/tablet/ipad-a16-128gb' },
-  '8850002300043': { note: 'Tặng kèm khi mua Laptop Gaming', picUrl: 'https://www.dienmayxanh.com/balo-laptop/chong-soc-15-6-inch' },
-  '8850002300067': { note: 'Cần chốt lại mẫu mã trước khi in', picUrl: 'https://www.dienmayxanh.com/tai-nghe-bluetooth/loa-mini-t8' },
-  '8935003300019': { note: 'Còn 15 sản phẩm tại kho HCM', picUrl: 'https://www.dienmayxanh.com/may-xay-sinh-to/sunhouse-shd5120dmx' },
-  '8935003300026': { note: 'Giao hàng miễn phí nội thành', picUrl: 'https://www.dienmayxanh.com/quat-treo-tuong/asia-vy628890' },
-  '8935003300033': { note: 'Kiểm tra lại giá KM trước khi in chính thức', picUrl: 'https://www.dienmayxanh.com/may-loc-nuoc/kangaroo-kg11a3' },
-}
-
-// Ghi chú riêng cho phiếu 8 (MKT trả kết quả) qua withExtras — picUrl ở đây trùng giá trị đã khai báo sẵn trong
-// PRODUCT_POOL (mọi phiếu dùng chung pool đều có link hình), chỉ note là đặc thù riêng của phiếu 8.
-const ID8_NOTE_LINKS: Record<string, { note?: string; picUrl?: string }> = {
-  '0194253789012': { note: 'Bảo hành chính hãng Apple 12 tháng', picUrl: 'https://www.dienmayxanh.com/dtdd/iphone-17-128gb' },
-  '8806095123456': { note: 'Tặng kèm sạc nhanh 45W', picUrl: 'https://www.dienmayxanh.com/dtdd/samsung-galaxy-s26-5g' },
-  '4711387296451': { note: 'Ưu tiên trưng bày khu vực học sinh sinh viên', picUrl: 'https://www.dienmayxanh.com/laptop/asus-vivobook-15-a1504' },
-  '0195949012345': { note: 'Trả góp 0% qua thẻ tín dụng', picUrl: 'https://www.dienmayxanh.com/laptop/macbook-air-m4-13-inch' },
-  '0196123456789': { note: 'Tặng túi chống sốc khi mua kèm', picUrl: 'https://www.dienmayxanh.com/laptop/dell-inspiron-15' },
-  '0196234567890': { note: 'Hàng mới về, còn nhiều màu', picUrl: 'https://www.dienmayxanh.com/laptop/lenovo-ideapad-slim-3' },
-  '0196345678901': { note: 'Phù hợp văn phòng, nhẹ 1.5kg', picUrl: 'https://www.dienmayxanh.com/laptop/hp-240-g9' },
-  '0196456789012': { note: 'Giá tốt nhất phân khúc phổ thông', picUrl: 'https://www.dienmayxanh.com/laptop/acer-aspire-3' },
-  '0196567890123': { note: 'Thiết kế mỏng nhẹ, pin 10 tiếng', picUrl: 'https://www.dienmayxanh.com/laptop/msi-modern-14' },
-  '0196678901234': { note: 'Cần xác nhận lại số lượng tồn kho', picUrl: 'https://www.dienmayxanh.com/laptop-gaming/acer-nitro-v' },
-  '0196789012345': { note: 'Ưu tiên trưng bày khu vực AI PC', picUrl: 'https://www.dienmayxanh.com/laptop/asus-zenbook-14-ai' },
-  '0196890123456': { note: 'Tặng Office 365 bản quyền 1 năm', picUrl: 'https://www.dienmayxanh.com/laptop/hp-15-sinh-vien' },
-  '8934563021458': { note: 'Tặng kèm cọ vệ sinh chuyên dụng', picUrl: 'https://www.dienmayxanh.com/noi-chien-khong-dau/sunhouse-5l' },
-  '8809123456789': { note: 'Bảo hành 24 tháng chính hãng', picUrl: 'https://www.dienmayxanh.com/robot-hut-bui/ecovacs-deebot' },
-  '8935001100028': { note: 'Tặng kèm khăn lau bếp', picUrl: 'https://www.dienmayxanh.com/binh-dun-sieu-toc/rapido-rk2015-c' },
-  '8935001100042': { note: 'Giao hàng miễn phí nội thành' },
-  '8840001000017': { note: 'Tặng kèm khi mua điện thoại từ 5 triệu', picUrl: 'https://www.dienmayxanh.com/phu-kien-dien-thoai/cap-sac-type-c-1m' },
-  '8840001000024': { note: 'Hàng chính hãng, bảo hành 12 tháng', picUrl: 'https://www.dienmayxanh.com/phu-kien-dien-thoai/adapter-sac-20w' },
-  '8840001000031': { note: 'Còn 50 sản phẩm tại kho HCM', picUrl: 'https://www.dienmayxanh.com/phu-kien-may-tinh/chuot-dareu-lm106g' },
-  '8840001000055': { note: 'Ưu tiên trưng bày đầu kệ phụ kiện', picUrl: 'https://www.dienmayxanh.com/sac-du-phong/jp388-10000mah' },
-  '8840005500035': { note: 'Tặng kèm dây đeo dự phòng', picUrl: 'https://www.dienmayxanh.com/dong-ho-thong-minh/xiaomi-watch' },
-  '8936012300011': { note: 'Áp dụng mua 2 tặng 1 khăn ướt', picUrl: 'https://www.dienmayxanh.com/me-be/bim-bobby-size-m' },
-  '8936012300028': { note: 'Hàng nhập khẩu, hạn dùng còn 18 tháng', picUrl: 'https://www.dienmayxanh.com/me-be/sua-bot-nan-nga-800g' },
-  '8936012300035': { note: 'Bảo hành khung 12 tháng', picUrl: 'https://www.dienmayxanh.com/me-be/xe-day-em-be-gap-gon' },
-  '8936012300042': { note: 'Tặng kèm yếm ăn dặm silicon', picUrl: 'https://www.dienmayxanh.com/me-be/ghe-an-dam-da-nang' },
-  '8938012400011': { note: 'Phù hợp da nhạy cảm', picUrl: 'https://www.dienmayxanh.com/lam-dep/sua-rua-mat-cetaphil-500ml' },
-  '8938012400028': { note: 'Hàng chính hãng Nhật Bản', picUrl: 'https://www.dienmayxanh.com/lam-dep/kem-chong-nang-anessa' },
-  '8938012400035': { note: 'Bảo hành 6 tháng, tặng kèm pin sạc', picUrl: 'https://www.dienmayxanh.com/lam-dep/may-massage-cam-tay' },
-  '8938012400042': { note: 'Hàng nội địa Nhật, có tem phụ', picUrl: 'https://www.dienmayxanh.com/lam-dep/vitamin-c-dhc-60-vien' },
+const T8_PIC_LINKS: Record<string, { picUrl?: string }> = {
+  '8850009900017': { picUrl: 'https://www.dienmayxanh.com/may-in/canon-pixma-g2010' },
+  '8850009900024': { picUrl: 'https://www.dienmayxanh.com/phu-kien/combo-qua-tang-t8' },
+  '8840001000017': { picUrl: 'https://www.dienmayxanh.com/phu-kien-dien-thoai/cap-sac-type-c-1m' },
+  '8840001000024': { picUrl: 'https://www.dienmayxanh.com/phu-kien-dien-thoai/adapter-sac-20w' },
+  '8840001000031': { picUrl: 'https://www.dienmayxanh.com/phu-kien-may-tinh/chuot-dareu-lm106g' },
+  '8840001000048': { picUrl: 'https://www.dienmayxanh.com/balo-tui-chong-soc/togo-keo-ngang' },
+  '8840001000055': { picUrl: 'https://www.dienmayxanh.com/sac-du-phong/jp388-10000mah' },
+  '8935001100011': { picUrl: 'https://www.dienmayxanh.com/do-dung-nha-bep/chao-chong-dinh-26cm' },
+  '8935001100028': { picUrl: 'https://www.dienmayxanh.com/binh-dun-sieu-toc/rapido-rk2015-c' },
+  '8935001100035': { picUrl: 'https://www.dienmayxanh.com/ban-ui-hoi-nuoc/tefal-fv1955e0' },
+  '8935001100059': { picUrl: 'https://www.dienmayxanh.com/noi-com-dien/bluestone-rcb-5520' },
+  '8850002200015': { picUrl: 'https://www.dienmayxanh.com/man-hinh-may-tinh/dell-24-inch' },
+  '8850002200022': { picUrl: 'https://www.dienmayxanh.com/laptop/hp-15-sinh-vien' },
+  '8850002200039': { picUrl: 'https://www.dienmayxanh.com/laptop/asus-zenbook-14-ai' },
+  '8850002200046': { picUrl: 'https://www.dienmayxanh.com/laptop-gaming/acer-nitro-v' },
+  '8850002300012': { picUrl: 'https://www.dienmayxanh.com/dtdd/samsung-galaxy-a16' },
+  '8850002300029': { picUrl: 'https://www.dienmayxanh.com/dtdd/samsung-galaxy-a56' },
+  '8850002300036': { picUrl: 'https://www.dienmayxanh.com/tablet/ipad-a16-128gb' },
+  '8850002300043': { picUrl: 'https://www.dienmayxanh.com/balo-laptop/chong-soc-15-6-inch' },
+  '8850002300067': { picUrl: 'https://www.dienmayxanh.com/tai-nghe-bluetooth/loa-mini-t8' },
+  '8935003300019': { picUrl: 'https://www.dienmayxanh.com/may-xay-sinh-to/sunhouse-shd5120dmx' },
+  '8935003300026': { picUrl: 'https://www.dienmayxanh.com/quat-treo-tuong/asia-vy628890' },
+  '8935003300033': { picUrl: 'https://www.dienmayxanh.com/may-loc-nuoc/kangaroo-kg11a3' },
 }
 
 // Dựng danh sách duyệt theo từng ngành hàng của chiến dịch — mỗi NH 1 dòng: ai duyệt, lúc nào (giãn cách 25 phút cho tự nhiên).
@@ -658,7 +635,7 @@ export const posmNhCampaigns: PosmCampaign[] = [
     createdBy: 'Lê Hoàng Nam (POSM)',
     startDate: '2026-08-14', endDate: '2026-08-23', printDate: '2026-08-06', deployDate: '2026-08-12',
     description: 'Tựu trường Sale To — 10 ngày 14–23/8. Mặt trước quà tặng 0đ + phụ kiện/gia dụng giá sốc, mặt sau laptop tặng Office bản quyền.',
-    ...withExtras(t8FlyerTiers('c3', '2026-07-08T09:00:00'), T8_NOTE_LINKS),
+    ...withExtras(t8FlyerTiers('c3', '2026-07-08T09:00:00'), T8_PIC_LINKS),
     mktArtworks: t8Artwork('3'),
     mktArtworkUploadedAt: '2026-07-12T10:15:00',
     wfStatus: 'passed',
@@ -715,7 +692,7 @@ export const posmPromotionCampaigns: PosmCampaign[] = [
     createdBy: 'Lê Hoàng Nam (POSM)',
     startDate: '2026-06-12', endDate: '2026-06-21', printDate: '2026-06-06', deployDate: '2026-06-10',
     description: 'Tựu trường Sale To — đợt chạy 12–21/6 (đợt trước). Mặt trước quà tặng 0đ + phụ kiện/gia dụng giá sốc, mặt sau laptop tặng Office bản quyền. Đã hoàn tất và phát hành.',
-    ...withExtras(t8FlyerTiers('c6', '2026-06-05T09:00:00'), T8_NOTE_LINKS),
+    ...withExtras(t8FlyerTiers('c6', '2026-06-05T09:00:00'), T8_PIC_LINKS),
     mktArtworks: t8Artwork('6'),
     mktArtworkUploadedAt: '2026-06-08T10:00:00',
     wfStatus: 'passed',
@@ -756,7 +733,7 @@ export const posmMktCampaigns: PosmCampaign[] = [
     createdBy: 'Trần Quốc Bảo (POSM)',
     startDate: '2026-07-15', endDate: '2026-08-15', printDate: '2026-07-09', deployDate: '2026-07-13',
     description: 'Tờ rơi nhóm điện máy cao điểm mùa nắng nóng.',
-    ...withExtras(standardFlyer('c8', 'full', '2026-07-04T16:45:00'), ID8_NOTE_LINKS),
+    ...standardFlyer('c8', 'full', '2026-07-04T16:45:00'),
     mktArtworks: t8Artwork('8'),
     mktArtworkUploadedAt: '2026-07-06T11:05:00',
     wfStatus: 'passed',
