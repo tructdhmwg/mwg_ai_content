@@ -2,22 +2,24 @@ import { useRef, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { AppShell } from '../../components/layout/AppShell'
-import { Card } from '../../features/ocps/components/Card'
 import { OcpsButton } from '../../features/ocps/components/OcpsButton'
 import { useToast } from '../../components/ui/Toast'
 import { usePosmStore } from '../../store/posmStore'
+import { useAuthStore } from '../../store/authStore'
 import { formatDate, formatDateTime } from '../../lib/utils'
 import { PosmFlyerSketch } from './PosmFlyerSketch'
 import { PosmDotBadge } from './PosmDotBadge'
 import { PosmFlyerWireframe } from './PosmFlyerWireframe'
 import { PosmMktArtworkSection } from './PosmMktArtworkSection'
 import { PosmNhReviewSection } from './PosmNhReviewSection'
-import { artworkSlots, campaignNganhHangs, FLYER_TIER_LIMITS, isFullyRegistered, LAYOUT_TYPES, STATUS_META, WF_STATUS_META, type PosmCampaign, type PosmCampaignGroup, type PosmCampaignStatus, type PosmMktArtwork, type PosmTier } from './posmMockData'
+import { PosmSectionCard } from './PosmSectionCard'
+import { allNhApproved, artworkSlots, campaignNganhHangs, FLYER_TIER_LIMITS, isFullyRegistered, LAYOUT_TYPES, SLOT_LAYOUT_TYPES, STATUS_META, WF_STATUS_META, wfTierResults, type PosmCampaign, type PosmCampaignGroup, type PosmCampaignStatus, type PosmMktArtwork, type PosmTier } from './posmMockData'
 
-// editable: sửa thông tin/cấu trúc chiến dịch (chỉ tab Chiến dịch POSM)
-// canRegister: ngành hàng đăng ký sản phẩm vào slot có sẵn + feedback/duyệt cả chiến dịch (chỉ tab Dashboard NH)
+// editable: sửa thông tin/cấu trúc chiến dịch + duyệt chốt phiếu (chỉ tab Chiến dịch POSM)
+// canRegister: ngành hàng đăng ký sản phẩm vào slot có sẵn + feedback/duyệt phần ngành hàng của mình (chỉ tab Dashboard NH)
 // canUploadArtwork: MKT upload/upload lại thành phẩm, tự chuyển trạng thái "MKT done" + chạy AI Workflow check (chỉ tab Dashboard MKT)
-// — 3 quyền tách biệt nhau, phần thành phẩm/kết quả AI Workflow + feedback/duyệt NH hiển thị (đọc) ở cả 3 tab
+// — 3 quyền tách biệt nhau; riêng nút chạy AI Workflow kiểm tra thành phẩm có ở CẢ 3 tab, và phần thành phẩm/kết quả
+// AI Workflow + danh sách duyệt của các NH thì hiển thị (đọc) ở cả 3 tab.
 const GROUP_CONFIG: Record<PosmCampaignGroup, { editable: boolean; canRegister: boolean; canUploadArtwork: boolean; backTo: string; tabLabel: string }> = {
   nh:          { editable: false, canRegister: true,  canUploadArtwork: false, backTo: '/posm/nh/dashboard',       tabLabel: 'Dashboard NH' },
   promotions:  { editable: true,  canRegister: false, canUploadArtwork: false, backTo: '/posm/promotions',         tabLabel: 'Chiến dịch POSM' },
@@ -49,12 +51,27 @@ function incompleteTiers(tiers: PosmTier[], caps: number[]): string[] {
 const inputClass = 'w-full text-xs border border-[#E2E8F0] rounded px-3 py-2 text-[#0F172A] placeholder:text-[#94A3B8] outline-none focus:border-[#3B82F6]'
 const labelClass = 'block text-xs font-medium text-[#475569] mb-1.5'
 
+// 1 ô ngày trong vùng thông tin campaign — sửa được (input date) ở tab Chiến dịch POSM, còn lại chỉ đọc.
+function DateField({ label, value, editable, onChange }: { label: string; value: string; editable: boolean; onChange: (v: string) => void }) {
+  return (
+    <div>
+      <label className={labelClass}>{label}</label>
+      {editable ? (
+        <input type="date" value={value} onChange={(e) => onChange(e.target.value)} className={inputClass} />
+      ) : (
+        <p className="text-sm text-[#0F172A]">{value ? formatDate(value) : '—'}</p>
+      )}
+    </div>
+  )
+}
+
 export function PosmCampaignDetailPage() {
   const { id = '' } = useParams()
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const { toast } = useToast()
   const { campaigns, addCampaign, updateCampaign } = usePosmStore()
+  const authUser = useAuthStore((s) => s.user)
 
   const group = resolveGroup(pathname)
   const config = GROUP_CONFIG[group]
@@ -68,6 +85,8 @@ export function PosmCampaignDetailPage() {
     status: existing?.status ?? ('new' as PosmCampaignStatus),
     startDate: existing?.startDate ?? '',
     endDate: existing?.endDate ?? '',
+    deployDate: existing?.deployDate ?? '',
+    printDate: existing?.printDate ?? '',
     description: existing?.description ?? '',
     note: existing?.note ?? '',
     frontTiers: existing?.frontTiers ?? defaultTiers('front'),
@@ -87,6 +106,8 @@ export function PosmCampaignDetailPage() {
   }
 
   const nameInputRef = useRef<HTMLInputElement>(null)
+  const todayIso = new Date().toISOString().slice(0, 10)
+  const currentUserName = authUser?.name ?? 'User POSM'
 
   const handleSave = () => {
     if (!form.campaignName.trim()) {
@@ -116,7 +137,8 @@ export function PosmCampaignDetailPage() {
       const newCampaign: PosmCampaign = {
         id: nextId,
         group,
-        createdAt: new Date().toISOString().slice(0, 10),
+        createdAt: todayIso,
+        createdBy: currentUserName,
         ...form,
       }
       addCampaign(newCampaign)
@@ -134,23 +156,25 @@ export function PosmCampaignDetailPage() {
   // Đăng ký/sửa dòng sản phẩm cho phép ở mọi trạng thái, TRỪ "Hoàn tất" (khoá cứng sau khi tab Chiến dịch POSM duyệt chốt).
   // Cột "Ngành hàng" luôn tĩnh (không sửa được) dù ở trạng thái nào — xử lý ngay trong PosmFlyerSketch/ProductTable.
   const canEditProducts = canRegister && existing?.status !== 'completed'
-  // "Thành phẩm MKT & kiểm tra AI" chỉ xuất hiện khi phiếu đã sang giai đoạn MKT trở đi —
-  // ẩn ở "Mới"/"Đang cập nhật" (lúc NH còn đang dựng danh sách sản phẩm).
-  const showMktArtwork =
+  // Vùng 2 (bố cục campaign) chỉ có nội dung với các layout dùng sơ đồ slot (Tờ rơi / Banner)
+  const hasSlotLayout = SLOT_LAYOUT_TYPES.includes(form.layoutType)
+  // Các trạng thái từ khi MKT đã trả thành phẩm trở đi ("MKT trả kết quả" → "NH duyệt" → "Hoàn tất") — dùng cho:
+  // bật nút chạy AI Workflow kiểm tra thành phẩm (cả 3 tab), nút Duyệt của POSM, khu feedback/duyệt của NH,
+  // và mặc định THU GỌN vùng bố cục (lúc này layout đã chốt, không cần mở ra nữa).
+  const MKT_RESULT_STATUSES: PosmCampaignStatus[] = ['mkt_done', 'nh_approved', 'completed']
+  const hasMktResult = !!existing && MKT_RESULT_STATUSES.includes(existing.status)
+  // Vùng 3 (duyệt & AI) xuất hiện khi phiếu đã sang giai đoạn MKT trở đi — ẩn ở "Mới"/"Đang cập nhật"/"Đủ sản phẩm"
+  // (lúc NH còn đang dựng danh sách sản phẩm, chưa có gì để duyệt/kiểm tra).
+  const showApprovalRegion =
     !isCreate && !!existing &&
     (['transferred_mkt', 'mkt_proccessing', 'mkt_done', 'nh_approved', 'completed'] as PosmCampaignStatus[]).includes(existing.status)
-  // Các trạng thái từ khi MKT đã trả thành phẩm trở đi — dùng chung cho: hiện khu Feedback & Duyệt NH (showReview),
-  // và chuyển nút "AI kiểm tra thành quả của Marketing" sang chạy lại AI Workflow trên ảnh MKT đã nộp (hasMktResult)
-  // thay vì soát dữ liệu tầng/slot như các trạng thái trước đó.
-  const MKT_RESULT_STATUSES: PosmCampaignStatus[] = ['mkt_done', 'nh_approved', 'completed']
-  // Feedback + duyệt của NH cho CẢ chiến dịch (không theo từng dòng sản phẩm) — hiện (đọc) từ khi "MKT trả kết quả" trở đi,
-  // chỉ NH sửa được (canReview) và chỉ khi đang đúng trạng thái "MKT trả kết quả".
-  const showReview = !!existing && MKT_RESULT_STATUSES.includes(existing.status)
+  // NH chỉ duyệt được khi phiếu đang đúng ở "MKT trả kết quả"; duyệt xong hết ngành hàng thì phiếu sang "NH duyệt" (khoá lại)
   const canReview = canRegister && existing?.status === 'mkt_done'
-  const hasMktResult = !!existing && MKT_RESULT_STATUSES.includes(existing.status)
+  const artworkWfRunning = existing?.wfStatus === 'running'
+  const nganhHangs = existing ? campaignNganhHangs(existing) : []
 
   // Tab Dashboard NH không có nút Lưu cho phần đăng ký slot (đăng ký sản phẩm lưu thẳng vào store ngay khi thao tác);
-  // riêng feedback/duyệt cả chiến dịch có nút Lưu riêng (xem handleSaveReview).
+  // riêng feedback/duyệt có nút riêng (xem handleApproveNh / handleSaveNhFeedback).
   // Vừa đăng ký đủ mọi slot lúc đang "Mới"/"Đang cập nhật" → tự chuyển "Đủ sản phẩm"; nếu sau đó gỡ bớt khiến
   // thiếu lại thì tự lùi về "Đang cập nhật" — chỉ tác động 2 trạng thái tiền-MKT này, không đụng các giai đoạn sau.
   const persistIfRegisterOnly = (partial: Partial<PosmCampaign>) => {
@@ -163,29 +187,48 @@ export function PosmCampaignDetailPage() {
     updateCampaign(existing.id, { ...partial, ...statusPartial })
   }
 
-  // Lưu feedback + duyệt của NH cho cả chiến dịch — tick Duyệt rồi Lưu sẽ chuyển trạng thái sang "NH duyệt"
-  // và đóng dấu 1 dòng duyệt cho TỪNG ngành hàng tham gia chiến dịch (ai duyệt, lúc nào).
-  const handleSaveReview = (feedback: string, approved: boolean) => {
-    if (!existing) return
-    const now = new Date().toISOString()
+  // 1 NH bấm Duyệt cho ĐÚNG ngành hàng của mình → ghi 1 dòng duyệt (ai duyệt, lúc nào) cho ngành hàng đó.
+  // Chỉ khi ngành hàng CUỐI CÙNG duyệt xong thì phiếu mới chuyển trạng thái sang "NH duyệt".
+  const handleApproveNh = (nganhHang: string, feedback: string) => {
+    if (!existing || !nganhHang) return
+    const trimmed = feedback.trim() || undefined
+    const nhApprovals = [
+      ...(existing.nhApprovals ?? []).filter((a) => a.nganhHang !== nganhHang),
+      // approvedBy chỉ cần tên người duyệt — ngành hàng đã là 1 cột riêng trong bảng chi tiết duyệt
+      { nganhHang, approvedBy: currentUserName, approvedAt: new Date().toISOString(), feedback: trimmed },
+    ]
+    const allDone = allNhApproved({ ...existing, nhApprovals })
     updateCampaign(existing.id, {
-      nhFeedback: feedback.trim() || undefined,
-      nhApproved: approved,
-      status: approved ? 'nh_approved' : existing.status,
-      nhApprovals: approved
-        ? campaignNganhHangs(existing).map((nganhHang) => ({
-            nganhHang,
-            approvedBy: `NH ${nganhHang}`,
-            approvedAt: now,
-            feedback: feedback.trim() || undefined,
-          }))
-        : existing.nhApprovals,
+      nhFeedback: trimmed ?? existing.nhFeedback,
+      nhApprovals,
+      nhApproved: allDone,
+      status: allDone ? 'nh_approved' : existing.status,
     })
-    toast(approved ? 'Đã duyệt chiến dịch' : 'Đã lưu feedback', 'success')
+    toast(allDone ? `NH ${nganhHang} đã duyệt — đủ toàn bộ ngành hàng, chuyển "NH duyệt"` : `NH ${nganhHang} đã duyệt`, 'success')
   }
 
-  // Kiểm tra dữ liệu chiến dịch bằng AI Workflow — chỉ tab Chiến dịch POSM tự chạy để soát lại cấu hình tầng/slot
-  // + thông tin campaign trước khi lưu (khác WF kiểm tra thành phẩm MKT ở trên, chạy trên form hiện tại, không cần existing).
+  const handleSaveNhFeedback = (feedback: string) => {
+    if (!existing) return
+    updateCampaign(existing.id, { nhFeedback: feedback.trim() || undefined })
+    toast('Đã lưu feedback', 'success')
+  }
+
+  // Duyệt CHỐT của user tab Chiến dịch POSM → phiếu "Hoàn tất" (khoá luôn phần đăng ký sản phẩm của NH).
+  // Đồng bộ luôn form.status để nút "Lưu thay đổi" sau đó không ghi đè trạng thái cũ.
+  const handleApprovePosm = () => {
+    if (!existing) return
+    updateCampaign(existing.id, {
+      status: 'completed',
+      posmApproved: true,
+      posmApprovedBy: currentUserName,
+      posmApprovedAt: new Date().toISOString(),
+    })
+    setForm((f) => ({ ...f, status: 'completed' }))
+    toast('Đã duyệt — chiến dịch chuyển "Hoàn tất"', 'success')
+  }
+
+  // Kiểm tra DỮ LIỆU chiến dịch bằng AI Workflow — chỉ tab Chiến dịch POSM tự chạy để soát lại cấu hình tầng/slot
+  // + thông tin campaign trước khi lưu (khác WF kiểm tra thành phẩm MKT ở vùng 3, chạy trên form hiện tại, không cần existing).
   const handleRunDataCheck = () => {
     setForm((f) => ({ ...f, dataCheckStatus: 'running', dataCheckCheckedAt: undefined, dataCheckResult: undefined }))
     setTimeout(() => {
@@ -229,6 +272,7 @@ export function PosmCampaignDetailPage() {
       wfStatus: 'running',
       wfCheckedAt: undefined,
       wfResult: undefined,
+      wfResultDetails: undefined,
     })
     toast('Đã upload thành phẩm — đang chạy AI Workflow kiểm tra', 'info')
 
@@ -238,23 +282,24 @@ export function PosmCampaignDetailPage() {
         wfStatus: 'passed',
         wfCheckedAt: new Date().toISOString(),
         wfResult: `AI Workflow: kiểm tra ${files.length}/${labels.length} hình — bố cục đúng chuẩn, đủ ngành hàng đăng ký, không phát hiện lỗi.`,
+        wfResultDetails: wfTierResults(existing),
       })
     }, 2500)
   }
 
-  // Chạy lại AI Workflow kiểm tra thành phẩm MKT đã nộp (không cần MKT upload lại) — nút "AI kiểm tra thành quả của
-  // Marketing" ở tab Chiến dịch POSM gọi hàm này từ giai đoạn "MKT trả kết quả" trở đi (xem hasMktResult). Ghi thẳng
-  // vào store như handleUploadArtwork nên kết quả hiện ngay ở khu "Thành phẩm MKT & kiểm tra AI" (đọc từ `existing`, cả 3 tab).
+  // Chạy (lại) AI Workflow kiểm tra THÀNH PHẨM MKT đã nộp — nút này có ở CẢ 3 tab, bật từ khi "MKT trả kết quả" trở đi.
+  // Ghi thẳng vào store nên kết quả hiện ngay ở khu "Thành phẩm MKT & kiểm tra AI" của cả 3 tab (đọc từ `existing`).
   const handleRecheckArtwork = () => {
     if (!existing) return
     const slotCount = artworkSlots(existing.layoutType).length
     const artworkCount = existing.mktArtworks?.length ?? 0
-    updateCampaign(existing.id, { wfStatus: 'running', wfCheckedAt: undefined, wfResult: undefined })
+    updateCampaign(existing.id, { wfStatus: 'running', wfCheckedAt: undefined, wfResult: undefined, wfResultDetails: undefined })
     setTimeout(() => {
       updateCampaign(existing.id, {
         wfStatus: 'passed',
         wfCheckedAt: new Date().toISOString(),
         wfResult: `AI Workflow: kiểm tra lại ${artworkCount}/${slotCount} hình — bố cục đúng chuẩn, đủ ngành hàng đăng ký, không phát hiện lỗi.`,
+        wfResultDetails: wfTierResults(existing),
       })
     }, 1500)
   }
@@ -271,9 +316,9 @@ export function PosmCampaignDetailPage() {
             </>
           )}
         </div>
-        <div className="flex items-center justify-between mb-6 mt-2">
+        <div className="flex items-center justify-between gap-3 mb-5 mt-2">
           <h1 className="text-lg font-semibold text-[#0F172A]">{title}</h1>
-          {!editable && !isCreate && (
+          {!isCreate && (
             <PosmDotBadge
               label={STATUS_META[existing!.status].label}
               dot={STATUS_META[existing!.status].dot}
@@ -281,26 +326,27 @@ export function PosmCampaignDetailPage() {
               color={STATUS_META[existing!.status].color}
             />
           )}
-          {editable && (
-            <OcpsButton
-              size="sm"
-              onClick={handleRunDataCheck}
-              disabled={form.status !== 'products_full' || form.dataCheckStatus === 'running'}
-              title={form.status !== 'products_full' ? 'Chỉ chạy được khi chiến dịch ở trạng thái "Đủ sản phẩm"' : undefined}
-            >
-              {form.dataCheckStatus === 'running' ? (
-                <span className="inline-flex items-center gap-1.5"><Loader2 size={12} className="animate-spin" /> Đang kiểm tra...</span>
-              ) : 'AI kiểm tra'}
-            </OcpsButton>
-          )}
         </div>
 
-        <Card className="space-y-5">
-          {!isCreate && (
-            <p className="text-xs text-[#94A3B8]">Ngày tạo: {formatDate(existing!.createdAt)}</p>
-          )}
+        {/* ================= VÙNG 1 · THÔNG TIN CAMPAIGN ================= */}
+        <PosmSectionCard title="Thông tin campaign">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className={labelClass}>Ngày tạo</label>
+              <p className="text-sm text-[#0F172A]">{formatDate(isCreate ? todayIso : existing!.createdAt)}</p>
+            </div>
+            <div>
+              <label className={labelClass}>Người tạo</label>
+              <p className="text-sm text-[#0F172A]">{(isCreate ? currentUserName : existing!.createdBy) || '—'}</p>
+            </div>
+            <div>
+              <label className={labelClass}>Trạng thái</label>
+              {/* Chỉ đọc — trạng thái chuyển qua các nút hành động (Duyệt, upload thành phẩm, đăng ký đủ slot...),
+                  không cho chọn tay để tránh lệch với luồng xử lý tương ứng. */}
+              <p className="text-sm text-[#0F172A]">{STATUS_META[form.status].label}</p>
+            </div>
+          </div>
 
-          {/* Loại campaign + Tên campaign — đặt trước sơ đồ layout để không bị bỏ sót khi cấu hình tầng/slot dài */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className={labelClass}>Loại campaign</label>
@@ -334,66 +380,6 @@ export function PosmCampaignDetailPage() {
             </div>
           </div>
 
-          {/* Phác thảo bố cục in 2 mặt — chỉ xem, đặt trước bảng cấu hình chi tiết bên dưới */}
-          <PosmFlyerWireframe layoutType={form.layoutType} frontTiers={form.frontTiers} backTiers={form.backTiers} />
-
-          <PosmFlyerSketch
-            layoutType={form.layoutType}
-            editable={editable}
-            canRegister={canEditProducts}
-            frontTiers={form.frontTiers}
-            backTiers={form.backTiers}
-            bannerCategories={form.bannerCategories}
-            onChangeFrontTiers={(tiers) => { setForm((f) => ({ ...f, frontTiers: tiers })); persistIfRegisterOnly({ frontTiers: tiers }) }}
-            onChangeBackTiers={(tiers) => { setForm((f) => ({ ...f, backTiers: tiers })); persistIfRegisterOnly({ backTiers: tiers }) }}
-            onChangeBannerCategories={(categories) => { setForm((f) => ({ ...f, bannerCategories: categories })); persistIfRegisterOnly({ bannerCategories: categories }) }}
-          />
-
-          {/* Trạng thái (chỉ hiện dropdown khi sửa, không hiện lúc tạo mới) + Thời gian áp dụng */}
-          <div className={`grid grid-cols-1 gap-4 ${editable && !isCreate ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
-            {editable && !isCreate && (
-              <div>
-                <label className={labelClass}>Trạng thái</label>
-                <select
-                  value={form.status}
-                  onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as PosmCampaignStatus }))}
-                  className={inputClass}
-                >
-                  {(Object.keys(STATUS_META) as PosmCampaignStatus[]).map((s) => (
-                    <option key={s} value={s}>{STATUS_META[s].label}</option>
-                  ))}
-                </select>
-              </div>
-            )}
-            <div>
-              <label className={labelClass}>Ngày bắt đầu</label>
-              {editable ? (
-                <input
-                  type="date"
-                  value={form.startDate}
-                  onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))}
-                  className={inputClass}
-                />
-              ) : (
-                <p className="text-sm text-[#0F172A]">{form.startDate ? formatDate(form.startDate) : '—'}</p>
-              )}
-            </div>
-            <div>
-              <label className={labelClass}>Ngày kết thúc</label>
-              {editable ? (
-                <input
-                  type="date"
-                  value={form.endDate}
-                  onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))}
-                  className={inputClass}
-                />
-              ) : (
-                <p className="text-sm text-[#0F172A]">{form.endDate ? formatDate(form.endDate) : '—'}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Mô tả */}
           <div>
             <label className={labelClass}>Mô tả</label>
             {editable ? (
@@ -409,7 +395,14 @@ export function PosmCampaignDetailPage() {
             )}
           </div>
 
-          {/* Ghi chú */}
+          {/* Mốc thời gian: áp dụng (bắt đầu → kết thúc) + vận hành (triển khai tại điểm bán, in ấn) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <DateField label="Ngày bắt đầu" value={form.startDate} editable={editable} onChange={(v) => setForm((f) => ({ ...f, startDate: v }))} />
+            <DateField label="Ngày kết thúc" value={form.endDate} editable={editable} onChange={(v) => setForm((f) => ({ ...f, endDate: v }))} />
+            <DateField label="Ngày triển khai" value={form.deployDate} editable={editable} onChange={(v) => setForm((f) => ({ ...f, deployDate: v }))} />
+            <DateField label="Ngày in" value={form.printDate} editable={editable} onChange={(v) => setForm((f) => ({ ...f, printDate: v }))} />
+          </div>
+
           <div>
             <label className={labelClass}>Ghi chú</label>
             {editable ? (
@@ -425,7 +418,79 @@ export function PosmCampaignDetailPage() {
             )}
           </div>
 
-          {showMktArtwork && (
+          {/* Lưu/Hủy nằm ngay trong vùng thông tin campaign — sát các field mà nút này lưu.
+              Vẫn lưu cả cấu hình tầng/slot của vùng 2 (chung 1 form state). */}
+          {editable && (
+            <div className="flex gap-2 pt-4 border-t border-[#F1F5F9]">
+              <OcpsButton variant="primary" onClick={handleSave}>{isCreate ? 'Tạo campaign' : 'Lưu thay đổi'}</OcpsButton>
+              <OcpsButton type="button" variant="ghost" onClick={() => navigate(config.backTo)}>Hủy</OcpsButton>
+            </div>
+          )}
+        </PosmSectionCard>
+
+        {/* ================= VÙNG 2 · BỐ CỤC CAMPAIGN =================
+            Sơ đồ (cấu hình tầng/slot + đăng ký sản phẩm) và phác thảo bố cục in.
+            Thu gọn được; mặc định THU GỌN từ khi MKT trả kết quả trở đi vì layout đã chốt. */}
+        {hasSlotLayout && (
+          <PosmSectionCard
+            title="Bố cục campaign"
+            hint={`Layout ${form.layoutType}`}
+            collapsible
+            defaultCollapsed={hasMktResult}
+          >
+            <PosmFlyerWireframe layoutType={form.layoutType} frontTiers={form.frontTiers} backTiers={form.backTiers} />
+
+            <PosmFlyerSketch
+              layoutType={form.layoutType}
+              editable={editable}
+              canRegister={canEditProducts}
+              frontTiers={form.frontTiers}
+              backTiers={form.backTiers}
+              bannerCategories={form.bannerCategories}
+              onChangeFrontTiers={(tiers) => { setForm((f) => ({ ...f, frontTiers: tiers })); persistIfRegisterOnly({ frontTiers: tiers }) }}
+              onChangeBackTiers={(tiers) => { setForm((f) => ({ ...f, backTiers: tiers })); persistIfRegisterOnly({ backTiers: tiers }) }}
+              onChangeBannerCategories={(categories) => { setForm((f) => ({ ...f, bannerCategories: categories })); persistIfRegisterOnly({ bannerCategories: categories }) }}
+            />
+
+            {/* AI Workflow soát DỮ LIỆU cấu hình (tầng/slot, thông tin campaign) — chỉ tab Chiến dịch POSM.
+                Ẩn hẳn ở trạng thái "Mới": phiếu vừa tạo thì chưa có thông tin AI nào để hiện. */}
+            {editable && form.status !== 'new' && (
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs font-medium text-[#475569]">Kiểm tra dữ liệu chiến dịch bằng AI Workflow</p>
+                  {form.dataCheckStatus && (
+                    <PosmDotBadge
+                      label={WF_STATUS_META[form.dataCheckStatus].label}
+                      dot={WF_STATUS_META[form.dataCheckStatus].dot}
+                      bg={WF_STATUS_META[form.dataCheckStatus].bg}
+                      color={WF_STATUS_META[form.dataCheckStatus].color}
+                    />
+                  )}
+                </div>
+                <div className="border border-[#E2E8F0] rounded-lg p-3 space-y-2">
+                  {form.dataCheckResult && form.dataCheckStatus !== 'running' && (
+                    <p className="text-xs text-[#475569]">{form.dataCheckResult}</p>
+                  )}
+                  {form.dataCheckCheckedAt && form.dataCheckStatus !== 'running' && (
+                    <p className="text-[11px] text-[#94A3B8]">Kiểm tra lúc: {formatDateTime(form.dataCheckCheckedAt)}</p>
+                  )}
+                  <OcpsButton size="sm" onClick={handleRunDataCheck} disabled={form.dataCheckStatus === 'running'}>
+                    {form.dataCheckStatus === 'running' ? (
+                      <span className="inline-flex items-center gap-1.5"><Loader2 size={12} className="animate-spin" /> Đang chạy AI Workflow...</span>
+                    ) : 'AI kiểm tra dữ liệu chiến dịch'}
+                  </OcpsButton>
+                </div>
+              </div>
+            )}
+          </PosmSectionCard>
+        )}
+
+        {/* ================= VÙNG 3 · DUYỆT & AI =================
+            Thành phẩm MKT (MKT upload) · nút chạy AI Workflow kiểm tra thành phẩm (cả 3 tab) ·
+            nút Duyệt (POSM chốt phiếu ở tab Chiến dịch POSM, NH duyệt phần ngành hàng của mình ở Dashboard NH) ·
+            danh sách người duyệt + thời gian duyệt của các NH. */}
+        {showApprovalRegion && (
+          <PosmSectionCard title="Duyệt & AI kiểm tra">
             <PosmMktArtworkSection
               canUpload={config.canUploadArtwork}
               layoutType={existing!.layoutType}
@@ -434,59 +499,60 @@ export function PosmCampaignDetailPage() {
               wfStatus={existing!.wfStatus}
               wfCheckedAt={existing!.wfCheckedAt}
               wfResult={existing!.wfResult}
+              wfResultDetails={existing!.wfResultDetails}
               onUpload={handleUploadArtwork}
             />
-          )}
 
-          <PosmNhReviewSection
-            visible={showReview}
-            canReview={canReview}
-            feedback={existing?.nhFeedback}
-            approved={existing?.nhApproved}
-            approvals={existing?.nhApprovals}
-            onSave={handleSaveReview}
-          />
+            <div className="flex flex-wrap items-center gap-2">
+              <OcpsButton
+                size="sm"
+                variant="outline"
+                onClick={handleRecheckArtwork}
+                disabled={!hasMktResult || artworkWfRunning}
+                title={!hasMktResult ? 'Chỉ chạy được khi MKT đã trả kết quả' : undefined}
+              >
+                {artworkWfRunning ? (
+                  <span className="inline-flex items-center gap-1.5"><Loader2 size={12} className="animate-spin" /> Đang chạy AI Workflow...</span>
+                ) : 'AI kiểm tra thành phẩm'}
+              </OcpsButton>
 
-          {editable && (
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-medium text-[#475569]">Kiểm tra dữ liệu chiến dịch bằng AI Workflow</p>
-                {form.dataCheckStatus && (
-                  <PosmDotBadge
-                    label={WF_STATUS_META[form.dataCheckStatus].label}
-                    dot={WF_STATUS_META[form.dataCheckStatus].dot}
-                    bg={WF_STATUS_META[form.dataCheckStatus].bg}
-                    color={WF_STATUS_META[form.dataCheckStatus].color}
-                  />
-                )}
-              </div>
-              <div className="border border-[#E2E8F0] rounded-lg p-3 space-y-2">
-                {form.dataCheckResult && form.dataCheckStatus !== 'running' && (
-                  <p className="text-xs text-[#475569]">{form.dataCheckResult}</p>
-                )}
-                {form.dataCheckCheckedAt && form.dataCheckStatus !== 'running' && (
-                  <p className="text-[11px] text-[#94A3B8]">Kiểm tra lúc: {formatDateTime(form.dataCheckCheckedAt)}</p>
-                )}
+              {/* Duyệt chốt của POSM — chỉ tab Chiến dịch POSM, chuyển phiếu sang "Hoàn tất" */}
+              {editable && (
                 <OcpsButton
                   size="sm"
-                  onClick={hasMktResult ? handleRecheckArtwork : handleRunDataCheck}
-                  disabled={hasMktResult ? existing?.wfStatus === 'running' : form.dataCheckStatus === 'running'}
+                  variant="success"
+                  onClick={handleApprovePosm}
+                  disabled={!hasMktResult || existing!.status === 'completed'}
+                  title={
+                    existing!.status === 'completed' ? 'Chiến dịch đã được duyệt chốt'
+                    : !hasMktResult ? 'Chỉ duyệt được khi MKT đã trả kết quả'
+                    : undefined
+                  }
                 >
-                  {(hasMktResult ? existing?.wfStatus === 'running' : form.dataCheckStatus === 'running') ? (
-                    <span className="inline-flex items-center gap-1.5"><Loader2 size={12} className="animate-spin" /> Đang chạy AI Workflow...</span>
-                  ) : 'AI kiểm tra thành quả của Marketing'}
+                  Duyệt
                 </OcpsButton>
-              </div>
-            </div>
-          )}
+              )}
 
-          {editable && (
-            <div className="flex gap-2 pt-2">
-              <OcpsButton variant="primary" onClick={handleSave}>{isCreate ? 'Tạo campaign' : 'Lưu thay đổi'}</OcpsButton>
-              <OcpsButton type="button" variant="ghost" onClick={() => navigate(config.backTo)}>Hủy</OcpsButton>
+              {existing!.posmApproved && (
+                <span className="text-xs text-[#16A34A] font-medium">
+                  ✓ POSM đã duyệt · {existing!.posmApprovedBy}
+                  {existing!.posmApprovedAt ? ` · ${formatDateTime(existing!.posmApprovedAt)}` : ''}
+                </span>
+              )}
             </div>
-          )}
-        </Card>
+
+            <PosmNhReviewSection
+              visible={hasMktResult}
+              canReview={canReview}
+              nganhHangs={nganhHangs}
+              feedback={existing!.nhFeedback}
+              approvals={existing!.nhApprovals}
+              onApprove={handleApproveNh}
+              onSaveFeedback={handleSaveNhFeedback}
+            />
+          </PosmSectionCard>
+        )}
+
       </div>
     </AppShell>
   )

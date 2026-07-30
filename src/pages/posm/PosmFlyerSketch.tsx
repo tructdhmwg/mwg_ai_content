@@ -8,6 +8,14 @@ function formatVnd(n: number) {
   return n.toLocaleString('vi-VN') + 'đ'
 }
 
+// Feedback AI tự động soát giá KM so với giá gốc cho từng dòng sản phẩm — phát hiện giá KM cao hơn giá gốc (nhập sai).
+function priceFeedback(r: PosmSlotRegistration): { label: string; color: string } {
+  if (r.originalPrice != null && r.promoPrice != null && r.promoPrice > r.originalPrice) {
+    return { label: 'Giá khuyến mãi bất thường', color: '#DC2626' }
+  }
+  return { label: 'Hợp lệ', color: '#16A34A' }
+}
+
 const cellInputClass = 'w-full border border-[#E2E8F0] rounded px-1.5 py-1 text-xs text-[#0F172A] placeholder:text-[#94A3B8] outline-none focus:border-[#3B82F6]'
 const EMPTY_REG_FORM = { productCode: '', productName: '', originalPrice: '', promoPrice: '', note: '', picUrl: '' }
 
@@ -38,7 +46,7 @@ function AddProductRow({ nganhHang, onSubmit }: { nganhHang: string; onSubmit: (
       <td className="px-1.5 py-1"><input type="number" min={0} className={cellInputClass} placeholder="Giá KM" value={form.promoPrice} onChange={(e) => setForm((f) => ({ ...f, promoPrice: e.target.value }))} /></td>
       <td className="px-1.5 py-1"><input className={cellInputClass} placeholder="Ghi chú" value={form.note} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))} /></td>
       <td className="px-1.5 py-1"><input className={cellInputClass} placeholder="Link ảnh" value={form.picUrl} onChange={(e) => setForm((f) => ({ ...f, picUrl: e.target.value }))} /></td>
-      <td className="px-2.5 py-1.5 text-center text-[10px] text-[#94A3B8] italic" colSpan={2}>Tự động khi đăng ký</td>
+      <td className="px-2.5 py-1.5 text-center text-[10px] text-[#94A3B8] italic" colSpan={3}>Tự động khi đăng ký</td>
       <td className="px-1.5 py-1 whitespace-nowrap">
         <OcpsButton size="sm" variant="primary" onClick={submit} disabled={!canSubmit} className="whitespace-nowrap">+ Đăng ký</OcpsButton>
       </td>
@@ -126,7 +134,7 @@ function ProductTable({ categories, canRegister, onChange }: { categories: PosmC
   // Đóng dấu "Người cập nhật"/"Ngày cập nhật" khi rời khỏi ô chỉnh sửa (onBlur) — không đóng dấu theo từng phím gõ.
   const stampUpdated = (catId: string, regId: string, nganhHang: string) =>
     updateRegistration(catId, regId, { updatedBy: `NH ${nganhHang}`, updatedAt: new Date().toISOString() })
-  const emptyColSpan = 8 + (canRegister ? 1 : 0)
+  const emptyColSpan = 9 + (canRegister ? 1 : 0)
 
   return (
     <div className="overflow-x-auto border border-[#E2E8F0] rounded-lg">
@@ -142,6 +150,7 @@ function ProductTable({ categories, canRegister, onChange }: { categories: PosmC
             <th className="px-2.5 py-2 font-medium">Link hình (drive hoặc web)</th>
             <th className="px-2.5 py-2 font-medium">Người cập nhật</th>
             <th className="px-2.5 py-2 font-medium">Ngày cập nhật</th>
+            <th className="px-2.5 py-2 font-medium">Feedback AI</th>
             {canRegister && <th className="px-2.5 py-2 font-medium w-8" />}
           </tr>
         </thead>
@@ -150,7 +159,9 @@ function ProductTable({ categories, canRegister, onChange }: { categories: PosmC
             const emptySlots = Math.max(0, cat.slotCount - cat.registrations.length)
             return (
               <Fragment key={cat.id}>
-                {cat.registrations.map((r) => (
+                {cat.registrations.map((r) => {
+                  const feedback = priceFeedback(r)
+                  return (
                   <tr key={r.id} className="border-t border-[#F1F5F9] hover:bg-[#F8FAFC]">
                     <td className="px-2.5 py-1.5 text-[#0F172A] font-medium whitespace-nowrap">{cat.nganhHang}</td>
                     {canRegister ? (
@@ -226,10 +237,14 @@ function ProductTable({ categories, canRegister, onChange }: { categories: PosmC
                     )}
                     <td className="px-2.5 py-1.5 text-[#475569] whitespace-nowrap">{r.updatedBy || '—'}</td>
                     <td className="px-2.5 py-1.5 text-[#94A3B8] whitespace-nowrap">{r.updatedAt ? formatDateTime(r.updatedAt) : '—'}</td>
+                    <td className="px-2.5 py-1.5 whitespace-nowrap">
+                      <span className="font-medium" style={{ color: feedback.color }}>{feedback.label}</span>
+                    </td>
                     {/* Không có nút xoá — 1 slot đã đăng ký sản phẩm là vĩnh viễn, chỉ sửa được nội dung. Ô trống giữ đúng số cột với AddProductRow. */}
                     {canRegister && <td className="px-2.5 py-1.5" />}
                   </tr>
-                ))}
+                  )
+                })}
                 {/* Mỗi slot còn trống là 1 dòng nhập độc lập (khi được đăng ký) — không còn dòng placeholder trơ,
                     để NH điền thẳng vào đúng dòng slot muốn dùng thay vì chỉ có 1 dòng nhập ở đầu. */}
                 {canRegister

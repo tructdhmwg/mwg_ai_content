@@ -1,7 +1,7 @@
 import type { ChangeEvent } from 'react'
 import { Loader2, Upload } from 'lucide-react'
 import { PosmDotBadge } from './PosmDotBadge'
-import { WF_STATUS_META, artworkSlots, type PosmMktArtwork, type PosmWfStatus } from './posmMockData'
+import { WF_STATUS_META, artworkSlots, type PosmMktArtwork, type PosmWfStatus, type PosmWfTierResult } from './posmMockData'
 import { formatDateTime } from '../../lib/utils'
 
 interface Props {
@@ -12,10 +12,11 @@ interface Props {
   wfStatus?: PosmWfStatus
   wfCheckedAt?: string
   wfResult?: string
+  wfResultDetails?: PosmWfTierResult[]
   onUpload: (files: { url: string; name: string }[]) => void
 }
 
-export function PosmMktArtworkSection({ canUpload, layoutType, artworks = [], uploadedAt, wfStatus = 'idle', wfCheckedAt, wfResult, onUpload }: Props) {
+export function PosmMktArtworkSection({ canUpload, layoutType, artworks = [], uploadedAt, wfStatus = 'idle', wfCheckedAt, wfResult, wfResultDetails, onUpload }: Props) {
   const isRunning = wfStatus === 'running'
   const hasArtwork = artworks.length > 0
   const slots = artworkSlots(layoutType)
@@ -64,6 +65,16 @@ export function PosmMktArtworkSection({ canUpload, layoutType, artworks = [], up
         )}
         {wfResult && wfStatus !== 'running' && (
           <p className="text-xs text-[#475569]">{wfResult}</p>
+        )}
+        {/* Nhận xét chi tiết theo từng tầng/ngành hàng — bổ sung cho wfResult (1 dòng tổng quát) ở trên. */}
+        {wfResultDetails && wfResultDetails.length > 0 && wfStatus !== 'running' && (
+          <ul className="text-xs text-[#475569] space-y-1">
+            {wfResultDetails.map((d, i) => (
+              <li key={i}>
+                <span className="font-medium text-[#0F172A]">{d.tierLabel}:</span> {d.result}
+              </li>
+            ))}
+          </ul>
         )}
 
         {canUpload && (
