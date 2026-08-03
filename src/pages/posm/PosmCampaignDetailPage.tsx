@@ -169,9 +169,10 @@ export function PosmCampaignDetailPage() {
     (['transferred_mkt', 'mkt_proccessing', 'mkt_done', 'nh_approved', 'completed'] as PosmCampaignStatus[]).includes(existing.status)
   // Phiếu đã đủ sản phẩm nhưng chưa chuyển MKT → tab Chiến dịch POSM có nút Duyệt để chốt danh sách và chuyển MKT
   const isProductsFull = existing?.status === 'products_full'
-  // Vùng 3 (duyệt & AI) xuất hiện từ giai đoạn MKT trở đi; riêng tab Chiến dịch POSM hiện sớm hơn 1 bước
-  // (ngay ở "Đủ sản phẩm") để có chỗ đặt nút Duyệt chuyển MKT. Ẩn ở "Mới"/"Đang cập nhật" — lúc đó chưa có gì để duyệt.
-  const showApprovalRegion = !isCreate && !!existing && (showMktArtwork || (editable && isProductsFull))
+  // Vùng 3 (duyệt & AI) xuất hiện từ giai đoạn MKT trở đi; riêng tab Chiến dịch POSM hiện từ "Đang cập nhật"
+  // vì khu kiểm tra dữ liệu AI + nút "Duyệt chuyển marketing" nằm chung ở đây. Ẩn ở "Mới" — phiếu vừa tạo
+  // thì chưa có thông tin AI nào và cũng chưa có gì để duyệt.
+  const showApprovalRegion = !isCreate && !!existing && (showMktArtwork || (editable && existing.status !== 'new'))
   // NH chỉ duyệt được khi phiếu đang đúng ở "MKT trả kết quả"; duyệt xong hết ngành hàng thì phiếu sang "NH duyệt" (khoá lại)
   const canReview = canRegister && existing?.status === 'mkt_done'
   const artworkWfRunning = existing?.wfStatus === 'running'
@@ -272,25 +273,27 @@ export function PosmCampaignDetailPage() {
   const handleUploadArtwork = (files: { url: string; name: string; mime: string }[]) => {
     if (!existing) return
     const labels = artworkSlots(existing.layoutType)
+    // Upload là CỘNG DỒN, không ghi đè: file mới nối vào sau các file đã nộp (muốn bỏ file nào thì xoá riêng file đó).
+    const prev = existing.mktArtworks ?? []
+    const prevImages = prev.filter((a) => !isPdfArtwork(a)).length
+    const prevPdfs = prev.length - prevImages
     // MKT được nộp NHIỀU hơn số slot của layout, và nộp cả PDF bản in. File dư (không còn nhãn slot) đặt nhãn
-    // theo loại: "Bản in PDF n" cho PDF, "Hình bổ sung n" cho hình.
-    let extraPdf = 0
-    let extraImage = 0
-    const mktArtworks: PosmMktArtwork[] = files.map((f, i) => {
+    // theo loại: "Bản in PDF n" cho PDF, "Hình bổ sung n" cho hình — đánh số tiếp theo các file đã có.
+    let extraPdf = prevPdfs
+    let extraImage = Math.max(0, prevImages - labels.length)
+    let imageSlot = prevImages
+    const added: PosmMktArtwork[] = files.map((f) => {
       const isPdf = f.mime === 'application/pdf' || /\.pdf$/i.test(f.name)
       // PDF không dùng nhãn mặt in (Mặt trước/Mặt sau) vì không thuộc 1 mặt cụ thể.
       // Bộ đếm file dư chỉ tăng khi thực sự dùng nhãn dư, để bắt đầu từ 1 chứ không nhảy theo index.
-      const useSlotLabel = !isPdf && i < labels.length
-      return {
-        id: crypto.randomUUID(),
-        name: f.name,
-        label: useSlotLabel
-          ? labels[i]
-          : isPdf ? `Bản in PDF ${++extraPdf}` : `Hình bổ sung ${++extraImage}`,
-        url: f.url,
-        mime: f.mime || undefined,
-      }
+      const useSlotLabel = !isPdf && imageSlot < labels.length
+      const label = useSlotLabel
+        ? labels[imageSlot]
+        : isPdf ? `Bản in PDF ${++extraPdf}` : `Hình bổ sung ${++extraImage}`
+      if (!isPdf) imageSlot++
+      return { id: crypto.randomUUID(), name: f.name, label, url: f.url, mime: f.mime || undefined }
     })
+    const mktArtworks = [...prev, ...added]
     const imageCount = mktArtworks.filter((a) => !isPdfArtwork(a)).length
     const pdfCount = mktArtworks.length - imageCount
     updateCampaign(existing.id, {
@@ -303,7 +306,7 @@ export function PosmCampaignDetailPage() {
       wfResultDetails: undefined,
     })
     toast(
-      `Đã upload ${imageCount} hình${pdfCount ? ` + ${pdfCount} PDF` : ''} — đang chạy AI Workflow kiểm tra`,
+      `Đã thêm ${added.length} file (tổng ${imageCount} hình${pdfCount ? ` + ${pdfCount} PDF` : ''}) — đang chạy AI Workflow kiểm tra`,
       'info',
     )
 
@@ -316,6 +319,24 @@ export function PosmCampaignDetailPage() {
         wfResultDetails: wfTierResults(existing),
       })
     }, 2500)
+  }
+
+  // MKT tự đặt lại tên từng file thành phẩm (Mặt trước / Mặt sau / Bản in PDF...) — ghi thẳng vào store nên
+  // tên mới hiện luôn ở cả 3 tab. Không đụng tới file gốc (mktArtwork.name) đã upload.
+  const handleRenameArtwork = (artworkId: string, label: string) => {
+    if (!existing) return
+    updateCampaign(existing.id, {
+      mktArtworks: (existing.mktArtworks ?? []).map((a) => (a.id === artworkId ? { ...a, label } : a)),
+    })
+  }
+
+  // Gỡ 1 file đã nộp — vì upload là cộng dồn nên cần đường xoá riêng để sửa khi nộp nhầm.
+  const handleRemoveArtwork = (artworkId: string) => {
+    if (!existing) return
+    updateCampaign(existing.id, {
+      mktArtworks: (existing.mktArtworks ?? []).filter((a) => a.id !== artworkId),
+    })
+    toast('Đã gỡ file thành phẩm', 'success')
   }
 
   // Chạy (lại) AI Workflow kiểm tra THÀNH PHẨM MKT đã nộp — nút này có ở CẢ 3 tab, bật từ khi "MKT trả kết quả" trở đi.
@@ -481,28 +502,6 @@ export function PosmCampaignDetailPage() {
               onChangeBackTiers={(tiers) => { setForm((f) => ({ ...f, backTiers: tiers })); persistIfRegisterOnly({ backTiers: tiers }) }}
               onChangeBannerCategories={(categories) => { setForm((f) => ({ ...f, bannerCategories: categories })); persistIfRegisterOnly({ bannerCategories: categories }) }}
             />
-
-            {/* AI Workflow soát DỮ LIỆU cấu hình (tầng/slot, thông tin campaign) — chỉ tab Chiến dịch POSM.
-                Ẩn hẳn ở trạng thái "Mới": phiếu vừa tạo thì chưa có thông tin AI nào để hiện. */}
-            {editable && form.status !== 'new' && (
-              <div>
-                {/* Không hiện badge trạng thái WF ở đây — nội dung kết quả + thời gian kiểm tra bên dưới đã đủ. */}
-                <p className="text-xs font-medium text-[#475569] mb-2">Kiểm tra dữ liệu chiến dịch bằng AI Workflow</p>
-                <div className="border border-[#E2E8F0] rounded-lg p-3 space-y-2">
-                  {form.dataCheckResult && form.dataCheckStatus !== 'running' && (
-                    <p className="text-xs text-[#475569]">{form.dataCheckResult}</p>
-                  )}
-                  {form.dataCheckCheckedAt && form.dataCheckStatus !== 'running' && (
-                    <p className="text-[11px] text-[#94A3B8]">Kiểm tra lúc: {formatDateTime(form.dataCheckCheckedAt)}</p>
-                  )}
-                  <OcpsButton size="sm" onClick={handleRunDataCheck} disabled={form.dataCheckStatus === 'running'}>
-                    {form.dataCheckStatus === 'running' ? (
-                      <span className="inline-flex items-center gap-1.5"><Loader2 size={12} className="animate-spin" /> Đang chạy AI Workflow...</span>
-                    ) : 'AI kiểm tra dữ liệu chiến dịch'}
-                  </OcpsButton>
-                </div>
-              </div>
-            )}
           </PosmSectionCard>
         )}
 
@@ -524,7 +523,32 @@ export function PosmCampaignDetailPage() {
               wfResult={existing!.wfResult}
               wfResultDetails={existing!.wfResultDetails}
               onUpload={handleUploadArtwork}
+              onRename={handleRenameArtwork}
+              onRemove={handleRemoveArtwork}
             />
+            )}
+
+            {/* AI Workflow soát DỮ LIỆU cấu hình (tầng/slot, thông tin campaign) — chỉ tab Chiến dịch POSM.
+                Ẩn ở trạng thái "Mới": phiếu vừa tạo thì chưa có thông tin AI nào để hiện.
+                Nằm chung khu với nút "Duyệt chuyển marketing" bên dưới: soát dữ liệu xong thì duyệt luôn. */}
+            {editable && form.status !== 'new' && (
+              <div>
+                {/* Không hiện badge trạng thái WF ở đây — nội dung kết quả + thời gian kiểm tra bên dưới đã đủ. */}
+                <p className="text-xs font-medium text-[#475569] mb-2">Kiểm tra dữ liệu chiến dịch bằng AI Workflow</p>
+                <div className="border border-[#E2E8F0] rounded-lg p-3 space-y-2">
+                  {form.dataCheckResult && form.dataCheckStatus !== 'running' && (
+                    <p className="text-xs text-[#475569]">{form.dataCheckResult}</p>
+                  )}
+                  {form.dataCheckCheckedAt && form.dataCheckStatus !== 'running' && (
+                    <p className="text-[11px] text-[#94A3B8]">Kiểm tra lúc: {formatDateTime(form.dataCheckCheckedAt)}</p>
+                  )}
+                  <OcpsButton size="sm" onClick={handleRunDataCheck} disabled={form.dataCheckStatus === 'running'}>
+                    {form.dataCheckStatus === 'running' ? (
+                      <span className="inline-flex items-center gap-1.5"><Loader2 size={12} className="animate-spin" /> Đang chạy AI Workflow...</span>
+                    ) : 'AI kiểm tra dữ liệu chiến dịch'}
+                  </OcpsButton>
+                </div>
+              </div>
             )}
 
             <div className="flex flex-wrap items-center gap-2">
@@ -552,15 +576,12 @@ export function PosmCampaignDetailPage() {
               {/* Duyệt của POSM — 2 mốc, không bao giờ hiện cùng lúc vì phụ thuộc trạng thái:
                   "Đủ sản phẩm" → chốt danh sách sản phẩm, chuyển MKT · từ "MKT trả kết quả" → duyệt chốt, chuyển Hoàn tất */}
               {editable && isProductsFull && (
-                <>
-                  <OcpsButton size="sm" variant="success" onClick={handleApproveToMkt} title="Duyệt danh sách sản phẩm và chuyển sang MKT">
-                    Duyệt
-                  </OcpsButton>
-                  <span className="text-[11px] text-[#94A3B8]">Duyệt để chuyển chiến dịch sang MKT dàn thành phẩm</span>
-                </>
+                <OcpsButton size="sm" variant="success" onClick={handleApproveToMkt} title="Duyệt danh sách sản phẩm và chuyển chiến dịch sang MKT dàn thành phẩm">
+                  Duyệt chuyển marketing
+                </OcpsButton>
               )}
 
-              {editable && !isProductsFull && (
+              {editable && showMktArtwork && (
                 <OcpsButton
                   size="sm"
                   variant="success"
